@@ -6,6 +6,7 @@ from django.forms.widgets import HiddenInput
 class ParentInlineMixin(admin.TabularInline):
     def __init__(self, parent_mode, admin_site):
         super().__init__(parent_mode, admin_site)
+        self.parent_obj = None
 
     def get_formset(self, request, obj=None, **kwargs):
         self.parent_obj = obj
@@ -40,6 +41,7 @@ class CharacterAdmin(admin.ModelAdmin):
         (None, {
             'fields': (
                 ('name', 'template', ),
+                ('player', 'storyteller', ),
             ),
         }),
         ('Template', {

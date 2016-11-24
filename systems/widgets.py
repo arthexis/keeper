@@ -15,6 +15,8 @@ class DotsInput(Widget):
         dots = ""
         for i in range(1, self.circles + 1):
             dots += format_html('<input type="radio" value="{}"></input> ', i)
+            if i % 5 == 0:
+                dots += format_html('&nbsp;&nbsp;')
         if self.clear:
             dots += format_html('<button class="clear">x</button>')
         return format_html(

@@ -51,7 +51,7 @@ class Character(models.Model):
     weaponry = DotsField()
 
     # Social Skills
-    animal_ken = DotsField()
+    animal_ken = DotsField('Animal Ken')
     empathy = DotsField()
     expression = DotsField()
     intimidation = DotsField()
@@ -72,8 +72,8 @@ class Character(models.Model):
     template_experiences = models.PositiveIntegerField(default=0)
 
     # Organization related fields
-    player = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True, related_name='characters')
-    storyteller = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True, related_name='+')
+    player = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True, related_name='characters', blank=True)
+    storyteller = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True, related_name='+', blank=True)
     version = models.PositiveIntegerField(default=0)
     created_on = models.DateField(auto_now_add=True)
     modified_on = models.DateField(auto_now=True)

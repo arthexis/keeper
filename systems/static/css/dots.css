@@ -1,4 +1,7 @@
 div.dots {
+    display: block;
+    min-width: 370px;
+    padding-top: 0.4em;
 }
 div.dots button.clear {
     background: none;
