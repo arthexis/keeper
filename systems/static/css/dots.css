@@ -1,0 +1,13 @@
+div.dots {
+}
+div.dots button.clear {
+    background: none;
+    border: none;
+    color: #003366;
+    font-size: smaller;
+    cursor: hand;
+    outline: none;
+}
+div.dots input[type='radio'] {
+    transform: scale(1.2);
+}

@@ -2,26 +2,39 @@ from django.db import models
 from systems.fields import DotsField
 
 
+class ReferenceMixin(models.Model):
+    reference_book = models.CharField(max_length=100, blank=True)
+    reference_page = models.PositiveIntegerField(null=True, blank=True)
+
+    class Meta:
+        abstract = True
+
+
 class Template(models.Model):
     name = models.CharField(max_length=20)
     alias = models.CharField(max_length=20, blank=True)
-    integrity_name = models.CharField(max_length=20, verbose_name="Integrity")
+    integrity_name = models.CharField(max_length=20, verbose_name="Integrity", default="Integrity")
     power_stat_name = models.CharField(max_length=20, verbose_name="Power Stat")
     resource_name = models.CharField(max_length=20, verbose_name="Resource")
+    primary_anchor_name = models.CharField(max_length=20, verbose_name="Primary Anchor", default="Virtue")
+    secondary_anchor_name = models.CharField(max_length=20, verbose_name="Secondary Anchor", default="Vice")
 
     def __str__(self):
         return str(self.name)
 
 
-class SplatCategory(models.Model):
+class Splat(models.Model):
+    FLAVOR = (
+        ('primary', 'Primary (Must be chosen on character creation)'),
+        ('secondary', 'Secondary (Optional and can be changed later)'),
+        ('tertiary', 'Tertiary (Optional but cannot be changed once chosen )'),
+    )
     name = models.CharField(max_length=20)
     template = models.ForeignKey(Template, on_delete=models.CASCADE, related_name='splat_categories')
-    is_required = models.BooleanField('Splat is required on creation', default=False)
-    is_editable = models.BooleanField('Splat can be changed after assigned', default=True)
+    flavor = models.CharField(max_length=10, choices=FLAVOR, null=True)
 
     class Meta:
-        verbose_name = 'Splat Category'
-        verbose_name_plural = 'Splat Categories'
+        ordering = ('template', 'flavor', )
 
     def __str__(self):
         return str(self.name)
@@ -30,12 +43,9 @@ class SplatCategory(models.Model):
         return ', '.join(self.splats.values_list('name', flat=True))
 
 
-class Splat(models.Model):
+class SplatOption(ReferenceMixin):
     name = models.CharField(max_length=40)
-    category = models.ForeignKey(SplatCategory, on_delete=models.CASCADE, related_name='splats')
-    alias = models.CharField(max_length=20, blank=True)
-    description = models.TextField(blank=True)
-    is_playable = models.BooleanField(default=True)
+    category = models.ForeignKey(Splat, on_delete=models.CASCADE, related_name='splats')
 
     class Meta:
         ordering = ('category', 'name', )
@@ -47,16 +57,20 @@ class Splat(models.Model):
         return self.category.template
 
 
-# Note that there can be multiple versions of the same merit with different dots
-class Merit(models.Model):
+class Merit(ReferenceMixin):
+    CATEGORIES = (
+        ('mental', 'Mental'),
+        ('physical', 'Physical'),
+        ('social', 'Social'),
+        ('supernatural', 'Supernatural'),
+        ('style', 'Style'),
+    )
     name = models.CharField(max_length=40)
-    is_style = models.BooleanField(default=False)
-    description = models.TextField()
-    template = models.ForeignKey('Template', on_delete=models.CASCADE, null=True)
-    dots = DotsField()
+    category = models.CharField(max_length=20, choices=CATEGORIES, null=True)
+    template = models.ForeignKey('Template', on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
-        unique_together = ('name', 'dots')
+        ordering = ('template', 'category', 'name')
 
     def __str__(self):
         return str(self.name)
@@ -64,7 +78,7 @@ class Merit(models.Model):
 
 class PowerCategory(models.Model):
     name = models.CharField(max_length=20)
-    template = models.ManyToManyField('Template', related_name='powers')
+    template = models.ForeignKey('Template', on_delete=models.PROTECT, related_name='power_categories', null=True)
 
     class Meta:
         verbose_name = "Power Category"
@@ -73,16 +87,17 @@ class PowerCategory(models.Model):
     def __str__(self):
         return str(self.name)
 
+    def power_names(self):
+        return ', '.join(self.powers.values_list('name', flat=True))
 
-# Just like for Merits, each level of a Power is its own record with different dots
-class Power(models.Model):
+
+class Power(ReferenceMixin):
     name = models.CharField(max_length=40)
-    description = models.TextField(blank=True)
     category = models.ForeignKey('PowerCategory', on_delete=models.PROTECT, related_name='powers')
-    dots = DotsField()
 
     class Meta:
-        unique_together = ('name', 'category', 'dots')
+        unique_together = ('name', 'category', )
+        ordering = ('category', 'name', )
 
     def __str__(self):
         return str(self.name)

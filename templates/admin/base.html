@@ -1,3 +1,8 @@
 {% extends 'admin/base.html' %}
 {% load static from staticfiles %}
+{% block extrahead %}
+  <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"
+    integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc="
+    crossorigin="anonymous"></script>
+{% endblock %}
 {% block extrastyle %}<link rel="stylesheet" type="text/css" href="{% static "css/admin.css" %}" />{% endblock %}
