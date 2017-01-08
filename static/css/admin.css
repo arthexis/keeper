@@ -1,3 +1,20 @@
 .field-description textarea {
     height: 3em;
 }
+
+.form-control {
+    font-size: 13px;
+}
+
+.field-box {
+    padding-right: 0;
+}
+
+select.form-control {
+    width: 180px;
+}
+
+textarea.form-control {
+    min-width: 870px;
+    height: 180px;
+}

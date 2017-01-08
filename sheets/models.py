@@ -9,7 +9,7 @@ class Character(models.Model):
 
     # Character basic info
     name = models.CharField(max_length=40, verbose_name="Character Name")
-    template = models.ForeignKey(Template, on_delete=models.PROTECT, verbose_name="Supernatural Template")
+    template = models.ForeignKey(Template, on_delete=models.PROTECT)
     power_stat = DotsField(default=1, clear=False)
     integrity = DotsField(default=7)
     background = models.TextField(blank=True)

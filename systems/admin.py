@@ -5,7 +5,7 @@ from systems.models import *
 
 class SplatInline(admin.TabularInline):
     model = SplatOption
-    fields = ('name', 'reference_book', 'reference_page', 'is_playable')
+    fields = ('name', 'reference_book', 'reference_page')
     min_num = 1
     extra = 0
 

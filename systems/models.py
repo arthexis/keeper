@@ -1,5 +1,4 @@
 from django.db import models
-from systems.fields import DotsField
 
 
 class ReferenceMixin(models.Model):
@@ -25,9 +24,9 @@ class Template(models.Model):
 
 class Splat(models.Model):
     FLAVOR = (
-        ('primary', 'Primary (Must be chosen on character creation)'),
-        ('secondary', 'Secondary (Optional and can be changed later)'),
-        ('tertiary', 'Tertiary (Optional but cannot be changed once chosen )'),
+        ('primary', 'Primary (Nature)'),
+        ('secondary', 'Secondary (Faction)'),
+        ('tertiary', 'Tertiary (Attained)'),
     )
     name = models.CharField(max_length=20)
     template = models.ForeignKey(Template, on_delete=models.CASCADE, related_name='splat_categories')

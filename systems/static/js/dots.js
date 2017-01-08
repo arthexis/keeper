@@ -4,7 +4,7 @@
 
 $(document).ready(function() {
     // Clicking on a circle fills all behind and clears all after
-    $('div.dots input[type=radio]').on('click', function () {
+    $('.dots input[type=radio]').on('click', function () {
         var val = parseInt($(this).val());
         $(this).siblings().each(function () {
             if ($(this).is('[type=radio]')) {
@@ -15,7 +15,7 @@ $(document).ready(function() {
         });
     });
     // Clicking the clear button empties all circles
-    $('div.dots button.clear').on('click', function () {
+    $('.dots button.clear').on('click', function () {
         $(this).siblings().each(function () {
             if ($(this).is('[type=radio]')) {
                 $(this).prop('checked', false);
@@ -26,7 +26,7 @@ $(document).ready(function() {
         return false;
     });
     // Click the initial value
-    $('div.dots').each(function () {
+    $('.dots').each(function () {
         $(this).children('[type=radio][value="' + $(this).children('[type=hidden]').val() + '"]').click();
     })
 });
