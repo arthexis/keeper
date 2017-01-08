@@ -14,6 +14,9 @@ class Character(models.Model):
     integrity = DotsField(default=7)
     background = models.TextField(blank=True)
     resource = models.PositiveIntegerField(default=10)
+    concept = models.CharField(max_length=200, blank=True)
+    faction = models.CharField(max_length=200, blank=True)
+    character_group = models.CharField(max_length=100, blank=True)
 
     # Physical Attributes
     strength = DotsField(default=1, clear=False)
@@ -117,6 +120,7 @@ class CharacterPower(models.Model):
     character = models.ForeignKey(Character, on_delete=models.CASCADE, related_name='powers')
     power = models.ForeignKey(Power, on_delete=models.PROTECT, related_name='+')
     rating = DotsField(default=1, clear=False)
+    notes = models.CharField(max_length=200, blank=True)
 
     class Meta:
         verbose_name = "Power"

@@ -34,7 +34,7 @@ class TemplateAdmin(admin.ModelAdmin):
             'fields': (
                 ('name', 'alias'),
                 ('integrity_name', 'power_stat_name', 'resource_name'),
-                ('primary_anchor_name', 'secondary_anchor_name'),
+                ('primary_anchor_name', 'secondary_anchor_name', 'character_group_name'),
             ),
         }),
     )

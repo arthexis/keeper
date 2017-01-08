@@ -17,6 +17,7 @@ class Template(models.Model):
     resource_name = models.CharField(max_length=20, verbose_name="Resource")
     primary_anchor_name = models.CharField(max_length=20, verbose_name="Primary Anchor", default="Virtue")
     secondary_anchor_name = models.CharField(max_length=20, verbose_name="Secondary Anchor", default="Vice")
+    character_group_name = models.CharField(max_length=20, verbose_name="Group Name", default="Group")
 
     def __str__(self):
         return str(self.name)

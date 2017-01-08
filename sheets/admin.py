@@ -21,7 +21,7 @@ class MeritInline(admin.TabularInline):
 
 class PowerInline(ParentInlineMixin):
     model = CharacterPower
-    fields = ('power', 'rating', 'category', )
+    fields = ('power', 'rating', 'notes', 'category', )
     readonly_fields = ('category', )
     extra = 0
 
@@ -35,7 +35,7 @@ class PowerInline(ParentInlineMixin):
 @admin.register(Character)
 class CharacterAdmin(admin.ModelAdmin):
     model = Character
-    inlines = (MeritInline, PowerInline )
+    inlines = (MeritInline, PowerInline)
     fieldsets = (
         (None, {
             'fields': (
@@ -45,7 +45,8 @@ class CharacterAdmin(admin.ModelAdmin):
         ('Template', {
             'fields': (
                 ('primary_splat', 'secondary_splat', 'tertiary_splat', ),
-                ('primary_anchor', 'secondary_anchor', ),
+                ('primary_anchor', 'secondary_anchor', 'concept', ),
+                ('faction', 'character_group', ),
                 ('power_stat', 'integrity', 'resource', ),
             ),
         }),
@@ -70,7 +71,7 @@ class CharacterAdmin(admin.ModelAdmin):
         }),
         ('Information', {
             'fields': (
-                ('background'),
+                ('background', ),
             ),
         }),
     )
@@ -79,6 +80,10 @@ class CharacterAdmin(admin.ModelAdmin):
     formfield_overrides = {
         DotsField: {'widget': DotsInput}
     }
+    rename_traits = (
+        'power_stat', 'integrity', 'resource', 'primary_anchor',
+        'secondary_anchor', 'character_group',
+    )
 
     def get_fieldsets(self, request, obj=None):
         if obj is None:
@@ -101,11 +106,8 @@ class CharacterAdmin(admin.ModelAdmin):
                     field.widget = HiddenInput()
             # Modify other template specific labels
             if obj.template:
-                form.base_fields['power_stat'].label = obj.template.power_stat_name
-                form.base_fields['integrity'].label = obj.template.integrity_name
-                form.base_fields['resource'].label = obj.template.resource_name
-                form.base_fields['primary_anchor'].label = obj.template.primary_anchor_name
-                form.base_fields['secondary_anchor'].label = obj.template.secondary_anchor_name
+                for trait in self.rename_traits:
+                    form.base_fields[trait].label = getattr(obj.template, "{}_name".format(trait))
         return form
 
     def get_readonly_fields(self, request, obj=None):
