@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'systems',
     'sheets',
     'debug_toolbar',
+    'django_extensions',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -118,3 +119,8 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 DAB_FIELD_RENDERER = 'django_admin_bootstrapped.renderers.BootstrapFieldRenderer'
+
+# Keeper system specific settings
+
+BEATS_PER_EXPERIENCE = 5
+

@@ -90,3 +90,9 @@ ENV/
 # Rope project settings
 .ropeproject
 
+.idea/dataSources.local.xml
+.idea/dataSources.xml
+.idea/dataSources/
+.idea/webResources.xml
+.idea/workspace.xml
+static/*

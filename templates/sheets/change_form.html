@@ -1,0 +1,39 @@
+{% extends 'admin/change_form.html' %}
+{% load i18n admin_urls admin_static admin_modify bootstrapped_goodies_tags %}
+
+{#{% block extrastyle %}#}
+{#    {{ block.super }}#}
+{#    <link href="//cdn.rawgit.com/noelboss/featherlight/1.7.0/release/featherlight.min.css" type="text/css"#}
+{#          rel="stylesheet"/>#}
+{#{% endblock %}#}
+{##}
+{#{% block extrahead %}#}
+{#    {{ block.super }}#}
+{#    <script src="https://code.jquery.com/jquery-2.2.4.min.js"#}
+{#            integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="#}
+{#            crossorigin="anonymous"></script>#}
+{#    <script src="//cdn.rawgit.com/noelboss/featherlight/1.7.0/release/featherlight.min.js" type="text/javascript"#}
+{#            charset="utf-8"></script>#}
+{#{% endblock %}#}
+
+{% block field_sets %}
+    {% for fieldset in adminform %}
+        {% include "sheets/includes/fieldset.html" with group_column_width=adminform|form_fieldset_column_width %}
+    {% endfor %}
+{% endblock %}
+
+{% block submit_buttons_bottom %}
+    {{ block.super }}
+    <script>
+        $(document).ready(function () {
+            $('.dynamic-approval_requests.form-row').each(function (index, obj) {
+                var status = $(obj).find('.field-status select').val();
+                if (status != 'pending') {
+                   $(obj).find('.field-status select').prop('disabled', true);
+                   $(obj).find('.field-details input').prop('disabled', true);
+                   $(obj).find('.field-spent_experience input').prop('disabled', true);
+                }
+            });
+        });
+    </script>
+{% endblock %}

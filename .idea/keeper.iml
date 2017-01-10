@@ -21,6 +21,9 @@
     </content>
     <orderEntry type="jdk" jdkName="Python 3.5.2 virtualenv at C:\Users\Rafael\PycharmProjects\keeper\env" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="jquery-latest" level="application" />
+    <orderEntry type="library" name="featherlight" level="application" />
+    <orderEntry type="library" name="jquery-2.2.4" level="application" />
   </component>
   <component name="TemplatesService">
     <option name="TEMPLATE_CONFIGURATION" value="Django" />

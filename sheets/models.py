@@ -1,14 +1,73 @@
-from django.contrib.auth.models import User
+import uuid
+import itertools
+from django.contrib.auth.models import User, Group
+from django.utils import timezone
+from django.conf import settings
 
 from systems.fields import *
 from systems.models import *
+
+SKILLS = (
+    ("academics", "Academics"),
+    ("computer", "Computer"),
+    ("crafts", "Crafts"),
+    ("investigation", "Investigation"),
+    ("medicine", "Medicine"),
+    ("occult", "Occult"),
+    ("politics", "Politics"),
+    ("science", "Science"),
+    ("athletics", "Athletics"),
+    ("brawl", "Brawl"),
+    ("drive", "Drive"),
+    ("firearms", "Firearms"),
+    ("larceny", "Larceny"),
+    ("stealth", "Stealth"),
+    ("survival", "Survival"),
+    ("weaponry", "Weaponry"),
+    ("animal_ken", "Animal Ken"),
+    ("empathy", "Empathy"),
+    ("expression", "Expression"),
+    ("intimidation", "Intimidation"),
+    ("persuasion", "Persuasion"),
+    ("socialize", "Socialize"),
+    ("streetwise", "Streetwise"),
+    ("subterfuge", "Subterfuge"),
+)
+
+ATTRIBUTES = (
+    ("strength", "Strength"),
+    ("dexterity", "Dexterity"),
+    ("stamina", "Stamina"),
+    ("intelligence", "Intelligence"),
+    ("wits", "Wits"),
+    ("resolve", "Resolve"),
+    ("presence", "Presence"),
+    ("manipulation", "Manipulation"),
+    ("composure", "Composure"),
+)
+
+
+class Chronicle(models.Model):
+    name = models.CharField(max_length=40, verbose_name="Chronicle Name")
+    venue_storyteller = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
+    domain_storyteller = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
+    venue_coordinator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
+    domain_coordinator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
+    storytelling_group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
+    coordinating_group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
+    mood = models.CharField(max_length=200, blank=True)
+    theme = models.CharField(max_length=200, blank=True)
+    default_template = models.ForeignKey(Template, on_delete=models.PROTECT, null=True)
+
+    def __str__(self):
+        return "{} ({})".format(self.name, self.default_template)
 
 
 # Create your models here.
 class Character(models.Model):
 
     # Character basic info
-    name = models.CharField(max_length=40, verbose_name="Character Name")
+    name = models.CharField(max_length=40, verbose_name="Character")
     template = models.ForeignKey(Template, on_delete=models.PROTECT)
     power_stat = DotsField(default=1, clear=False)
     integrity = DotsField(default=7)
@@ -75,14 +134,13 @@ class Character(models.Model):
     template_experiences = models.PositiveIntegerField(default=0)
 
     # Organization related fields
-    player = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True, related_name='characters')
-    storyteller = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True, related_name='+')
-    version = models.PositiveIntegerField(default=0)
-    created_on = models.DateField(auto_now_add=True)
-    modified_on = models.DateField(auto_now=True)
-    is_approved = models.BooleanField(default=False)
-    approved_on = models.DateField(null=True)
-    is_retired = models.BooleanField(default=False)
+    player = models.ForeignKey(
+        User, on_delete=models.DO_NOTHING, null=True, blank=True, related_name='characters')
+    chronicle = models.ForeignKey(
+        Chronicle, on_delete=models.PROTECT, null=True, blank=True, related_name='characters')
+    created_on = models.DateField(editable=False)
+    modified_on = models.DateField(auto_now=True, editable=False)
+    tracking_id = models.UUIDField(null=True, editable=False)
 
     # Derived traits, they are not handled automatically because in some situations
     # their values can be manually adjusted
@@ -93,15 +151,99 @@ class Character(models.Model):
     primary_anchor = models.CharField(max_length=40, blank=True)
     secondary_anchor = models.CharField(max_length=40, blank=True)
 
+    # Character Advancement
+    storyteller_beats = models.SmallIntegerField(default=0)
+    organization_beats = models.SmallIntegerField('Org beats', default=30)
+    available_experience = models.SmallIntegerField('Available Exp', default=6, editable=False)
+    spent_experience = models.SmallIntegerField('Spent Exp', default=0, editable=False)
+    version = models.IntegerField(default=1)
+    is_current = models.BooleanField(default=True, editable=False)
+
+    # Derived Traits
+
+    def speed(self):
+        return 5 + self.strength + self.dexterity
+
+    def initiative(self):
+        return self.dexterity + self.composure
+
+    def defense(self):
+        return min((self.dexterity, self.wits)) + self.defense_skill()
+
+    def defense_skill(self):
+        return self.athletics
+
+    def size(self):
+        return 5
+
+    def health(self):
+        return self.size() + self.stamina
+
+    def merit_value(self, merit_name):
+        qs = self.merits.filter(merit__name=merit_name)
+        return qs.first().rating if qs.exists() else 0
+
+    # Other model methods
+
     def __str__(self):
         return str(self.name)
 
+    def all_versions(self):
+        return Character.objects.filter(tracking_id=self.tracking_id)
 
-class CharacterMerit(models.Model):
+    def other_versions(self):
+        return self.all_versions().exclude(pk=self.pk)
+
+    def current_version(self):
+        return Character.objects.get(tracking_id=self.tracking_id, is_current=True)
+
+    def save(self, **kwargs):
+        created = not bool(self.pk)
+        new_version = not bool(self.version)
+        previous = self.other_versions()
+        self.available_experience = \
+            int((self.storyteller_beats + self.organization_beats) / settings.BEATS_PER_EXPERIENCE) - \
+            self.spent_experience
+        if not self.tracking_id:
+            self.created_on = timezone.now().date()
+            self.tracking_id = uuid.uuid4()
+        elif created or new_version:
+            self.pk = None
+            self.version = previous.count() + 1
+            previous.filter(is_current=True).update(is_current=False)
+        super().save(**kwargs)
+        if created:
+            approvals = ApprovalRequest.objects.filter(tracking_id=self.tracking_id)
+            if not approvals.exists():
+                ApprovalRequest.objects.create(
+                    character=self,
+                    status="approved",
+                    tracking_id=self.tracking_id,
+                    details="New character approval.",
+                )
+        elif new_version:
+            for element in itertools.chain(self.merits, self.powers, self.specialities):
+                element.pk = None
+                element.save()
+
+
+class CharacterElement(models.Model):
+
+    def save(self, **kwargs):
+        created = not bool(self.pk)
+        if created and not self.character.is_current:
+            self.character = self.character.current_version()
+        super().save(**kwargs)
+
+    class Meta:
+        abstract = True
+
+
+class CharacterMerit(CharacterElement):
     character = models.ForeignKey(Character, on_delete=models.CASCADE, related_name='merits')
     merit = models.ForeignKey(Merit, on_delete=models.PROTECT, related_name='+')
     rating = DotsField(default=1, clear=False)
-    notes = models.CharField(max_length=200, blank=True)
+    detail = models.CharField(max_length=200, blank=True)
 
     class Meta:
         verbose_name = "Merit"
@@ -116,20 +258,62 @@ class CharacterMerit(models.Model):
         return '{} ({})'.format(self.merit.name, self.rating)
 
 
-class CharacterPower(models.Model):
+class CharacterPower(CharacterElement):
     character = models.ForeignKey(Character, on_delete=models.CASCADE, related_name='powers')
     power = models.ForeignKey(Power, on_delete=models.PROTECT, related_name='+')
     rating = DotsField(default=1, clear=False)
-    notes = models.CharField(max_length=200, blank=True)
+    detail = models.CharField(max_length=200, blank=True)
 
     class Meta:
         verbose_name = "Power"
 
     def __str__(self):
-        return '{}: {} ({})'.format(self.category(), self.power.name, self.rating)
+        if self.detail:
+            return '{} {} ({})'.format(self.power.name, self.rating, self.detail)
+        else:
+            return '{} {}'.format(self.power.name, self.rating)
 
     def category(self):
         return self.power.category.name
 
 
+class SkillSpeciality(CharacterElement):
+    character = models.ForeignKey(Character, on_delete=models.CASCADE, related_name='specialities')
+    skill = models.CharField(max_length=20, choices=SKILLS)
+    speciality = models.CharField(max_length=200)
+
+    def __str__(self):
+        return "{} ({})".format(self.speciality, self.get_skill_display())
+
+    class Meta:
+        verbose_name = "Skill Speciality"
+        verbose_name_plural = "Skill Specialities"
+
+
+class ApprovalRequest(models.Model):
+    STATUSES = (
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    )
+    created_on = models.DateField(auto_now_add=True, editable=False)
+    completed_on = models.DateField(null=True, blank=True, editable=False)
+    character = models.OneToOneField(
+        Character, on_delete=models.CASCADE, related_name='approval_requests', null=True)
+    player_notes = models.TextField(blank=True)
+    details = models.CharField(max_length=1000, null=True)
+    status = models.CharField(max_length=20, default='pending', choices=STATUSES)
+    spent_experience = models.SmallIntegerField('Spent Exp', default=0)
+    tracking_id = models.UUIDField(null=True, editable=False)
+
+    def character_version(self):
+        return "#{}".format(self.character.version)
+
+    def __str__(self):
+        return "{:06d}".format(int(self.pk))
+
+    def save(self, **kwargs):
+        if self.status != 'pending' and not self.completed_on:
+            self.completed_on = timezone.now().date()
+        super().save(**kwargs)
 

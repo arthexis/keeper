@@ -1,3 +1,6 @@
-from django.shortcuts import render
+from django.views.generic import TemplateView
 
-# Create your views here.
+
+# class StaffUpdateView(TemplateView):
+#     template_name = "sheets/staff_update.html"
+#

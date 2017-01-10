@@ -32,9 +32,10 @@ class TemplateAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {
             'fields': (
-                ('name', 'alias'),
-                ('integrity_name', 'power_stat_name', 'resource_name'),
-                ('primary_anchor_name', 'secondary_anchor_name', 'character_group_name'),
+                ('name', 'alias',),
+                ('integrity_name', 'power_stat_name',),
+                ('resource_name', 'character_group_name',),
+                ('primary_anchor_name', 'secondary_anchor_name',),
             ),
         }),
     )
