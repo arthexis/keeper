@@ -138,9 +138,8 @@ class Character(models.Model):
         User, on_delete=models.DO_NOTHING, null=True, blank=True, related_name='characters')
     chronicle = models.ForeignKey(
         Chronicle, on_delete=models.PROTECT, null=True, blank=True, related_name='characters')
-    created_on = models.DateField(editable=False)
+    created_on = models.DateField(auto_now_add=True, editable=False)
     modified_on = models.DateField(auto_now=True, editable=False)
-    tracking_id = models.UUIDField(null=True, editable=False)
 
     # Derived traits, they are not handled automatically because in some situations
     # their values can be manually adjusted
@@ -156,7 +155,6 @@ class Character(models.Model):
     organization_beats = models.SmallIntegerField('Org beats', default=30)
     available_experience = models.SmallIntegerField('Available Exp', default=6, editable=False)
     spent_experience = models.SmallIntegerField('Spent Exp', default=0, editable=False)
-    version = models.IntegerField(default=1)
     is_current = models.BooleanField(default=True, editable=False)
 
     # Derived Traits
@@ -188,51 +186,30 @@ class Character(models.Model):
     def __str__(self):
         return str(self.name)
 
-    def all_versions(self):
-        return Character.objects.filter(tracking_id=self.tracking_id)
+    def last_approved(self):
+        return ApprovalRequest.objects.filter(character=self, status="approved").latest(field_name='completed_on')
 
-    def other_versions(self):
-        return self.all_versions().exclude(pk=self.pk)
-
-    def current_version(self):
-        return Character.objects.get(tracking_id=self.tracking_id, is_current=True)
+    def version(self):
+        return self.last_approved().version
 
     def save(self, **kwargs):
         created = not bool(self.pk)
-        new_version = not bool(self.version)
-        previous = self.other_versions()
         self.available_experience = \
             int((self.storyteller_beats + self.organization_beats) / settings.BEATS_PER_EXPERIENCE) - \
             self.spent_experience
-        if not self.tracking_id:
-            self.created_on = timezone.now().date()
-            self.tracking_id = uuid.uuid4()
-        elif created or new_version:
-            self.pk = None
-            self.version = previous.count() + 1
-            previous.filter(is_current=True).update(is_current=False)
         super().save(**kwargs)
         if created:
-            approvals = ApprovalRequest.objects.filter(tracking_id=self.tracking_id)
-            if not approvals.exists():
-                ApprovalRequest.objects.create(
-                    character=self,
-                    status="approved",
-                    tracking_id=self.tracking_id,
-                    details="New character approval.",
-                )
-        elif new_version:
-            for element in itertools.chain(self.merits, self.powers, self.specialities):
-                element.pk = None
-                element.save()
+            ApprovalRequest.objects.create(
+                character=self,
+                version=1,
+                status="approved",
+                details="New character approval.",
+            )
 
 
 class CharacterElement(models.Model):
 
     def save(self, **kwargs):
-        created = not bool(self.pk)
-        if created and not self.character.is_current:
-            self.character = self.character.current_version()
         super().save(**kwargs)
 
     class Meta:
@@ -298,16 +275,13 @@ class ApprovalRequest(models.Model):
     )
     created_on = models.DateField(auto_now_add=True, editable=False)
     completed_on = models.DateField(null=True, blank=True, editable=False)
-    character = models.OneToOneField(
+    character = models.ForeignKey(
         Character, on_delete=models.CASCADE, related_name='approval_requests', null=True)
     player_notes = models.TextField(blank=True)
     details = models.CharField(max_length=1000, null=True)
     status = models.CharField(max_length=20, default='pending', choices=STATUSES)
     spent_experience = models.SmallIntegerField('Spent Exp', default=0)
-    tracking_id = models.UUIDField(null=True, editable=False)
-
-    def character_version(self):
-        return "#{}".format(self.character.version)
+    version = models.IntegerField(null=True, blank='')
 
     def __str__(self):
         return "{:06d}".format(int(self.pk))
@@ -315,5 +289,9 @@ class ApprovalRequest(models.Model):
     def save(self, **kwargs):
         if self.status != 'pending' and not self.completed_on:
             self.completed_on = timezone.now().date()
+            if not self.version:
+                self.version = ApprovalRequest.objects\
+                    .filter(character=self.character)\
+                    .latest(field_name='completed_on').version + 1
         super().save(**kwargs)
 

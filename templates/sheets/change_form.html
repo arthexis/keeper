@@ -1,20 +1,6 @@
 {% extends 'admin/change_form.html' %}
 {% load i18n admin_urls admin_static admin_modify bootstrapped_goodies_tags %}
 
-{#{% block extrastyle %}#}
-{#    {{ block.super }}#}
-{#    <link href="//cdn.rawgit.com/noelboss/featherlight/1.7.0/release/featherlight.min.css" type="text/css"#}
-{#          rel="stylesheet"/>#}
-{#{% endblock %}#}
-{##}
-{#{% block extrahead %}#}
-{#    {{ block.super }}#}
-{#    <script src="https://code.jquery.com/jquery-2.2.4.min.js"#}
-{#            integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="#}
-{#            crossorigin="anonymous"></script>#}
-{#    <script src="//cdn.rawgit.com/noelboss/featherlight/1.7.0/release/featherlight.min.js" type="text/javascript"#}
-{#            charset="utf-8"></script>#}
-{#{% endblock %}#}
 
 {% block field_sets %}
     {% for fieldset in adminform %}
@@ -28,10 +14,15 @@
         $(document).ready(function () {
             $('.dynamic-approval_requests.form-row').each(function (index, obj) {
                 var status = $(obj).find('.field-status select').val();
+                var status_text = $(obj).find('.field-status select').find('option[selected]').text();
                 if (status != 'pending') {
-                   $(obj).find('.field-status select').prop('disabled', true);
-                   $(obj).find('.field-details input').prop('disabled', true);
-                   $(obj).find('.field-spent_experience input').prop('disabled', true);
+                    $(obj).find('.field-status select').replaceWith(
+                        '<input class="form-control" readonly="readonly" value="' + status_text + '" >' +
+                        '<input id="id_approval_requests-0-status" name="approval_requests-0-status" ' +
+                        '       class="form-control" style="display: none" value="' + status + '" >'
+                    );
+                    $(obj).find('.field-details input').prop('readonly', true);
+                    $(obj).find('.field-spent_experience input').prop('readonly', true);
                 }
             });
         });

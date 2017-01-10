@@ -41,21 +41,10 @@ class SkillSpecialityInline(admin.TabularInline):
 
 class ApprovalRequestInline(admin.TabularInline):
     model = ApprovalRequest
-    fields = ('character_version', 'status', 'created_on', 'completed_on', 'details', 'spent_experience' )
-    readonly_fields = ('character_version', 'created_on', 'completed_on',)
-    extra = 0
+    fields = ('version', 'status', 'created_on', 'completed_on', 'details', 'spent_experience', )
+    readonly_fields = ('version', 'created_on', 'completed_on',)
     can_delete = False
-
-    def __init__(self, parent_model, admin_site):
-        super().__init__(parent_model, admin_site)
-        self.parent_obj = None
-
-    def get_fields(self, request, obj: Character=None):
-        self.parent_obj = obj
-        return super().get_fields(request, obj)
-
-    def get_queryset(self, request):
-        return ApprovalRequest.objects.filter(tracking_id=self.parent_obj.tracking_id)
+    max_num = 0
 
 
 @admin.register(Character)
@@ -66,7 +55,7 @@ class CharacterAdmin(admin.ModelAdmin):
         (None, {
             'fields': (
                 ('name', 'template', ),
-                ('player', 'chronicle', 'version_label'),
+                ('player', 'chronicle', 'version'),
             ),
         }),
         ('Template', {
@@ -117,9 +106,10 @@ class CharacterAdmin(admin.ModelAdmin):
     list_display = ('name', 'template', 'chronicle', 'player')
     list_filter = ('template', 'chronicle', )
     readonly_fields = (
-        'template', 'size', 'health', 'speed', 'initiative', 'defense', 'version_label',
+        'template', 'size', 'health', 'speed', 'initiative', 'defense', 'version',
         'spent_experience', 'available_experience', 'created_on', 'modified_on',
     )
+    readonly_fields_new = ('version', )
     formfield_overrides = {
         DotsField: {'widget': DotsInput}
     }
@@ -195,13 +185,6 @@ class CharacterAdmin(admin.ModelAdmin):
     def get_readonly_fields(self, request, obj=None):
         if obj is not None:
             return self.readonly_fields
-        return ('version_label', )
+        return self.readonly_fields_new
 
-    def version_label(self, obj: Character=None):
-        if not obj:
-            return "New"
-        if obj.is_current:
-            return "#{} (Current)".format(obj.version)
-        return "#{} (Archived)".format(obj.version)
-    version_label.short_description = "Version"
 
