@@ -13,22 +13,31 @@ class ParentInlineMixin(admin.TabularInline):
         return super().get_formset(request, obj, **kwargs)
 
 
+class EventInline(admin.TabularInline):
+    model = Event
+    fields = ('name', 'event_date', 'planning_document')
+    extra = 0
+    show_change_link = True
+
+
 @admin.register(Chronicle)
 class ChronicleAdmin(admin.ModelAdmin):
     model = Chronicle
+    inlines = (EventInline, )
     fields = (
-        ('name', 'default_template'),
+        ('name', 'code'),
+        ('default_template', ),
         ('theme', 'mood'),
         ('venue_storyteller', 'domain_storyteller'),
         ('venue_coordinator', 'domain_coordinator'),
         ('storytelling_group', 'coordinating_group'),
     )
-    list_display = ('name', 'default_template', 'venue_storyteller', 'venue_coordinator')
+    list_display = ('name', 'code', 'default_template', 'venue_storyteller', 'venue_coordinator')
 
 
 class MeritInline(admin.TabularInline):
     model = CharacterMerit
-    fields = ('merit', 'rating', 'detail', 'category', 'origin', )
+    fields = ('merit', 'rating', 'details', 'category', 'origin', )
     readonly_fields = ('category', 'origin', )
     extra = 0
 
@@ -45,6 +54,18 @@ class ApprovalRequestInline(admin.TabularInline):
     readonly_fields = ('version', 'created_on', 'completed_on',)
     can_delete = False
     max_num = 0
+
+
+class EventAssistanceInline(admin.TabularInline):
+    model = Assistance
+    fields = ('character', 'storyteller_beats', 'coordinator_beats', 'details')
+    extra = 0
+
+
+class CharacterAssistanceInline(admin.TabularInline):
+    model = Assistance
+    fields = ('event', 'storyteller_beats', 'coordinator_beats', 'details')
+    extra = 0
 
 
 @admin.register(Character)
@@ -93,8 +114,9 @@ class CharacterAdmin(admin.ModelAdmin):
         }),
         ('Character Advancement', {
             'fields': (
-                ('storyteller_beats', 'organization_beats', 'created_on', ),
-                ('spent_experience', 'available_experience', 'modified_on', ),
+                ('storyteller_beats', 'coordinator_beats', ),
+                ('accumulated_experience', 'spent_experience', 'available_experience', ),
+                ('created_on', 'modified_on',)
             ),
         }),
         ('Information', {
@@ -103,11 +125,13 @@ class CharacterAdmin(admin.ModelAdmin):
             ),
         }),
     )
-    list_display = ('name', 'template', 'chronicle', 'player')
-    list_filter = ('template', 'chronicle', )
+    list_display = ('name', 'template', 'chronicle', 'player_name', 'player_email')
+    list_filter = ('template', )
+    search_fields = ('name', 'player_name', 'player_email', 'player')
     readonly_fields = (
         'template', 'size', 'health', 'speed', 'initiative', 'defense', 'version',
         'spent_experience', 'available_experience', 'created_on', 'modified_on',
+        'storyteller_beats', 'coordinator_beats', 'accumulated_experience',
     )
     readonly_fields_new = ('version', )
     formfield_overrides = {
@@ -124,7 +148,9 @@ class CharacterAdmin(admin.ModelAdmin):
             self.inlines = ()
             return (self.fieldsets[0], )
         else:
-            self.inlines = CharacterAdmin.inlines + self.get_extra_inlines(request, obj)
+            self.inlines = CharacterAdmin.inlines + \
+                           self.get_extra_inlines(request, obj) + \
+                           (CharacterAssistanceInline, )
         return self.fieldsets
 
     def get_extra_inlines(self, request, obj: Character):
@@ -133,7 +159,7 @@ class CharacterAdmin(admin.ModelAdmin):
 
             class PowerInline(ParentInlineMixin):
                 model = CharacterPower
-                fields = ('power', 'rating', 'detail', )
+                fields = ('power', 'rating', 'details', )
                 readonly_fields = ('category', )
                 power_category = category
                 verbose_name = category.name
@@ -186,5 +212,37 @@ class CharacterAdmin(admin.ModelAdmin):
         if obj is not None:
             return self.readonly_fields
         return self.readonly_fields_new
+
+
+@admin.register(PendingApproval)
+class PendingApprovalAdmin(admin.ModelAdmin):
+    model = PendingApproval
+    list_display = ('request_id', 'chronicle', 'character', 'created_on', 'summary', )
+    search_fields = ('character', '`player_name', 'player_email', )
+    fieldsets = (
+        (None, {
+            'fields': (
+                ('character', 'status'),
+                ('spent_experience', 'created_on', ),
+                ('details', ),
+            ),
+        }),
+    )
+    readonly_fields = ('version', 'created_on', )
+
+    def get_readonly_fields(self, request, obj=None):
+        fields = self.readonly_fields
+        if obj:
+            fields += ('character', )
+        if not obj or not obj.can_approve(request.user):
+            return fields + ('status', )
+        return fields
+
+
+@admin.register(Event)
+class EventAdmin(admin.ModelAdmin):
+    model = Event
+    list_display = ('short_name', 'event_date', 'chronicle', 'name')
+    inlines = (EventAssistanceInline, )
 
 

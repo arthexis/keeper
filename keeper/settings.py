@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'sheets',
     'debug_toolbar',
     'django_extensions',
+    'rest_framework',
 ]
 
 MIDDLEWARE_CLASSES = [

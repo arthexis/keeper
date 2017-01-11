@@ -10,21 +10,21 @@
 
 {% block submit_buttons_bottom %}
     {{ block.super }}
-    <script>
-        $(document).ready(function () {
-            $('.dynamic-approval_requests.form-row').each(function (index, obj) {
-                var status = $(obj).find('.field-status select').val();
-                var status_text = $(obj).find('.field-status select').find('option[selected]').text();
-                if (status != 'pending') {
-                    $(obj).find('.field-status select').replaceWith(
-                        '<input class="form-control" readonly="readonly" value="' + status_text + '" >' +
-                        '<input id="id_approval_requests-0-status" name="approval_requests-0-status" ' +
-                        '       class="form-control" style="display: none" value="' + status + '" >'
-                    );
-                    $(obj).find('.field-details input').prop('readonly', true);
-                    $(obj).find('.field-spent_experience input').prop('readonly', true);
-                }
-            });
-        });
-    </script>
+{#    <script>#}
+{#        $(document).ready(function () {#}
+{#            $('.dynamic-approval_requests.form-row').each(function (index, obj) {#}
+{#                var status = $(obj).find('.field-status select').val();#}
+{#                var status_text = $(obj).find('.field-status select').find('option[selected]').text();#}
+{#                if (status != 'pending') {#}
+{#                    $(obj).find('.field-status select').replaceWith(#}
+{#                        '<input class="form-control" readonly="readonly" value="' + status_text + '" >' +#}
+{#                        '<input id="id_approval_requests-0-status" name="approval_requests-0-status" ' +#}
+{#                        '       class="form-control" style="display: none" value="' + status + '" >'#}
+{#                    );#}
+{#                    $(obj).find('.field-details input').prop('readonly', true);#}
+{#                    $(obj).find('.field-spent_experience input').prop('readonly', true);#}
+{#                }#}
+{#            });#}
+{#        });#}
+{#    </script>#}
 {% endblock %}
