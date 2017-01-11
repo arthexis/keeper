@@ -123,5 +123,6 @@ DAB_FIELD_RENDERER = 'django_admin_bootstrapped.renderers.BootstrapFieldRenderer
 
 # Keeper system specific settings
 
-BEATS_PER_EXPERIENCE = 5
+BEATS_PER_EXPERIENCE = 10
+BEATS_PER_PRESTIGE = 50
 

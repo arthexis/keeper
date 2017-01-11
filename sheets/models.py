@@ -6,6 +6,42 @@ from systems.fields import *
 from systems.models import *
 
 
+class Membership(models.Model):
+    STATUSES = (
+        ('hold', 'On Hold'),
+        ('provisional', 'Provisional'),
+        ('active', 'Active'),
+        ('expired', 'Expired'),
+        ('cancelled', 'Cancelled'),
+    )
+    user = models.OneToOneField(User, on_delete=models.PROTECT)
+    status = models.CharField(max_length=20, choices=STATUSES, default='provisional')
+    joined_on = models.DateField('Joined', null=True, blank=True)
+    starts_on = models.DateField('Starts', null=True, blank=True)
+    ends_on = models.DateField('Ends', null=True, blank=True)
+    phone = models.CharField(max_length=20, blank=True)
+
+    def prestige_level(self):
+        return int(Prestige.objects.filter(membership=self)
+                   .aggregate(x=models.Sum('member_beats'))['x'] / settings.BEATS_PER_PRESTIGE)
+
+    def user_name(self):
+        return self.user.get_full_name()
+
+    def user_email(self):
+        return self.user.email
+
+
+class Prestige(models.Model):
+    membership = models.ForeignKey(Membership, on_delete=models.PROTECT, related_name='prestige')
+    member_beats = models.SmallIntegerField(default=0)
+    details = models.TextField(blank=True)
+    awarded_on = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return "{}".format(str(self.member_beats))
+
+
 SKILLS = (
     ("academics", "Academics"),
     ("computer", "Computer"),

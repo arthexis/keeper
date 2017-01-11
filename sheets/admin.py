@@ -13,6 +13,25 @@ class ParentInlineMixin(admin.TabularInline):
         return super().get_formset(request, obj, **kwargs)
 
 
+class PrestigeInline(admin.TabularInline):
+    model = Prestige
+    extra = 0
+    fields = ('member_beats', 'details', 'awarded_on')
+    readonly_fields = ('awarded_on', )
+
+
+@admin.register(Membership)
+class MembershipAdmin(admin.ModelAdmin):
+    model = Membership
+    fields = (
+        ('user', 'status'),
+        ('joined_on', 'starts_on', 'ends_on'),
+        ('phone', '')
+    )
+    list_display = ('user_name', 'user_email', 'status', 'prestige_level')
+    inlines = (PrestigeInline, )
+
+
 class EventInline(admin.TabularInline):
     model = Event
     fields = ('name', 'event_date', 'planning_document')
