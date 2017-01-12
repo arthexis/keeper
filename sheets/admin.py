@@ -1,6 +1,7 @@
 from django.contrib import admin
 from sheets.models import *
 from django.forms.widgets import HiddenInput
+from easy_select2 import select2_modelform
 
 
 class ParentInlineMixin(admin.TabularInline):
@@ -56,6 +57,7 @@ class ChronicleAdmin(admin.ModelAdmin):
 
 class MeritInline(admin.TabularInline):
     model = CharacterMerit
+    form = select2_modelform(CharacterMerit, attrs={'width': '200px'})
     fields = ('merit', 'rating', 'details', 'category', 'origin', )
     readonly_fields = ('category', 'origin', )
     extra = 0
@@ -63,6 +65,7 @@ class MeritInline(admin.TabularInline):
 
 class SkillSpecialityInline(admin.TabularInline):
     model = SkillSpeciality
+    form = select2_modelform(SkillSpeciality, attrs={'width': '180px'})
     fields = ('speciality', 'skill')
     extra = 0
 
@@ -98,6 +101,7 @@ class CharacterDowntimeInline(admin.TabularInline):
 @admin.register(Character)
 class CharacterAdmin(admin.ModelAdmin):
     model = Character
+    form = select2_modelform(Character, attrs={'width': '180px'})
     inlines = (SkillSpecialityInline, MeritInline, )
     fieldsets = (
         (None, {
@@ -186,6 +190,7 @@ class CharacterAdmin(admin.ModelAdmin):
 
             class PowerInline(ParentInlineMixin):
                 model = CharacterPower
+                form = select2_modelform(CharacterPower, attrs={'width': '200px'})
                 fields = ('power', 'rating', 'details', )
                 readonly_fields = ('category', )
                 power_category = category
@@ -285,7 +290,7 @@ class DowntimeAdmin(admin.ModelAdmin):
     model = Downtime
     list_display = ('chronicle', 'event', 'character', 'sent_on', 'is_resolved')
     search_fields = ('event', 'character')
-    list_filter = ('event__chronicle', 'is_resolved' )
+    list_filter = ('event__chronicle', 'is_resolved')
     inlines = (AspirationInline, )
 
 

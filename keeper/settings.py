@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'django_extensions',
     'rest_framework',
+    'easy_select2',
 ]
 
 MIDDLEWARE_CLASSES = [
