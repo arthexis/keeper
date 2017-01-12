@@ -454,9 +454,44 @@ class Assistance(models.Model):
     coordinator_beats = models.SmallIntegerField('Org beats', default=0)
     details = models.CharField(max_length=200, blank=True)
 
+    class Meta:
+        unique_together = ('character', 'event')
+
     def event_short_name(self):
         return self.event.short_name()
 
     def __str__(self):
         return self.event_short_name()
+
+
+class Downtime(models.Model):
+    character = models.ForeignKey(Character, on_delete=models.PROTECT, related_name='+')
+    event = models.ForeignKey(Event, on_delete=models.PROTECT, related_name='+')
+    sent_on = models.DateField(null=True, editable=False)
+    comments = models.TextField(blank=True)
+    is_resolved = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name_plural = "Downtime"
+        unique_together = ('character', 'event')
+
+    def chronicle(self):
+        return self.event.chronicle
+
+    def __str__(self):
+        return str(self.event)
+
+
+class Aspiration(models.Model):
+    CATEGORIES = (
+        ('information', 'Gather information'),
+        ('resources', 'Gather resources'),
+        ('integrity', 'Develop integrity'),
+        ('aggressive', 'Aggressive action'),
+        ('background', 'Develop background'),
+    )
+    downtime = models.ForeignKey(Downtime, on_delete=models.PROTECT, related_name='+')
+    category = models.CharField(max_length=40)
+    player_aspiration = models.TextField(blank=True)
+    storyteller_response = models.TextField(blank=True)
 

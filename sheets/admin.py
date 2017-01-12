@@ -87,6 +87,14 @@ class CharacterAssistanceInline(admin.TabularInline):
     extra = 0
 
 
+class CharacterDowntimeInline(admin.TabularInline):
+    model = Downtime
+    show_change_link = True
+    fields = ('event', 'sent_on', 'is_resolved')
+    readonly_fields = ('sent_on', )
+    extra = 0
+
+
 @admin.register(Character)
 class CharacterAdmin(admin.ModelAdmin):
     model = Character
@@ -169,7 +177,7 @@ class CharacterAdmin(admin.ModelAdmin):
         else:
             self.inlines = CharacterAdmin.inlines + \
                            self.get_extra_inlines(request, obj) + \
-                           (CharacterAssistanceInline, )
+                           (CharacterAssistanceInline, CharacterDowntimeInline)
         return self.fieldsets
 
     def get_extra_inlines(self, request, obj: Character):
@@ -263,5 +271,21 @@ class EventAdmin(admin.ModelAdmin):
     model = Event
     list_display = ('short_name', 'event_date', 'chronicle', 'name')
     inlines = (EventAssistanceInline, )
+
+
+class AspirationInline(admin.StackedInline):
+    model = Aspiration
+    min_num = 3
+    max_num = 3
+    fields = ('downtime', 'category', 'player_aspiration', 'storyteller_response')
+
+
+@admin.register(Downtime)
+class DowntimeAdmin(admin.ModelAdmin):
+    model = Downtime
+    list_display = ('chronicle', 'event', 'character', 'sent_on', 'is_resolved')
+    search_fields = ('event', 'character')
+    list_filter = ('event__chronicle', 'is_resolved' )
+    inlines = (AspirationInline, )
 
 
