@@ -84,13 +84,24 @@ class EventAssistanceInline(admin.TabularInline):
     extra = 0
 
 
-class CharacterAssistanceInline(admin.TabularInline):
+class CharacterEventFieldInlineMixin(admin.TabularInline):
+    def get_formset(self, request, obj: Character=None, **kwargs):
+        self.parent_obj = obj
+        return super().get_formset(request, obj, **kwargs)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "event":
+            kwargs['queryset'] = Event.objects.filter(chronicle=self.parent_obj.chronicle)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+
+class CharacterAssistanceInline(CharacterEventFieldInlineMixin):
     model = Assistance
     fields = ('event', 'storyteller_beats', 'coordinator_beats', 'details')
     extra = 0
 
 
-class CharacterDowntimeInline(admin.TabularInline):
+class CharacterDowntimeInline(CharacterEventFieldInlineMixin):
     model = Downtime
     show_change_link = True
     fields = ('event', 'sent_on', 'is_resolved')

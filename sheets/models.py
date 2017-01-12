@@ -491,7 +491,7 @@ class Aspiration(models.Model):
         ('background', 'Develop background'),
     )
     downtime = models.ForeignKey(Downtime, on_delete=models.PROTECT, related_name='+')
-    category = models.CharField(max_length=40)
+    category = models.CharField(max_length=40, choices=CATEGORIES)
     player_aspiration = models.TextField(blank=True)
     storyteller_response = models.TextField(blank=True)
 
