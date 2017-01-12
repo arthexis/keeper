@@ -34,7 +34,7 @@ class Membership(models.Model):
 
 class Prestige(models.Model):
     membership = models.ForeignKey(Membership, on_delete=models.PROTECT, related_name='prestige')
-    member_beats = models.SmallIntegerField(default=0)
+    prestige_beats = models.SmallIntegerField(default=0)
     details = models.TextField(blank=True)
     awarded_on = models.DateField(auto_now_add=True)
 
@@ -254,8 +254,14 @@ class Character(models.Model):
         return Assistance.objects.filter(character=self).aggregate(x=models.Sum('coordinator_beats'))['x']
     coordinator_beats.short_description = "Coord. beats"
 
+    def prestige_beats(self):
+        return (Prestige.objects
+                .filter(membership__user=self.user).aggregate(x=models.Sum('prestige_beats'))['x'])
+    prestige_beats.short_description = "Prestige"
+
     def accumulated_experience(self):
-        return int((self.storyteller_beats() + self.coordinator_beats()) / settings.BEATS_PER_EXPERIENCE)
+        return int((self.storyteller_beats() + self.coordinator_beats() + self.prestige_beats())
+                   / settings.BEATS_PER_EXPERIENCE)
     accumulated_experience.short_description = "Total Exp"
 
     def available_experience(self):

@@ -26,7 +26,7 @@ class MembershipAdmin(admin.ModelAdmin):
     fields = (
         ('user', 'status'),
         ('joined_on', 'starts_on', 'ends_on'),
-        ('phone', '')
+        ('phone', )
     )
     list_display = ('user_name', 'user_email', 'status', 'prestige_level')
     inlines = (PrestigeInline, )
@@ -133,7 +133,7 @@ class CharacterAdmin(admin.ModelAdmin):
         }),
         ('Character Advancement', {
             'fields': (
-                ('storyteller_beats', 'coordinator_beats', ),
+                ('storyteller_beats', 'coordinator_beats', 'prestige_beats', ),
                 ('accumulated_experience', 'spent_experience', 'available_experience', ),
                 ('created_on', 'modified_on',)
             ),
@@ -241,7 +241,7 @@ class PendingApprovalAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {
             'fields': (
-                ('character', 'status'),
+                ('character', 'status', ),
                 ('spent_experience', 'created_on', ),
                 ('details', ),
             ),
