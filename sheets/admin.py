@@ -16,7 +16,7 @@ class ParentInlineMixin(admin.TabularInline):
 class PrestigeInline(admin.TabularInline):
     model = Prestige
     extra = 0
-    fields = ('member_beats', 'details', 'awarded_on')
+    fields = ('prestige_beats', 'details', 'awarded_on')
     readonly_fields = ('awarded_on', )
 
 
@@ -150,7 +150,7 @@ class CharacterAdmin(admin.ModelAdmin):
     readonly_fields = (
         'template', 'size', 'health', 'speed', 'initiative', 'defense', 'version',
         'spent_experience', 'available_experience', 'created_on', 'modified_on',
-        'storyteller_beats', 'coordinator_beats', 'accumulated_experience',
+        'storyteller_beats', 'coordinator_beats', 'prestige_beats', 'accumulated_experience',
     )
     readonly_fields_new = ('version', )
     formfield_overrides = {

@@ -23,7 +23,7 @@ class Membership(models.Model):
 
     def prestige_level(self):
         return int(Prestige.objects.filter(membership=self)
-                   .aggregate(x=models.Sum('member_beats'))['x'] / settings.BEATS_PER_PRESTIGE)
+                   .aggregate(x=models.Sum('prestige_beats'))['x'] / settings.BEATS_PER_PRESTIGE)
 
     def user_name(self):
         return self.user.get_full_name()
@@ -39,7 +39,7 @@ class Prestige(models.Model):
     awarded_on = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return "{}".format(str(self.member_beats))
+        return "{}".format(str(self.prestige_beats))
 
 
 SKILLS = (
@@ -217,7 +217,6 @@ class Character(models.Model):
     secondary_anchor = models.CharField(max_length=40, blank=True)
 
     # Character Advancement
-    spent_experience = models.SmallIntegerField('Spent Exp', default=0, editable=False)
     is_current = models.BooleanField(default=True, editable=False)
 
     # Derived Traits
@@ -247,25 +246,30 @@ class Character(models.Model):
     # Experience related calculations
 
     def storyteller_beats(self):
-        return Assistance.objects.filter(character=self).aggregate(x=models.Sum('storyteller_beats'))['x']
+        return Assistance.objects.filter(character=self).aggregate(x=models.Sum('storyteller_beats'))['x']  or 0
     storyteller_beats.short_description = "Story beats"
 
     def coordinator_beats(self):
-        return Assistance.objects.filter(character=self).aggregate(x=models.Sum('coordinator_beats'))['x']
+        return Assistance.objects.filter(character=self).aggregate(x=models.Sum('coordinator_beats'))['x'] or 0
     coordinator_beats.short_description = "Coord. beats"
 
     def prestige_beats(self):
-        return (Prestige.objects
-                .filter(membership__user=self.user).aggregate(x=models.Sum('prestige_beats'))['x'])
+        return (Prestige.objects.filter(membership__user=self.player)
+                .aggregate(x=models.Sum('prestige_beats'))['x']) or 0
     prestige_beats.short_description = "Prestige"
 
     def accumulated_experience(self):
         return int((self.storyteller_beats() + self.coordinator_beats() + self.prestige_beats())
-                   / settings.BEATS_PER_EXPERIENCE)
+                   / settings.BEATS_PER_EXPERIENCE) or 0
     accumulated_experience.short_description = "Total Exp"
 
+    def spent_experience(self):
+        return (ApprovalRequest.objects.filter(status='approved', character=self)
+                .aggregate(x=models.Sum('spent_experience'))['x']) or 0
+    spent_experience.short_description = "Spent Exp"
+
     def available_experience(self):
-        return self.accumulated_experience() - self.spent_experience
+        return self.accumulated_experience() - self.spent_experience()
     available_experience.short_description = "Available Exp"
 
     # Other model methods

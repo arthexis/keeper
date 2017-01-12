@@ -19,7 +19,8 @@ class SplatCategoryAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {
             'fields': (
-                ('name', 'template', 'flavor', ),
+                ('name',),
+                ('template', 'flavor', ),
             ),
         }),
     )
