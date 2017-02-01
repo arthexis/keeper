@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'rest_framework',
     'easy_select2',
+    'bootstrap3',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -126,4 +127,7 @@ DAB_FIELD_RENDERER = 'django_admin_bootstrapped.renderers.BootstrapFieldRenderer
 
 BEATS_PER_EXPERIENCE = 10
 BEATS_PER_PRESTIGE = 50
+
+SITE_HEADER = "Keeper"
+
 

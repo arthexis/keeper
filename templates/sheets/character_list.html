@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <ul>
+    {% for character in object_list %}
+        <li><a href="{% url 'character_update' character.pk %}">{{ character.name }}</a> </li>
+    {% endfor %}
+    </ul>
+</body>
+</html>

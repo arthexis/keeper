@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User, Group
 from django.utils import timezone
 from django.conf import settings
+from django.urls import reverse
 
 from systems.fields import *
 from systems.models import *
@@ -219,6 +220,9 @@ class Character(models.Model):
     # Character Advancement
     is_current = models.BooleanField(default=True, editable=False)
 
+    def get_absolute_url(self):
+        return reverse('character_update', args=(self.pk,))
+
     # Derived Traits
 
     def speed(self):
@@ -278,10 +282,10 @@ class Character(models.Model):
         return str(self.name)
 
     def player_email(self):
-        return self.player.email
+        return self.player.email if self.player else None
 
     def player_name(self):
-        return self.player.get_full_name()
+        return self.player.get_full_name() if self.player else None
 
     def last_approved(self):
         return ApprovalRequest.objects.filter(character=self, status="approved").latest(field_name='completed_on')

@@ -1,0 +1,18 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <form action="{% if object %}
+            {% url 'character_update' object.pk %}{% else %}{% url 'character_create' %}
+        {% endif %}" method="post">
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit" value="{% if object %}Actualizar{% else %}Crear{% endif %}">
+    </form>
+    <a href="{% url 'character_create' %}">Crear otro personaje nuevo</a>
+</body>
+</html>
