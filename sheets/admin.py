@@ -2,57 +2,8 @@ from django.contrib import admin
 from sheets.models import *
 from django.forms.widgets import HiddenInput
 from easy_select2 import select2_modelform
-
-
-class ParentInlineMixin(admin.TabularInline):
-    def __init__(self, parent_mode, admin_site):
-        super().__init__(parent_mode, admin_site)
-        self.parent_obj = None
-
-    def get_formset(self, request, obj=None, **kwargs):
-        self.parent_obj = obj
-        return super().get_formset(request, obj, **kwargs)
-
-
-class PrestigeInline(admin.TabularInline):
-    model = Prestige
-    extra = 0
-    fields = ('prestige_beats', 'details', 'awarded_on')
-    readonly_fields = ('awarded_on', )
-
-
-@admin.register(Membership)
-class MembershipAdmin(admin.ModelAdmin):
-    model = Membership
-    fields = (
-        ('user', 'status'),
-        ('joined_on', 'starts_on', 'ends_on'),
-        ('phone', )
-    )
-    list_display = ('user_name', 'user_email', 'status', 'prestige_level')
-    inlines = (PrestigeInline, )
-
-
-class EventInline(admin.TabularInline):
-    model = Event
-    fields = ('name', 'event_date', 'planning_document')
-    extra = 0
-    show_change_link = True
-
-
-@admin.register(Chronicle)
-class ChronicleAdmin(admin.ModelAdmin):
-    model = Chronicle
-    inlines = (EventInline, )
-    fields = (
-        ('name', 'code'),
-        ('default_template', ),
-        ('theme', 'mood'),
-        ('venue_storyteller', 'domain_storyteller'),
-        ('venue_coordinator', 'domain_coordinator'),
-        ('storytelling_group', 'coordinating_group'),
-    )
-    list_display = ('name', 'code', 'default_template', 'venue_storyteller', 'venue_coordinator')
+from systems.admin import ParentInlineMixin
+from orgs.models import Event
 
 
 class MeritInline(admin.TabularInline):
@@ -76,12 +27,6 @@ class ApprovalRequestInline(admin.TabularInline):
     readonly_fields = ('version', 'created_on', 'completed_on',)
     can_delete = False
     max_num = 0
-
-
-class EventAssistanceInline(admin.TabularInline):
-    model = Assistance
-    fields = ('character', 'storyteller_beats', 'coordinator_beats', 'details')
-    extra = 0
 
 
 class CharacterEventFieldInlineMixin(admin.TabularInline):
@@ -280,13 +225,6 @@ class PendingApprovalAdmin(admin.ModelAdmin):
         if not obj or not obj.can_approve(request.user):
             return fields + ('status', )
         return fields
-
-
-@admin.register(Event)
-class EventAdmin(admin.ModelAdmin):
-    model = Event
-    list_display = ('short_name', 'event_date', 'chronicle', 'name')
-    inlines = (EventAssistanceInline, )
 
 
 class AspirationInline(admin.StackedInline):

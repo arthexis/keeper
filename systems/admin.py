@@ -1,6 +1,15 @@
 from django.contrib import admin
-
 from systems.models import *
+
+
+class ParentInlineMixin(admin.TabularInline):
+    def __init__(self, parent_mode, admin_site):
+        super().__init__(parent_mode, admin_site)
+        self.parent_obj = None
+
+    def get_formset(self, request, obj=None, **kwargs):
+        self.parent_obj = obj
+        return super().get_formset(request, obj, **kwargs)
 
 
 class SplatInline(admin.TabularInline):

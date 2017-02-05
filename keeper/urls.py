@@ -2,7 +2,7 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib import admin
 
-from views import CreateCharacterView, UpdateCharacterView, ListCharacterView
+from sheets.views import CreateCharacterView, UpdateCharacterView, ListCharacterView
 
 urlpatterns = [
 
