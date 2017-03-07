@@ -13,7 +13,7 @@ class Membership(models.Model):
         ('expired', 'Expired'),
         ('cancelled', 'Cancelled'),
     )
-    user = models.OneToOneField(User, on_delete=models.PROTECT)
+    user = models.OneToOneField(User, on_delete=models.PROTECT, related_name='membership')
     status = models.CharField(max_length=20, choices=STATUSES, default='provisional')
     joined_on = models.DateField('Joined', null=True, blank=True)
     starts_on = models.DateField('Starts', null=True, blank=True)
@@ -21,8 +21,7 @@ class Membership(models.Model):
     phone = models.CharField(max_length=20, blank=True)
 
     def prestige_level(self):
-        return int(Prestige.objects.filter(membership=self)
-                   .aggregate(x=models.Sum('prestige_beats'))['x'] / settings.BEATS_PER_PRESTIGE)
+        return int(self.prestige.aggregate(x=models.Sum('prestige_beats'))['x'] / settings.BEATS_PER_PRESTIGE)
 
     def user_name(self):
         return self.user.get_full_name()

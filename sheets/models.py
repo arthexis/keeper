@@ -166,29 +166,24 @@ class Character(models.Model):
     # Experience related calculations
 
     def storyteller_beats(self):
-        return (apps.get_model('orgs', 'Assistance')
-                .objects.filter(character=self).aggregate(x=models.Sum('storyteller_beats'))['x'] or 0)
+        return self.assistance.aggregate(x=models.Sum('storyteller_beats'))['x'] or 0
     storyteller_beats.short_description = "Story beats"
 
     def coordinator_beats(self):
-        return (apps.get_model('orgs', 'Assistance')
-                .objects.filter(character=self).aggregate(x=models.Sum('coordinator_beats'))['x'] or 0)
+        return self.assistance.aggregate(x=models.Sum('coordinator_beats'))['x'] or 0
     coordinator_beats.short_description = "Coord. beats"
 
     def prestige_beats(self):
-        return (apps.get_model('orgs', 'Prestige')
-                .objects.filter(membership__user=self.player)
-                .aggregate(x=models.Sum('prestige_beats'))['x'] or 0)
+        return self.player.membership.prestige.aggregate(x=models.Sum('prestige_beats'))['x'] or 0
     prestige_beats.short_description = "Prestige"
 
     def accumulated_experience(self):
         return int((self.storyteller_beats() + self.coordinator_beats() + self.prestige_beats())
-                   / settings.BEATS_PER_EXPERIENCE) or 0
+                   / settings.BEATS_PER_EXPERIENCE)
     accumulated_experience.short_description = "Total Exp"
 
     def spent_experience(self):
-        return (ApprovalRequest.objects.filter(status='approved', character=self)
-                .aggregate(x=models.Sum('spent_experience'))['x']) or 0
+        return self.approval_requests.filter(status='approved').aggregate(x=models.Sum('spent_experience'))['x'] or 0
     spent_experience.short_description = "Spent Exp"
 
     def available_experience(self):
@@ -403,8 +398,8 @@ class Aspiration(models.Model):
 
 
 class Assistance(models.Model):
-    character = models.ForeignKey(Character, on_delete=models.PROTECT, related_name='+')
-    event = models.ForeignKey('orgs.Event', on_delete=models.PROTECT, related_name='+')
+    character = models.ForeignKey(Character, on_delete=models.PROTECT, related_name='assistance')
+    event = models.ForeignKey('orgs.Event', on_delete=models.PROTECT, related_name='assistance')
     storyteller_beats = models.SmallIntegerField('Story beats', default=0)
     coordinator_beats = models.SmallIntegerField('Org beats', default=0)
     details = models.CharField(max_length=200, blank=True)
