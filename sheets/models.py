@@ -1,8 +1,7 @@
 from django.contrib.auth.models import User, Group
 from django.utils import timezone
 from django.conf import settings
-from django.urls import reverse
-from django.apps import apps
+from django.core.urlresolvers import reverse
 from systems.fields import *
 from systems.models import *
 
