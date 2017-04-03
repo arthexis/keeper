@@ -1,9 +1,51 @@
 import os
+import sys
 import dj_database_url
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True
+
+# Logging configuration specialized for Heroku's console stream logging
+# An "audit" logger has been added that sends extra logs to an audit stream
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'verbose': {
+            'format': ('at=%(levelname)s logger="%(name)s" lineno=%(lineno)s ' +
+                       'funcname="%(funcName)s" msg="%(message)s"'),
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        }
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+            'stream': sys.stdout,
+        },
+    },
+    'loggers': {
+        'root': {
+            'level': 'INFO',
+            'handlers': ['console'],
+            'propagate': True,
+        },
+        'django': {
+            'level': 'INFO',
+            'handlers': ['console'],
+            'propagate': True,
+        },
+    }
+}
 
 
 # Quick-start development settings - unsuitable for production
@@ -12,8 +54,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '*9w$$hwtmu*o_-6g8-qppf^&&b5esec8(@cjy%ays285=cvsi*'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 ALLOWED_HOSTS = []
 
