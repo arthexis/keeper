@@ -1,9 +1,13 @@
 {
   "name": "Keeper",
   "description": "An app to keep track of CoD character sheets and groups.",
+  "image": "heroku/python",
   "keywords": [
     "chronicles of darkness",
     "character sheets"
   ],
-  "repository": "git://github.com/arthexis/keeper"
+  "repository": "https://github.com/arthexis/keeper",
+  "addons": [
+    "heroku-postgresql"
+  ]
 }
