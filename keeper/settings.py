@@ -55,7 +55,7 @@ LOGGING = {
 SECRET_KEY = '*9w$$hwtmu*o_-6g8-qppf^&&b5esec8(@cjy%ays285=cvsi*'
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['cod-keeper.herokuapp.com']
 
 INTERNAL_IPS = ['127.0.0.1']
 
