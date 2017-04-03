@@ -35,8 +35,8 @@ INSTALLED_APPS = [
     'django_extensions',
     'rest_framework',
     'easy_select2',
-    # 'bootstrap3',
-    'bootstrap4',
+    'bootstrap3',
+    # 'bootstrap4',
 ]
 
 MIDDLEWARE_CLASSES = [
