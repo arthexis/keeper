@@ -1,4 +1,6 @@
 import os
+import dj_database_url
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -76,12 +78,26 @@ WSGI_APPLICATION = 'keeper.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
+# Use sqlite for local development
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+
+
+# When on Heroku, switch to postgres using a DATABASE_URL
+DATABASE_URL = dj_database_url.config(conn_max_age=500)
+
+if DATABASE_URL:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        }
+    }
+    DATABASES['default'].update(DATABASE_URL)
 
 
 # Password validation
