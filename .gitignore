@@ -96,3 +96,8 @@ ENV/
 .idea/webResources.xml
 .idea/workspace.xml
 static/*
+
+
+node_modules/*
+webpack-stats.json
+assets/bundles/*

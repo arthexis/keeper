@@ -15,7 +15,7 @@ class MembershipAdmin(admin.ModelAdmin):
     model = Membership
     fields = (
         ('user', 'status'),
-        ('joined_on', 'starts_on', 'ends_on'),
+        ('joined_on', ),
         ('phone',)
     )
     list_display = ('user_name', 'user_email', 'status', 'prestige_level')

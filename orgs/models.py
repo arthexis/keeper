@@ -15,9 +15,8 @@ class Membership(models.Model):
     )
     user = models.OneToOneField(User, on_delete=models.PROTECT, related_name='membership')
     status = models.CharField(max_length=20, choices=STATUSES, default='provisional')
-    joined_on = models.DateField('Joined', null=True, blank=True)
-    starts_on = models.DateField('Starts', null=True, blank=True)
-    ends_on = models.DateField('Ends', null=True, blank=True)
+    joined_on = models.DateField('Joined on', null=True, blank=True)
+    renewal_on = models.DateField('Renews on', null=True, blank=True)
     phone = models.CharField(max_length=20, blank=True)
 
     def prestige_level(self):

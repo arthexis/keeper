@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'easy_select2',
     'bootstrap3',
+    'webpack_loader',
     # 'bootstrap4',
 ]
 
@@ -178,6 +179,23 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+# Required to pick up the webpack bundles
+# http://owaislone.org/blog/webpack-plus-reactjs-and-django/
+
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'assets'),
+)
+
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'CACHE': not DEBUG,
+        'BUNDLE_DIR_NAME': 'bundles/',
+        'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats.json'),
+    }
+}
+
+# Django Admin Boostrapped
 
 DAB_FIELD_RENDERER = 'django_admin_bootstrapped.renderers.BootstrapFieldRenderer'
 
