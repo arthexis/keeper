@@ -23,6 +23,7 @@
     <orderEntry type="library" name="jquery-latest" level="application" />
     <orderEntry type="library" name="featherlight" level="application" />
     <orderEntry type="library" name="jquery-2.2.4" level="application" />
+    <orderEntry type="library" name="jquery-3.2.1.slim" level="application" />
   </component>
   <component name="TemplatesService">
     <option name="TEMPLATE_CONFIGURATION" value="Django" />

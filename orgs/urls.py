@@ -14,6 +14,10 @@ urlpatterns = [
     url(r'^profile/(?P<pk>[0-9]+)/', ProfileDetailView.as_view(), name="profile"),
 
     # Pending Email Verification Screen
-    url(r'^pending/', PendingView.as_view(), name='pending')
+    url(r'^pending/', PendingView.as_view(), name='pending'),
+
+    # Login for regular users
+    url(r'^login/', LoginView.as_view(), name='login'),
+    url(r'^logout/', LogoutView.as_view(), name='logout'),
 
 ]

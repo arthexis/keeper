@@ -11,6 +11,7 @@ class Profile(User):
     user = OneToOneField(User, on_delete=PROTECT, related_name='profile')
     phone = CharField(max_length=20, blank=True)
     is_verified = BooleanField(default=False)
+    last_visit = DateTimeField(blank=True, null=True)
 
     def get_absolute_url(self):
         return reverse('orgs:profile', kwargs={'pk': self.pk})
@@ -30,8 +31,8 @@ class Membership(Model):
     )
     
     status = CharField(max_length=20, choices=STATUSES, default='inactive')
-    user = ForeignKey(User, CASCADE)
-    organization = ForeignKey(Organization, CASCADE)
+    user = ForeignKey(User, CASCADE, related_name="memberships")
+    organization = ForeignKey(Organization, CASCADE, related_name="memberships")
 
 
 # Organizations can create events in the event calendar

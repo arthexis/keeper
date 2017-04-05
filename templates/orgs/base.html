@@ -14,29 +14,18 @@
     {% bootstrap_javascript %}
 </head>
 <body>
+    <div id="content" class="container">{% block body %}
+        {% if user.is_authenticated %}
 
-    {% if user.is_authenticated %}
-
-        <div id="react-app"></div>
-        {% render_bundle 'main' %}
-
-    {% else %}
-
-        <div id="content" class="container">
-
-            <div class="page-header">{% block header %}
-                <h1>Keeper
-                    <small>Storytelling Repository</small>
-                </h1>
-            {% endblock %}</div>
-
-            {% block content %}
-                {% include 'orgs/login.html' %}
+            {% block navbar %}
+                {% include 'orgs/navbar.html' %}
             {% endblock %}
+            {% block content %}{% endblock %}
 
-        </div>
 
-    {% endif %}
-
+        {% else %}{# Not Authenticated #}
+            {% include 'orgs/login.html' %}
+        {% endif %}
+    {% endblock %}</div>
 </body>
 </html>

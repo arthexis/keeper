@@ -1,16 +1,24 @@
 {% load bootstrap3 %}
 
+<div class="header">
+    <h1>Keeper
+        <small>Storytelling Repository</small>
+    </h1>
+    <hr>
+</div>
+
 <div class="row">
 
     <div class="col-md-4 col-xs-12">
         <h2>Member Login</h2>
-        <form action="orgs:login">
-            {% bootstrap_form login_form %}
+        <form action="{% url 'orgs:login' %}" method="post">
+            {% csrf_token %}
+            {% bootstrap_form form %}
             <br>
             <input class="btn btn-lg btn-primary" type="submit" value="Login">
         </form>
         <hr>
-        <a href="{% url 'orgs:register' %}">Click here to register.</a>
+        <a href="{% url 'orgs:register' %}" class="lead">Click here to register.</a>
     </div>
 
     <div class="col-md-offset-1 col-md-7 col-xs-12">
