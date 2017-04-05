@@ -1,80 +1,57 @@
-from django.db import models
+from django.db.models import *
 from django.utils import timezone
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User, Group
 from systems.models import Template
 
 
-class Membership(models.Model):
+# Each individual user has a Profile
+class Profile(User):
+    user = OneToOneField(User, on_delete=PROTECT, related_name='profile')
+    phone = CharField(max_length=20, blank=True)
+    is_verified = BooleanField(default=False)
+
+    def get_absolute_url(self):
+        return reverse('orgs:profile', kwargs={'pk': self.pk})
+
+
+# Users can create Organizations
+class Organization(Model):
+    name = CharField(max_length=200)
+    parent_org = ForeignKey('Organization', SET_NULL, blank=True, null=True)
+
+
+# Membership is a relation between Users and Organizations
+class Membership(Model):
     STATUSES = (
-        ('hold', 'On Hold'),
-        ('provisional', 'Provisional'),
         ('active', 'Active'),
-        ('expired', 'Expired'),
-        ('cancelled', 'Cancelled'),
+        ('inactive', 'Inactive'),
     )
-    user = models.OneToOneField(User, on_delete=models.PROTECT, related_name='membership')
-    status = models.CharField(max_length=20, choices=STATUSES, default='provisional')
-    joined_on = models.DateField('Joined on', null=True, blank=True)
-    renewal_on = models.DateField('Renews on', null=True, blank=True)
-    phone = models.CharField(max_length=20, blank=True)
-
-    def prestige_level(self):
-        return int(self.prestige.aggregate(x=models.Sum('prestige_beats'))['x'] / settings.BEATS_PER_PRESTIGE)
-
-    def user_name(self):
-        return self.user.get_full_name()
-
-    def user_email(self):
-        return self.user.email
+    
+    status = CharField(max_length=20, choices=STATUSES, default='inactive')
+    user = ForeignKey(User, CASCADE)
+    organization = ForeignKey(Organization, CASCADE)
 
 
-class Prestige(models.Model):
-    membership = models.ForeignKey(Membership, on_delete=models.PROTECT, related_name='prestige')
-    prestige_beats = models.SmallIntegerField(default=0)
-    details = models.TextField(blank=True)
-    awarded_on = models.DateField(auto_now_add=True)
+# Organizations can create events in the event calendar
+class Event(Model):
+    name = CharField(max_length=40, verbose_name="Event Name")
+    organization = ForeignKey(Organization, CASCADE, null=True)
+    event_date = DateField(null=True, blank=True)
+    information = TextField(blank=True)
+    seq = SmallIntegerField(null=True, editable=False)
 
     def __str__(self):
-        return "{}".format(str(self.prestige_beats))
+        return self.name
 
-
-class Chronicle(models.Model):
-    name = models.CharField(max_length=40, verbose_name="Chronicle Name")
-    code = models.CharField(max_length=10, unique=True)
-    venue_storyteller = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
-    domain_storyteller = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
-    venue_coordinator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
-    domain_coordinator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
-    storytelling_group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
-    coordinating_group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
-    mood = models.CharField(max_length=200, blank=True)
-    theme = models.CharField(max_length=200, blank=True)
-    default_template = models.ForeignKey(Template, on_delete=models.PROTECT, null=True)
-    information = models.TextField(blank=True)
-
-    def __str__(self):
-        return "{} - {}".format(self.code, self.name)
-
-
-class Event(models.Model):
-    name = models.CharField(max_length=40, verbose_name="Event Name")
-    chronicle = models.ForeignKey(Chronicle, on_delete=models.PROTECT, related_name='events')
-    event_date = models.DateField(null=True, blank=True)
-    information = models.TextField(blank=True)
-    planning_document = models.URLField(blank=True)
-    seq = models.SmallIntegerField(null=True, editable=False)
-
-    def short_name(self):
-        return "{}-{}".format(self.chronicle.code, str(self.seq))
-
-    def __str__(self):
-        return self.short_name()
+    def last_org_event(self):
+        return Event.objects.filter(organization=self.organization).latest('event_date')
 
     def save(self, **kwargs):
         if not self.seq:
             try:
-                self.seq = Event.objects.filter(chronicle=self.chronicle).latest('event_date').seq + 1
+                self.seq = self.last_org_event().seq + 1
             except Event.DoesNotExist:
                 self.seq = 1
         super().save(**kwargs)
@@ -87,3 +64,5 @@ class Event(models.Model):
     class Meta:
         ordering = ('-event_date',)
 
+
+__all__ = ('Profile', 'Organization', 'Membership', 'Event')

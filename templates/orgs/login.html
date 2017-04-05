@@ -1,0 +1,25 @@
+{% load bootstrap3 %}
+
+<div class="row">
+
+    <div class="col-md-4 col-xs-12">
+        <h2>Member Login</h2>
+        <form action="orgs:login">
+            {% bootstrap_form login_form %}
+            <br>
+            <input class="btn btn-lg btn-primary" type="submit" value="Login">
+        </form>
+        <hr>
+        <a href="{% url 'orgs:register' %}">Click here to register.</a>
+    </div>
+
+    <div class="col-md-offset-1 col-md-7 col-xs-12">
+        <br>
+        <h2>About Keeper</h2>
+        <p class="lead">
+            Keeper is an online repository that can be utilized to keep track of large
+            and small gaming groups, events, stories and characters.
+        </p>
+    </div>
+
+</div>

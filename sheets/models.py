@@ -1,9 +1,12 @@
+from django.db.models import *
 from django.contrib.auth.models import User, Group
 from django.utils import timezone
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from systems.fields import *
 from systems.models import *
+from orgs.models import *
+from systems.fields import DotsField
 
 
 SKILLS = (
@@ -46,18 +49,18 @@ ATTRIBUTES = (
 )
 
 
-class Character(models.Model):
+class Character(Model):
 
     # Character basic info
-    name = models.CharField(max_length=40, verbose_name="Character")
-    template = models.ForeignKey(Template, on_delete=models.PROTECT)
+    name = CharField(max_length=40, verbose_name="Character")
+    template = ForeignKey(Template, PROTECT)
     power_stat = DotsField(default=1, clear=False)
     integrity = DotsField(default=7)
-    background = models.TextField(blank=True)
-    resource = models.PositiveIntegerField(default=10)
-    concept = models.CharField(max_length=200, blank=True)
-    faction = models.CharField(max_length=200, blank=True)
-    character_group = models.CharField(max_length=100, blank=True)
+    background = TextField(blank=True)
+    resource = PositiveIntegerField(default=10)
+    concept = CharField(max_length=200, blank=True)
+    faction = CharField(max_length=200, blank=True)
+    character_group = CharField(max_length=100, blank=True)
 
     # Physical Attributes
     strength = DotsField(default=1, clear=False)
@@ -105,38 +108,37 @@ class Character(models.Model):
     subterfuge = DotsField()
 
     # Splat foreign Keys
-    primary_splat = models.ForeignKey(SplatOption, on_delete=models.PROTECT, related_name='+', null=True, blank=True)
-    secondary_splat = models.ForeignKey(SplatOption, on_delete=models.PROTECT, related_name='+', null=True, blank=True)
-    tertiary_splat = models.ForeignKey(SplatOption, on_delete=models.PROTECT, related_name='+', null=True, blank=True)
+    primary_splat = ForeignKey(SplatOption, PROTECT, related_name='+', null=True, blank=True)
+    secondary_splat = ForeignKey(SplatOption, PROTECT, related_name='+', null=True, blank=True)
+    tertiary_splat = ForeignKey(SplatOption, PROTECT, related_name='+', null=True, blank=True)
 
     # Character Advancement related
     beats = DotsField()
-    experiences = models.PositiveIntegerField(default=0)
+    experiences = PositiveIntegerField(default=0)
     template_beats = DotsField()
-    template_experiences = models.PositiveIntegerField(default=0)
+    template_experiences = PositiveIntegerField(default=0)
 
     # Organization related fields
-    player = models.ForeignKey(
-        User, on_delete=models.DO_NOTHING, null=True, blank=True, related_name='characters')
-    chronicle = models.ForeignKey(
-        'orgs.Chronicle', on_delete=models.PROTECT, null=True, blank=True, related_name='characters')
-    created_on = models.DateField(auto_now_add=True, editable=False)
-    modified_on = models.DateField(auto_now=True, editable=False)
+    user = ForeignKey(
+        User, DO_NOTHING, null=True, blank=True, related_name='characters')
+    organization = ForeignKey(Organization, CASCADE, null=True, blank=True)
+    created_on = DateField(auto_now_add=True, editable=False)
+    modified_on = DateField(auto_now=True, editable=False)
 
     # Derived traits, they are not handled automatically because in some situations
     # their values can be manually adjusted
-    health_levels = models.PositiveIntegerField(default=0)
+    health_levels = PositiveIntegerField(default=0)
     willpower = DotsField(default=1, clear=False)
 
     # Character Anchors (ie. Virtue / Vice)
-    primary_anchor = models.CharField(max_length=40, blank=True)
-    secondary_anchor = models.CharField(max_length=40, blank=True)
+    primary_anchor = CharField(max_length=40, blank=True)
+    secondary_anchor = CharField(max_length=40, blank=True)
 
     # Character Advancement
-    is_current = models.BooleanField(default=True, editable=False)
+    # is_current = BooleanField(default=True, editable=False)
 
-    def get_absolute_url(self):
-        return reverse('character_update', args=(self.pk,))
+    # def get_absolute_url(self):
+    #     return reverse('sheets:character', args=(self.pk,))
 
     # Derived Traits
 
@@ -164,61 +166,61 @@ class Character(models.Model):
 
     # Experience related calculations
 
-    def storyteller_beats(self):
-        return self.assistance.aggregate(x=models.Sum('storyteller_beats'))['x'] or 0
-    storyteller_beats.short_description = "Story beats"
-
-    def coordinator_beats(self):
-        return self.assistance.aggregate(x=models.Sum('coordinator_beats'))['x'] or 0
-    coordinator_beats.short_description = "Coord. beats"
-
-    def prestige_beats(self):
-        return self.player.membership.prestige.aggregate(x=models.Sum('prestige_beats'))['x'] or 0
-    prestige_beats.short_description = "Prestige"
-
-    def accumulated_experience(self):
-        return int((self.storyteller_beats() + self.coordinator_beats() + self.prestige_beats())
-                   / settings.BEATS_PER_EXPERIENCE)
-    accumulated_experience.short_description = "Total Exp"
-
-    def spent_experience(self):
-        return self.approval_requests.filter(status='approved').aggregate(x=models.Sum('spent_experience'))['x'] or 0
-    spent_experience.short_description = "Spent Exp"
-
-    def available_experience(self):
-        return self.accumulated_experience() - self.spent_experience()
-    available_experience.short_description = "Available Exp"
+    # def storyteller_beats(self):
+    #     return self.assistance.aggregate(x=Sum('storyteller_beats'))['x'] or 0
+    # storyteller_beats.short_description = "Story beats"
+    #
+    # def coordinator_beats(self):
+    #     return self.assistance.aggregate(x=Sum('coordinator_beats'))['x'] or 0
+    # coordinator_beats.short_description = "Coord. beats"
+    #
+    # def prestige_beats(self):
+    #     return self.player.membership.prestige.aggregate(x=Sum('prestige_beats'))['x'] or 0
+    # prestige_beats.short_description = "Prestige"
+    #
+    # def accumulated_experience(self):
+    #     return int((self.storyteller_beats() + self.coordinator_beats() + self.prestige_beats())
+    #                / settings.BEATS_PER_EXPERIENCE)
+    # accumulated_experience.short_description = "Total Exp"
+    #
+    # def spent_experience(self):
+    #     return self.approval_requests.filter(status='approved').aggregate(x=Sum('spent_experience'))['x'] or 0
+    # spent_experience.short_description = "Spent Exp"
+    #
+    # def available_experience(self):
+    #     return self.accumulated_experience() - self.spent_experience()
+    # available_experience.short_description = "Available Exp"
 
     # Other model methods
 
     def __str__(self):
         return str(self.name)
 
-    def player_email(self):
-        return self.player.email if self.player else None
+    # def player_email(self):
+    #     return self.player.email if self.player else None
+    #
+    # def player_name(self):
+    #     return self.player.get_full_name() if self.player else None
 
-    def player_name(self):
-        return self.player.get_full_name() if self.player else None
+    # def last_approved(self):
+    #     return ApprovalRequest.objects.filter(character=self, status="approved").latest(field_name='completed_on')
+    #
+    # def version(self):
+    #     return self.last_approved().version
 
-    def last_approved(self):
-        return ApprovalRequest.objects.filter(character=self, status="approved").latest(field_name='completed_on')
-
-    def version(self):
-        return self.last_approved().version
-
-    def save(self, **kwargs):
-        created = not bool(self.pk)
-        super().save(**kwargs)
-        if created:
-            ApprovalRequest.objects.create(
-                character=self,
-                version=1,
-                status="approved",
-                details="New character approval.",
-            )
+    # def save(self, **kwargs):
+    #     created = not bool(self.pk)
+    #     super().save(**kwargs)
+    #     if created:
+    #         ApprovalRequest.objects.create(
+    #             character=self,
+    #             version=1,
+    #             status="approved",
+    #             details="New character approval.",
+    #         )
 
 
-class CharacterElement(models.Model):
+class CharacterElement(Model):
 
     def save(self, **kwargs):
         super().save(**kwargs)
@@ -228,10 +230,10 @@ class CharacterElement(models.Model):
 
 
 class CharacterMerit(CharacterElement):
-    character = models.ForeignKey(Character, on_delete=models.CASCADE, related_name='merits')
-    merit = models.ForeignKey(Merit, on_delete=models.PROTECT, related_name='+')
+    character = ForeignKey(Character, CASCADE, related_name='merits')
+    merit = ForeignKey(Merit, PROTECT, related_name='+')
     rating = DotsField(default=1, clear=False)
-    details = models.CharField(max_length=200, blank=True)
+    details = CharField(max_length=200, blank=True)
 
     class Meta:
         verbose_name = "Merit"
@@ -247,10 +249,10 @@ class CharacterMerit(CharacterElement):
 
 
 class CharacterPower(CharacterElement):
-    character = models.ForeignKey(Character, on_delete=models.CASCADE, related_name='powers')
-    power = models.ForeignKey(Power, on_delete=models.PROTECT, related_name='+')
+    character = ForeignKey(Character, CASCADE, related_name='powers')
+    power = ForeignKey(Power, PROTECT, related_name='+')
     rating = DotsField(default=1, clear=False)
-    details = models.CharField(max_length=200, blank=True)
+    details = CharField(max_length=200, blank=True)
 
     class Meta:
         verbose_name = "Power"
@@ -266,9 +268,9 @@ class CharacterPower(CharacterElement):
 
 
 class SkillSpeciality(CharacterElement):
-    character = models.ForeignKey(Character, on_delete=models.CASCADE, related_name='specialities')
-    skill = models.CharField(max_length=20, choices=SKILLS)
-    speciality = models.CharField(max_length=200)
+    character = ForeignKey(Character, CASCADE, related_name='specialities')
+    skill = CharField(max_length=20, choices=SKILLS)
+    speciality = CharField(max_length=200)
 
     def __str__(self):
         return "{} ({})".format(self.speciality, self.get_skill_display())
@@ -278,137 +280,138 @@ class SkillSpeciality(CharacterElement):
         verbose_name_plural = "Skill Specialities"
 
 
-class ApprovalRequest(models.Model):
-    STATUSES = (
-        ('pending', 'Pending'),
-        ('approved', 'Approved'),
-        ('rejected', 'Rejected'),
-    )
-    created_on = models.DateField(auto_now_add=True, editable=False)
-    completed_on = models.DateField(null=True, blank=True, editable=False)
-    character = models.ForeignKey(
-        Character, on_delete=models.CASCADE, related_name='approval_requests', null=True)
-    player_notes = models.TextField(blank=True)
-    details = models.TextField(help_text='First 80 characters of the first line will show as a summary.')
-    status = models.CharField(max_length=20, default='pending', choices=STATUSES)
-    spent_experience = models.SmallIntegerField('Spent Exp', default=0)
-    version = models.IntegerField(null=True, blank='')
-
-    def request_id(self):
-        return "{:06d}".format(int(self.pk))
-
-    def __str__(self):
-        return self.request_id()
-
-    def summary(self):
-        return self.details[:80].splitlines()[0] if self.details else '<< Blank >>'
-
-    def save(self, **kwargs):
-        if self.status != 'pending' and not self.completed_on:
-            self.completed_on = timezone.now().date()
-            if not self.version:
-                self.version = ApprovalRequest.objects\
-                    .filter(character=self.character)\
-                    .latest(field_name='completed_on').version + 1
-        super().save(**kwargs)
-
-    def chronicle(self):
-        return self.character.chronicle
-
-    def player_name(self):
-        return self.character.player.get_full_name()
-
-    def player_email(self):
-        return self.character.player.email
-
-    def template(self):
-        return self.character.template
-
-    def venue_storyteller(self):
-        try:
-            return self.character.chronicle.venue_storyteller
-        except AttributeError:
-            return None
-
-    def domain_storyteller(self):
-        try:
-            return self.character.chronicle.domain_storyteller
-        except AttributeError:
-            return None
-
-    def storytelling_group(self):
-        try:
-            return self.character.chronicle.storytelling_group
-        except AttributeError:
-            return None
-
-    def can_approve(self, user: User):
-        return (
-            user.is_superuser or
-            user == self.venue_storyteller() or
-            user == self.domain_storyteller() or
-            user in self.storytelling_group()
-        )
-
-
-class PendingApprovalManager(models.Manager):
-
-    def get_queryset(self):
-        return super().get_queryset().filter(status="pending")
-
-
-class PendingApproval(ApprovalRequest):
-    objects = PendingApprovalManager()
-
-    class Meta:
-        proxy = True
-
-
-class Downtime(models.Model):
-    character = models.ForeignKey(Character, on_delete=models.PROTECT, related_name='+')
-    event = models.ForeignKey('orgs.Event', on_delete=models.PROTECT, related_name='+')
-    sent_on = models.DateField(null=True, editable=False)
-    comments = models.TextField(blank=True)
-    is_resolved = models.BooleanField(default=False)
-
-    class Meta:
-        verbose_name_plural = "Downtime"
-        unique_together = ('character', 'event')
-
-    def chronicle(self):
-        return self.event.chronicle
-
-    def __str__(self):
-        return str(self.event)
-
-
-class Aspiration(models.Model):
-    CATEGORIES = (
-        ('information', 'Gather information'),
-        ('resources', 'Gather resources'),
-        ('integrity', 'Develop integrity'),
-        ('aggressive', 'Aggressive action'),
-        ('background', 'Develop background'),
-    )
-    downtime = models.ForeignKey(Downtime, on_delete=models.PROTECT, related_name='+')
-    category = models.CharField(max_length=40, choices=CATEGORIES)
-    player_aspiration = models.TextField(blank=True)
-    storyteller_response = models.TextField(blank=True)
+# class ApprovalRequest(Model):
+#     STATUSES = (
+#         ('pending', 'Pending'),
+#         ('approved', 'Approved'),
+#         ('rejected', 'Rejected'),
+#     )
+#     created_on = DateField(auto_now_add=True, editable=False)
+#     completed_on = DateField(null=True, blank=True, editable=False)
+#     character = ForeignKey(
+#         Character, CASCADE, related_name='approval_requests', null=True)
+#     player_notes = TextField(blank=True)
+#     details = TextField(help_text='First 80 characters of the first line will show as a summary.')
+#     status = CharField(max_length=20, default='pending', choices=STATUSES)
+#     spent_experience = SmallIntegerField('Spent Exp', default=0)
+#     version = IntegerField(null=True, blank='')
+#
+#     def request_id(self):
+#         return "{:06d}".format(int(self.pk))
+#
+#     def __str__(self):
+#         return self.request_id()
+#
+#     def summary(self):
+#         return self.details[:80].splitlines()[0] if self.details else '<< Blank >>'
+#
+#     def save(self, **kwargs):
+#         if self.status != 'pending' and not self.completed_on:
+#             self.completed_on = timezone.now().date()
+#             if not self.version:
+#                 self.version = ApprovalRequest.objects\
+#                     .filter(character=self.character)\
+#                     .latest(field_name='completed_on').version + 1
+#         super().save(**kwargs)
+#
+#     def chronicle(self):
+#         return self.character.chronicle
+#
+#     def player_name(self):
+#         return self.character.player.get_full_name()
+#
+#     def player_email(self):
+#         return self.character.player.email
+#
+#     def template(self):
+#         return self.character.template
+#
+#     def venue_storyteller(self):
+#         try:
+#             return self.character.chronicle.venue_storyteller
+#         except AttributeError:
+#             return None
+#
+#     def domain_storyteller(self):
+#         try:
+#             return self.character.chronicle.domain_storyteller
+#         except AttributeError:
+#             return None
+#
+#     def storytelling_group(self):
+#         try:
+#             return self.character.chronicle.storytelling_group
+#         except AttributeError:
+#             return None
+#
+#     def can_approve(self, user: User):
+#         return (
+#             user.is_superuser or
+#             user == self.venue_storyteller() or
+#             user == self.domain_storyteller() or
+#             user in self.storytelling_group()
+#         )
+#
+#
+# class PendingApprovalManager(Manager):
+#
+#     def get_queryset(self):
+#         return super().get_queryset().filter(status="pending")
+#
+#
+# class PendingApproval(ApprovalRequest):
+#     objects = PendingApprovalManager()
+#
+#     class Meta:
+#         proxy = True
+#
+#
+# class Downtime(Model):
+#     character = ForeignKey(Character, PROTECT, related_name='+')
+#     event = ForeignKey('orgs.Event', PROTECT, related_name='+')
+#     sent_on = DateField(null=True, editable=False)
+#     comments = TextField(blank=True)
+#     is_resolved = BooleanField(default=False)
+#
+#     class Meta:
+#         verbose_name_plural = "Downtime"
+#         unique_together = ('character', 'event')
+#
+#     def chronicle(self):
+#         return self.event.chronicle
+#
+#     def __str__(self):
+#         return str(self.event)
 
 
-class Assistance(models.Model):
-    character = models.ForeignKey(Character, on_delete=models.PROTECT, related_name='assistance')
-    event = models.ForeignKey('orgs.Event', on_delete=models.PROTECT, related_name='assistance')
-    storyteller_beats = models.SmallIntegerField('Story beats', default=0)
-    coordinator_beats = models.SmallIntegerField('Org beats', default=0)
-    details = models.CharField(max_length=200, blank=True)
+# class Aspiration(Model):
+#     CATEGORIES = (
+#         ('information', 'Gather information'),
+#         ('resources', 'Gather resources'),
+#         ('integrity', 'Develop integrity'),
+#         ('aggressive', 'Aggressive action'),
+#         ('background', 'Develop background'),
+#     )
+#     downtime = ForeignKey(Downtime, PROTECT, related_name='+')
+#     category = CharField(max_length=40, choices=CATEGORIES)
+#     player_aspiration = TextField(blank=True)
+#     storyteller_response = TextField(blank=True)
+#
+#
+# class Assistance(Model):
+#     character = ForeignKey(Character, PROTECT, related_name='assistance')
+#     event = ForeignKey('orgs.Event', PROTECT, related_name='assistance')
+#     storyteller_beats = SmallIntegerField('Story beats', default=0)
+#     coordinator_beats = SmallIntegerField('Org beats', default=0)
+#     details = CharField(max_length=200, blank=True)
+#
+#     class Meta:
+#         unique_together = ('character', 'event')
+#
+#     def event_short_name(self):
+#         return self.event.short_name()
+#
+#     def __str__(self):
+#         return self.event_short_name()
 
-    class Meta:
-        unique_together = ('character', 'event')
-
-    def event_short_name(self):
-        return self.event.short_name()
-
-    def __str__(self):
-        return self.event_short_name()
-
+__all__ = ("Character", "CharacterMerit", "CharacterPower", "SkillSpeciality")

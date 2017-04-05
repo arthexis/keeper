@@ -4,6 +4,7 @@ from django.forms.widgets import HiddenInput
 from easy_select2 import select2_modelform
 from systems.admin import ParentInlineMixin
 from orgs.models import Event
+from systems.fields import DotsField, DotsInput
 
 
 class MeritInline(admin.TabularInline):
@@ -21,37 +22,37 @@ class SkillSpecialityInline(admin.TabularInline):
     extra = 0
 
 
-class ApprovalRequestInline(admin.TabularInline):
-    model = ApprovalRequest
-    fields = ('version', 'status', 'created_on', 'completed_on', 'details', 'spent_experience', )
-    readonly_fields = ('version', 'created_on', 'completed_on',)
-    can_delete = False
-    max_num = 0
-
-
-class CharacterEventFieldInlineMixin(admin.TabularInline):
-    def get_formset(self, request, obj: Character=None, **kwargs):
-        self.parent_obj = obj
-        return super().get_formset(request, obj, **kwargs)
-
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == "event":
-            kwargs['queryset'] = Event.objects.filter(chronicle=self.parent_obj.chronicle)
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
-
-
-class CharacterAssistanceInline(CharacterEventFieldInlineMixin):
-    model = Assistance
-    fields = ('event', 'storyteller_beats', 'coordinator_beats', 'details')
-    extra = 0
-
-
-class CharacterDowntimeInline(CharacterEventFieldInlineMixin):
-    model = Downtime
-    show_change_link = True
-    fields = ('event', 'sent_on', 'is_resolved')
-    readonly_fields = ('sent_on', )
-    extra = 0
+# class ApprovalRequestInline(admin.TabularInline):
+#     model = ApprovalRequest
+#     fields = ('version', 'status', 'created_on', 'completed_on', 'details', 'spent_experience', )
+#     readonly_fields = ('version', 'created_on', 'completed_on',)
+#     can_delete = False
+#     max_num = 0
+#
+#
+# class CharacterEventFieldInlineMixin(admin.TabularInline):
+#     def get_formset(self, request, obj: Character=None, **kwargs):
+#         self.parent_obj = obj
+#         return super().get_formset(request, obj, **kwargs)
+#
+#     def formfield_for_foreignkey(self, db_field, request, **kwargs):
+#         if db_field.name == "event":
+#             kwargs['queryset'] = Event.objects.filter(chronicle=self.parent_obj.chronicle)
+#         return super().formfield_for_foreignkey(db_field, request, **kwargs)
+#
+#
+# class CharacterAssistanceInline(CharacterEventFieldInlineMixin):
+#     model = Assistance
+#     fields = ('event', 'storyteller_beats', 'coordinator_beats', 'details')
+#     extra = 0
+#
+#
+# class CharacterDowntimeInline(CharacterEventFieldInlineMixin):
+#     model = Downtime
+#     show_change_link = True
+#     fields = ('event', 'sent_on', 'is_resolved')
+#     readonly_fields = ('sent_on', )
+#     extra = 0
 
 
 @admin.register(Character)
@@ -112,13 +113,11 @@ class CharacterAdmin(admin.ModelAdmin):
             ),
         }),
     )
-    list_display = ('name', 'template', 'chronicle', 'player_name', 'player_email')
+    list_display = ('name', 'template',)
     list_filter = ('template', )
-    search_fields = ('name', 'player_name', 'player_email', 'player')
+    search_fields = ('name', 'user')
     readonly_fields = (
-        'template', 'size', 'health', 'speed', 'initiative', 'defense', 'version',
-        'spent_experience', 'available_experience', 'created_on', 'modified_on',
-        'storyteller_beats', 'coordinator_beats', 'prestige_beats', 'accumulated_experience',
+        'template', 'size', 'health', 'speed', 'initiative', 'defense', 'created_on', 'modified_on',
     )
     readonly_fields_new = ('version', )
     formfield_overrides = {
@@ -135,9 +134,7 @@ class CharacterAdmin(admin.ModelAdmin):
             self.inlines = ()
             return (self.fieldsets[0], )
         else:
-            self.inlines = CharacterAdmin.inlines + \
-                           self.get_extra_inlines(request, obj) + \
-                           (CharacterAssistanceInline, CharacterDowntimeInline)
+            self.inlines = CharacterAdmin.inlines + self.get_extra_inlines(request, obj)
         return self.fieldsets
 
     def get_extra_inlines(self, request, obj: Character):
@@ -202,44 +199,44 @@ class CharacterAdmin(admin.ModelAdmin):
         return self.readonly_fields_new
 
 
-@admin.register(PendingApproval)
-class PendingApprovalAdmin(admin.ModelAdmin):
-    model = PendingApproval
-    list_display = ('request_id', 'chronicle', 'character', 'created_on', 'summary', )
-    search_fields = ('character', '`player_name', 'player_email', )
-    fieldsets = (
-        (None, {
-            'fields': (
-                ('character', 'status', ),
-                ('spent_experience', 'created_on', ),
-                ('details', ),
-            ),
-        }),
-    )
-    readonly_fields = ('version', 'created_on', )
-
-    def get_readonly_fields(self, request, obj=None):
-        fields = self.readonly_fields
-        if obj:
-            fields += ('character', )
-        if not obj or not obj.can_approve(request.user):
-            return fields + ('status', )
-        return fields
-
-
-class AspirationInline(admin.StackedInline):
-    model = Aspiration
-    min_num = 3
-    max_num = 3
-    fields = ('downtime', 'category', 'player_aspiration', 'storyteller_response')
-
-
-@admin.register(Downtime)
-class DowntimeAdmin(admin.ModelAdmin):
-    model = Downtime
-    list_display = ('chronicle', 'event', 'character', 'sent_on', 'is_resolved')
-    search_fields = ('event', 'character')
-    list_filter = ('event__chronicle', 'is_resolved')
-    inlines = (AspirationInline, )
+# @admin.register(PendingApproval)
+# class PendingApprovalAdmin(admin.ModelAdmin):
+#     model = PendingApproval
+#     list_display = ('request_id', 'chronicle', 'character', 'created_on', 'summary', )
+#     search_fields = ('character', '`player_name', 'player_email', )
+#     fieldsets = (
+#         (None, {
+#             'fields': (
+#                 ('character', 'status', ),
+#                 ('spent_experience', 'created_on', ),
+#                 ('details', ),
+#             ),
+#         }),
+#     )
+#     readonly_fields = ('version', 'created_on', )
+#
+#     def get_readonly_fields(self, request, obj=None):
+#         fields = self.readonly_fields
+#         if obj:
+#             fields += ('character', )
+#         if not obj or not obj.can_approve(request.user):
+#             return fields + ('status', )
+#         return fields
+#
+#
+# class AspirationInline(admin.StackedInline):
+#     model = Aspiration
+#     min_num = 3
+#     max_num = 3
+#     fields = ('downtime', 'category', 'player_aspiration', 'storyteller_response')
+#
+#
+# @admin.register(Downtime)
+# class DowntimeAdmin(admin.ModelAdmin):
+#     model = Downtime
+#     list_display = ('chronicle', 'event', 'character', 'sent_on', 'is_resolved')
+#     search_fields = ('event', 'character')
+#     list_filter = ('event__chronicle', 'is_resolved')
+#     inlines = (AspirationInline, )
 
 

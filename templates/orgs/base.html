@@ -1,0 +1,42 @@
+{% load render_bundle from webpack_loader %}
+{% load bootstrap3 static %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Keeper</title>
+    {% bootstrap_css %}
+    <script
+        src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g="
+        crossorigin="anonymous"></script>
+    {% bootstrap_javascript %}
+</head>
+<body>
+
+    {% if user.is_authenticated %}
+
+        <div id="react-app"></div>
+        {% render_bundle 'main' %}
+
+    {% else %}
+
+        <div id="content" class="container">
+
+            <div class="page-header">{% block header %}
+                <h1>Keeper
+                    <small>Storytelling Repository</small>
+                </h1>
+            {% endblock %}</div>
+
+            {% block content %}
+                {% include 'orgs/login.html' %}
+            {% endblock %}
+
+        </div>
+
+    {% endif %}
+
+</body>
+</html>
