@@ -95,8 +95,8 @@ ENV/
 .idea/dataSources/
 .idea/webResources.xml
 .idea/workspace.xml
-static/*
 
+staticfiles/*
 
 node_modules/*
 #webpack-stats.json
