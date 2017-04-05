@@ -99,5 +99,5 @@ static/*
 
 
 node_modules/*
-webpack-stats.json
-assets/bundles/*
+#webpack-stats.json
+#assets/bundles/*
