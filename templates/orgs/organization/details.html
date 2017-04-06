@@ -1,0 +1,14 @@
+{% extends 'orgs/base.html' %}
+
+{% block content %}
+    {% block tools %}
+        <div class="btn-group pull-right" role="group">
+            <button type="button" class="btn btn-default">Edit Organization</button>
+        </div>
+    {% endblock %}
+    <h1>{{ organization.name }}
+        <small>Organization</small>
+    </h1>
+
+    <hr>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% load bootstrap3 %}
+
+{{ form.media.css }}
+
+<div class="row">
+    {% if user.memberships.count %}
+        <div class="col-md-8 col-xs-12">
+            <h3>Memberships</h3>
+            <br>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <tbody>{% for membership in user.memberships.all %}<tr>
+                        <td><a href="{% url 'orgs:organization' membership.organization.pk %}">
+                            {{ membership.organization.name }}
+                        </a></td>
+                        <td>{{ membership.get_status_display }}</td>
+                    </tr>{% endfor %}</tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+    <div class="col-md-4 col-xs-12">
+        {% if not user.memberships.count %}
+            <h3>You have no Memberships</h3>
+        {% else %}
+            <h3>Request new Membership</h3>
+        {% endif %}
+        <p>To request a membership, search the name of an Organization below.</p>
+        <form action="{% url 'orgs:membership' %}" method="post">
+            {% csrf_token %}
+            {% bootstrap_form form %}
+            <input class="btn btn-sm btn-primary" type="submit" value="Request Membership">
+        </form>
+        <hr>
+        <a class="lead" href="{% url 'orgs:organization' %}">Create your own Organization.</a>
+    </div>
+</div>
+
+{{ form.media.js }}

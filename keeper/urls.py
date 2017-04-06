@@ -19,6 +19,9 @@ urlpatterns = [
     # Admin
     url(r'^admin/', admin.site.urls),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+
+    # Django-Select2
+    url(r'^select2/', include('django_select2.urls')),
 ]
 
 if settings.DEBUG:

@@ -8,10 +8,11 @@
     <title>Keeper</title>
     {% bootstrap_css %}
     <script
-        src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-        integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g="
+        src="https://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
         crossorigin="anonymous"></script>
     {% bootstrap_javascript %}
+    {% block extrahead %}{% endblock %}
 </head>
 <body>
     <div id="content" class="container">{% block body %}
@@ -20,8 +21,10 @@
             {% block navbar %}
                 {% include 'orgs/navbar.html' %}
             {% endblock %}
+            {% block messages %}
+                {% bootstrap_messages %}
+            {% endblock %}
             {% block content %}{% endblock %}
-
 
         {% else %}{# Not Authenticated #}
             {% include 'orgs/login.html' %}

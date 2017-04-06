@@ -1,11 +1,12 @@
 {% extends 'orgs/base.html' %}
+{% load bootstrap3 %}
 
 {% block content %}
-
-    <h1>Activity Feed</h1><hr>
-
-    <div class="row">
-
+    <h1>Overview</h1><hr>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            {% include 'orgs/include/membership.html' with form=req_member_form %}
+            <br>
+        </div>
     </div>
-
 {% endblock %}

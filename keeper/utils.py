@@ -1,4 +1,7 @@
 import os
+import random
+import string
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -41,4 +44,8 @@ def missing(f, exceptions=None, default=None):
     return inner
 
 
-__all__ = ('getenv', 'missing')
+def rand_string(chars):
+    return ''.join(random.choice(string.ascii_letters) for _ in range(chars))
+
+
+__all__ = ('getenv', 'missing', 'rand_string')

@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'django_extensions',
     'rest_framework',
-    'easy_select2',
+    'django_select2',
     'bootstrap3',
     'webpack_loader',
     'whitenoise',
@@ -87,26 +87,31 @@ WSGI_APPLICATION = 'keeper.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
-# Use sqlite for local development
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'database.sqlite3'),
-    }
-}
-
-
+# Use sqlite3 for local development
 # When on Heroku, switch to postgres using a DATABASE_URL
+
 DATABASE_URL = dj_database_url.config(conn_max_age=500)
 
 if DATABASE_URL:
+
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
         }
     }
     DATABASES['default'].update(DATABASE_URL)
+
+else:
+
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'database.sqlite3'),
+            'OPTIONS': {
+                'timeout': 20,
+            }
+        }
+    }
 
 
 # Password validation
@@ -168,7 +173,7 @@ WEBPACK_LOADER = {
     }
 }
 
-# Django Admin Boostrapped
+# Django Admin Bootstrapped
 
 DAB_FIELD_RENDERER = 'django_admin_bootstrapped.renderers.BootstrapFieldRenderer'
 
@@ -179,4 +184,27 @@ BEATS_PER_PRESTIGE = 50
 
 SITE_HEADER = "Keeper"
 
+# Email address used as the default from_email for send_mail
+
+DEFAULT_FROM_EMAIL = 'keeper@arthexis.com'
+
+
+# Write to a file instead of sending an email while DEBUG
+
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
+
+
+# Django-Select2 Configuration
+# http://django-select2.readthedocs.io/en/latest/django_select2.html#module-django_select2.conf
+
+SELECT2_JS = 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.full.min.js'
+
+
+# CACHES = {
+#     'select2': {
+#         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+#         'LOCATION': '127.0.0.1:11211',
+#     }
+# }
 
