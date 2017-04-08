@@ -10,11 +10,12 @@
 <div class="row">
 
     <div class="col-md-4 col-xs-12">
-        <h2>Member Login</h2>
+        <h2>Login</h2>
         <form action="{% url 'orgs:login' %}" method="post">
             {% csrf_token %}
             {% bootstrap_form form %}
-            <br>
+            <a href="{% url 'orgs:recovery' %}">Forgot your username or password?</a>
+            <br><br>
             <input class="btn btn-lg btn-primary" type="submit" value="Login">
         </form>
         <hr>

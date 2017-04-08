@@ -5,9 +5,10 @@ from django.contrib.auth import login, logout
 from orgs.models import *
 from orgs.forms import *
 from django.core.urlresolvers import reverse_lazy, reverse
-from django.http.response import HttpResponseRedirect
+from django.http.response import HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
+from django.contrib.auth.models import User
 
 import logging
 logger = logging.getLogger(__name__)
@@ -27,7 +28,7 @@ class IndexView(TemplateView):
             except Profile.DoesNotExist:
                 logger.error(f"User <{user}> is missing a Profile object.")
                 context['profile'] = None
-            context['req_member_form'] = RequestMembershipForm()
+            context['req_member_form'] = RequestMembershipForm(request=self.request)
         return context
 
 
@@ -83,6 +84,23 @@ class LoginView(FormView):
         return response
 
 
+class RequestPasswordRecoveryView(FormView):
+    template_name = 'orgs/recovery.html'
+    form_class = PasswordRecoveryForm
+    success_url = reverse_lazy('orgs:index')
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        email = form.cleaned_data.get('email')
+        try:
+            profile = Profile.objects.get(email=email)
+
+        except Profile.DoesNotExist:
+            logger.warning(f"Recovery: No profile found with email={email}")
+            pass
+        return response
+
+
 class LogoutView(RedirectView):
     url = reverse_lazy('orgs:index')
 
@@ -94,7 +112,7 @@ class LogoutView(RedirectView):
 class EditProfileView(UpdateView):
     template_name = 'orgs/profile.html'
     model = Profile
-    fields = ("email", "phone",)
+    fields = ("email", "first_name", "last_name", "phone", "information")
     model_name = "Profile"
 
 
@@ -114,6 +132,7 @@ class OrganizationMixin(object):
 
     def __init__(self):
         self.object = None
+        self.user_membership = None
 
     def get_success_url(self):
         return reverse_lazy('orgs:organization', kwargs={'pk': self.object.pk})
@@ -122,7 +141,10 @@ class OrganizationMixin(object):
 class CreateOrganizationView(OrganizationMixin, CreateView):
     def form_valid(self, form):
         name = form.cleaned_data.get('name')
+        form.instance.created_by = self.request.user
         response = super().form_valid(form)
+        Membership.objects.create(
+            user=self.request.user, organization=form.instance, is_active=True, is_officer=True, is_owner=True)
         logger.info(f"Creating new organization <{name}>.")
         messages.add_message(
             self.request, messages.SUCCESS,
@@ -131,20 +153,41 @@ class CreateOrganizationView(OrganizationMixin, CreateView):
 
 
 class EditOrganizationView(OrganizationMixin, UpdateView):
-    pass
+    def get_object(self, queryset=None):
+        # Prevent non-officers from accessing this view
+        obj = super().get_object(queryset)
+        self.user_membership = obj.get_membership(self.request.user)
+        if not self.user_membership or not self.user_membership.is_officer:
+            return Http404()
+        return obj
 
 
 class DetailOrganizationView(OrganizationMixin, DetailView):
     template_name = 'orgs/organization/details.html'
 
+    def get_object(self, queryset=None):
+        # Prevent blocked users from accessing this view
+        obj = super().get_object(queryset)
+        self.user_membership = obj.get_membership(self.request.user)
+        if self.user_membership and self.user_membership.is_blocked:
+            return Http404()
+        return obj
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["user_membership"] = self.user_membership
+        return context
+
 
 class MembershipView(FormView):
-    form_class = RequestMembershipForm
     template_name = 'orgs/membership.html'
     success_url = reverse_lazy('orgs:index')
 
     def form_invalid(self, form):
         return super().form_invalid(form)
+
+    def get_form(self, form_class=None):
+        return RequestMembershipForm(self.request.POST, request=self.request)
 
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -164,6 +207,21 @@ class MembershipView(FormView):
         return response
 
 
+class CancelMembershipView(RedirectView):
+    url = reverse_lazy('orgs:index')
+
+    def dispatch(self, request, *args, pk=None, **kwargs):
+        membership = get_object_or_404(Membership, pk=pk)
+        user = self.request.user
+        if not user.is_superuser or user != membership.user:
+            logger.warning(f"Unauthorized cancel membership request {membership.pk} user={user}")
+            return Http404()
+        if not membership.is_active and not membership.is_blocked:
+            logger.info(f"Cancelled membership request {membership.pk} user={user}")
+            membership.delete()
+        return super().dispatch(request, *args, **kwargs)
+
+
 __all__ = (
     'IndexView',
     'RegistrationView',
@@ -177,4 +235,6 @@ __all__ = (
     'DetailOrganizationView',
     'MembershipView',
     'RedirectMyProfileView',
+    'CancelMembershipView',
+    'RequestPasswordRecoveryView',
 )

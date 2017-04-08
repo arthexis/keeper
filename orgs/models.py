@@ -16,12 +16,20 @@ logger = logging.getLogger(__name__)
 class Profile(User):
     VERIFICATION_CHARS = 14
 
-    user = OneToOneField(User, on_delete=PROTECT, related_name='profile')
-    phone = CharField(max_length=20, blank=True)
-    is_verified = BooleanField(default=False)
-    last_visit = DateTimeField(blank=True, null=True)
-    verification_code = CharField(max_length=VERIFICATION_CHARS, blank=True, null=True)
-    code_sent_on = DateTimeField(blank=True, null=True)
+    user = OneToOneField(User, on_delete=PROTECT, related_name='profile', editable=False)
+    phone = CharField(max_length=20, blank=True,
+                      help_text="Optional. Only shared with Organizations you join.")
+    is_verified = BooleanField(default=False, editable=False)
+    last_visit = DateTimeField(blank=True, null=True, editable=False)
+    verification_code = CharField(max_length=VERIFICATION_CHARS, blank=True, null=True, editable=False)
+    code_sent_on = DateTimeField(blank=True, null=True, editable=False)
+    org_create_cap = SmallIntegerField(default=5, editable=False)
+    information = TextField(
+        blank=True, null=True,
+        help_text="Optional. Personal information that you want to share with Orgs.")
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
 
     def get_absolute_url(self):
         return reverse('orgs:profile', kwargs={'pk': self.pk})
@@ -33,26 +41,42 @@ class Profile(User):
         self.save()
         return reverse("orgs:verification", kwargs={'pk': self.pk, 'code': self.verification_code})
 
-    def send_verification_email(self):
+    def send_mail(self, subject, message=None, template=None, context=None):
         if not self.email:
-            logger.error(f"Unable to send verification email to {self.username}; address missing.")
-        else:
-            verification_url = self.make_verification_url()
-            logger.info(f"Sending verification email to {self.username}. url={verification_url}")
-            message = (
+            logger.error(f"Unable to send email to {self.username}; address missing.")
+            return
+        kwargs = {'fail_silently': True}
+        if template is not None:
+            kwargs['html_message'] = render_to_string(template, context)
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [self.email], **kwargs)
+
+    def send_verification_email(self):
+        verification_url = self.make_verification_url()
+        logger.info(f"Sending verification email to {self.username}. url={verification_url}")
+        self.send_mail(
+            'Keeper Email Verification', (
                 "Keeper Email Verification\n\n"
-                f"Please enter ths URL into your browser's navigation bar: \n{verification_url}\n"
+                f"Please enter this URL into your browser's navigation bar: \n{verification_url}\n"
                 "If you didn't request an account, please ignore this message."
-            )
-            context = {'profile': self, 'verification_url': verification_url}
-            send_mail(
-                'Keeper Email Verification',
-                message,
-                settings.DEFAULT_FROM_EMAIL,
-                [self.email],
-                fail_silently=True,
-                html_message=render_to_string('orgs/email/verification.html', context)
-            )
+            ),
+            'orgs/email/verification.html',
+            {'profile': self, 'verification_url': verification_url},
+        )
+
+    def send_recovery_email(self):
+        verification_url = self.make_verification_url()
+        logger.info(f"Sending recovery email to {self.username}. url={verification_url}")
+        self.send_mail(
+            'Keeper Password Recovery', (
+                "Keeper Password Recovery\n\n"
+                "You are receiving this email because you or someone else requested to recover"
+                f"the password to your Keeper account with username: {self.username}"
+                f"To recover your account copy this URL into your browser's navigation bar: \n{verification_url}\n"
+                "If you didn't request to recover your password, please ignore this message."
+            ),
+            'orgs/email/recovery.html',
+            {'profile': self, 'verification_url': verification_url},
+        )
 
 
 # Users can create Organizations
@@ -62,23 +86,15 @@ class Organization(Model):
         'Organization', SET_NULL, verbose_name="Parent Organization", blank=True, null=True,
         help_text="Optional. If set, you will inherit settings and staff from this organization.")
     information = TextField(blank=True)
-    owner = ForeignKey(User, PROTECT, blank=True, null=True, editable=False)
     is_public = BooleanField(
         default=True, verbose_name="Open to the Public",
         help_text="Allow others to search and find this organization and request membership.")
 
-    def save(self, **kwargs):
-        super().save(**kwargs)
-        if self.owner:
-            logger.debug(f"Assigning user={self.owner} to own org={self}")
-            membership, created = Membership.objects.get_or_create(user=self.owner, organization=self)
-            membership.active = True
-            membership.rank = 'owner'
-            membership.save()
-            logger.debug(f"Assign successful, membership pk={membership.pk}")
-
     def __str__(self):
         return self.name
+
+    def get_membership(self, user):
+        return self.memberships.get(user=user)
 
 
 class PublicOrganizationManager(Manager):
@@ -95,23 +111,26 @@ class PublicOrganization(Organization):
 
 # Membership is a relation between Users and Organizations
 class Membership(Model):
-    STATUSES = (
-        ('active', 'Active'),
-        ('inactive', 'Inactive'),
-    )
-    RANKS = (
-        ('owner', 'Owner'),
-        ('staff', 'Staff'),
-        ('member', 'Member'),
-    )
-    
-    status = CharField(max_length=40, choices=STATUSES, default='inactive')
     user = ForeignKey(User, CASCADE, related_name="memberships")
     organization = ForeignKey(Organization, CASCADE, related_name="memberships")
-    rank = CharField(max_length=40, choices=RANKS, default="member")
+    title = CharField(max_length=200, blank=True, null=True)
+    is_active = BooleanField(default=False)
+    is_officer = BooleanField(default=False)
+    is_owner = BooleanField(default=False)
+    is_blocked = BooleanField(default=False)
 
     class Meta:
         unique_together = ('user', 'organization',)
+        ordering = ('organization__name', )
+
+    def description(self):
+        if not self.is_active:
+            if self.is_blocked:
+                return 'Blocked'
+            return 'Inactive'
+        if self.is_officer:
+            return 'Active Officer'
+        return 'Active Member'
 
 
 # Organizations can create events in the event calendar

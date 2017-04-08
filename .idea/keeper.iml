@@ -15,8 +15,11 @@
       <sourceFolder url="file://$MODULE_DIR$/keeper" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/sheets" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/systems" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/orgs" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/assets/js" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/.idea" />
       <excludeFolder url="file://$MODULE_DIR$/env" />
+      <excludeFolder url="file://$MODULE_DIR$/staticfiles" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.6.1 virtualenv at C:\Users\Rafael\Envs\keeper36" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

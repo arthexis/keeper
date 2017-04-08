@@ -4,13 +4,13 @@
 {% block body %}
 
     <div class="row">
-        <div class="col-md-6 col-xs-12">
-            <h2>Register</h2>
+        <div class="col-md-8 col-xs-12">
+            <h2>Register with Keeper</h2>
             <p>Please complete the following information.</p>
             <hr>
             <form action="{% url 'orgs:register' %}" method="post">
                 {% csrf_token %}
-                {% bootstrap_form form %}
+                {% bootstrap_form form field_class='col-md-8' label_class='col-md-4' %}
                 <br>
                 <input class="btn btn-lg btn-primary" type="submit" value="Register">
             </form>

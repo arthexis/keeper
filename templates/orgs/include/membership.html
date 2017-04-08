@@ -3,22 +3,36 @@
 {{ form.media.css }}
 
 <div class="row">
+
     {% if user.memberships.count %}
         <div class="col-md-8 col-xs-12">
             <h3>Memberships</h3>
-            <br>
             <div class="table-responsive">
                 <table class="table table-hover">
-                    <tbody>{% for membership in user.memberships.all %}<tr>
-                        <td><a href="{% url 'orgs:organization' membership.organization.pk %}">
-                            {{ membership.organization.name }}
-                        </a></td>
-                        <td>{{ membership.get_status_display }}</td>
-                    </tr>{% endfor %}</tbody>
+                    <thead><tr>
+                        <th>Organization</th>
+                        <th>Status</th>
+                    </tr></thead>
+                    <tbody>{% for membership in user.memberships.all %}
+                        {% if not membership.is_blocked %}<tr>
+                            <td><a href="{% url 'orgs:organization' membership.organization.pk %}">
+                                {{ membership.organization.name }}
+                            </a></td>
+                            <td>{{ membership.description }}</td>
+                            <td>{% if not membership.is_active %}
+                                <div class="btn-group">
+                                    <a href="{% url 'orgs:cancel-membership' membership.pk %}">
+                                        <button class="btn btn-default btn-xs">Cancel</button>
+                                    </a>
+                                </div>
+                            {% endif %}</td>
+                        </tr>{% endif %}
+                    {% endfor %}</tbody>
                 </table>
             </div>
         </div>
     {% endif %}
+
     <div class="col-md-4 col-xs-12">
         {% if not user.memberships.count %}
             <h3>You have no Memberships</h3>
@@ -34,6 +48,7 @@
         <hr>
         <a class="lead" href="{% url 'orgs:organization' %}">Create your own Organization.</a>
     </div>
+
 </div>
 
 {{ form.media.js }}

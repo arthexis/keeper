@@ -2,17 +2,35 @@ from django.contrib.auth.hashers import make_password
 from django_select2.forms import ModelSelect2Widget
 from orgs.models import *
 from django.forms import *
-from django.shortcuts import get_object_or_404
+
+
+class RequestFormMixin(Form):
+    def __init__(self, *args, request=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.request = request
 
 
 class RegistrationForm(ModelForm):
     email = EmailField(
-        required=True, help_text="Required. A confirmation email will be sent to this address.")
+        required=True,
+        help_text="Required. A confirmation email will be sent to this address."
+    )
     password = CharField(
         widget=PasswordInput, required=True,
-        help_text="At least 8 characters and alphanumeric."
+        help_text="Required. At least 8 characters and alphanumeric."
     )
-    confirm_password = CharField(widget=PasswordInput, required=True)
+    confirm_password = CharField(
+        widget=PasswordInput, required=True,
+        help_text="Required. Please type your password again."
+    )
+    first_name = CharField(
+        required=False,
+        help_text="Required. Only shared with Organizations you join."
+    )
+    last_name = CharField(
+        required=False,
+        help_text="Required. Only shared with Organizations you join."
+    )
 
     def clean(self):
         password = self.cleaned_data.get('password')
@@ -29,7 +47,9 @@ class RegistrationForm(ModelForm):
 
     class Meta:
         model = Profile
-        fields = ("username", "email", "password", "confirm_password", "phone")
+        fields = (
+            "username", "email", "first_name", "last_name",
+            "password", "confirm_password", "phone")
 
 
 class PublicOrganizationWidget(ModelSelect2Widget):
@@ -40,11 +60,16 @@ class PublicOrganizationWidget(ModelSelect2Widget):
         return obj.name
 
 
-class RequestMembershipForm(Form):
+class RequestMembershipForm(RequestFormMixin):
     organization = IntegerField(widget=PublicOrganizationWidget)
+
+
+class PasswordRecoveryForm(Form):
+    email = EmailField(required=True)
 
 
 __all__ = (
     'RegistrationForm',
     'RequestMembershipForm',
+    'PasswordRecoveryForm',
 )

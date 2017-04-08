@@ -17,6 +17,7 @@ urlpatterns = [
     # Pending Email Verification Screen
     url(r'^pending/', PendingView.as_view(), name='pending'),
     url(r'^verification/(?P<pk>[0-9]+)/(?P<code>[a-zA-Z]+)/', VerificationView.as_view(), name='verification'),
+    url(r'^recovery/$', RequestPasswordRecoveryView.as_view(), name='recovery'),
 
     # Login for regular users
     url(r'^login/', LoginView.as_view(), name='login'),
@@ -28,6 +29,7 @@ urlpatterns = [
     url(r'^organization/edit/(?P<pk>[0-9]+)/', EditOrganizationView.as_view(), name='edit-organization'),
 
     # Requesting Membership
-    url(r'^membership/$', MembershipView.as_view(), name="membership")
+    url(r'^membership/$', MembershipView.as_view(), name="membership"),
+    url(r'^membership/cancel/(?P<pk>[0-9]+)$', CancelMembershipView.as_view(), name="cancel-membership"),
 
 ]
