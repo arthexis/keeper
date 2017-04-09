@@ -32,7 +32,7 @@ class Profile(User):
         return f"{self.first_name} {self.last_name}"
 
     def get_absolute_url(self):
-        return reverse('orgs:profile', kwargs={'pk': self.pk})
+        return reverse('orgs:edit-profile', kwargs={'pk': self.pk})
 
     def make_verification_url(self):
         self.is_verified = False
@@ -133,10 +133,17 @@ class Membership(Model):
         return 'Active Member'
 
 
+class UpcomingEventManager(Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(event_date__gte=timezone.now().date())
+
+
 # Organizations can create events in the event calendar
 class Event(Model):
-    name = CharField(max_length=40, verbose_name="Event Name")
-    organization = ForeignKey(Organization, CASCADE, null=True)
+    upcoming = UpcomingEventManager()
+
+    name = CharField(max_length=40)
+    organization = ForeignKey(Organization, CASCADE, null=True, related_name='events')
     event_date = DateField(null=True, blank=True)
     information = TextField(blank=True)
     seq = SmallIntegerField(null=True, editable=False)
@@ -155,10 +162,9 @@ class Event(Model):
                 self.seq = 1
         super().save(**kwargs)
 
-    def is_scheduled(self):
+    def is_upcoming(self):
         return self.event_date >= timezone.now().date()
-
-    is_scheduled.boolean = True
+    is_upcoming.boolean = True
 
     class Meta:
         ordering = ('-event_date',)
@@ -169,5 +175,5 @@ __all__ = (
     'Organization',
     'PublicOrganization',
     'Membership',
-    'Event'
+    'Event',
 )

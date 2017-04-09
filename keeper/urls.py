@@ -8,7 +8,7 @@ from django.views.generic import RedirectView
 urlpatterns = [
 
     # Organization and Membership namespace
-    url(r'^orgs/', include('orgs.urls', namespace='orgs')),
+    url(r'^o/', include('orgs.urls', namespace='orgs')),
 
     # Redirect main page to orgs:index
     url(r'^$', RedirectView.as_view(url=reverse_lazy('orgs:index')), name='index'),
@@ -17,7 +17,7 @@ urlpatterns = [
     url('^', include('django.contrib.auth.urls')),
 
     # Admin
-    url(r'^admin/', admin.site.urls),
+    url(r'^a/', admin.site.urls),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 
     # Django-Select2

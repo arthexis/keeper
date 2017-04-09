@@ -1,0 +1,33 @@
+{% load bootstrap3 %}
+
+
+{% if user_membership.is_active %}
+    <h2>Members</h2>
+    <hr>
+    <div class="table-responsive">
+        <table id="member-table" class="table table-hover">
+            <thead>
+            <tr>
+                <th></th>
+                <th>Username</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>{% for membership in organization.memberships.all %}
+                <tr>
+                    <td><input type="checkbox" id="member-{{ membership.pk }}" title=""></td>
+                    <td>
+                        <a href="{% url 'orgs:edit-profile' membership.user.pk %}">
+                            {{ membership.user.username }}
+                        </a>
+                    </td>
+                    <td>{{ membership.user.profile }}</td>
+                    <td>{{ membership.user.email }}</td>
+                    <td>{{ membership.description }}</td>
+                </tr>{% endfor %}</tbody>
+        </table>
+    </div>
+
+{% endif %}

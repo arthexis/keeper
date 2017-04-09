@@ -119,7 +119,7 @@ class EditProfileView(UpdateView):
 class RedirectMyProfileView(RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         profile = Profile.objects.get(user=self.request.user)
-        return reverse('orgs:profile', kwargs={'pk': profile.pk})
+        return reverse('orgs:edit-profile', kwargs={'pk': profile.pk})
 
 
 # Base settings shared by CreateOrganizationView and EditOrganizationView
@@ -135,7 +135,7 @@ class OrganizationMixin(object):
         self.user_membership = None
 
     def get_success_url(self):
-        return reverse_lazy('orgs:organization', kwargs={'pk': self.object.pk})
+        return reverse_lazy('orgs:view-organization', kwargs={'pk': self.object.pk})
 
 
 class CreateOrganizationView(OrganizationMixin, CreateView):
@@ -163,7 +163,7 @@ class EditOrganizationView(OrganizationMixin, UpdateView):
 
 
 class DetailOrganizationView(OrganizationMixin, DetailView):
-    template_name = 'orgs/organization/details.html'
+    template_name = 'orgs/organization/overview.html'
 
     def get_object(self, queryset=None):
         # Prevent blocked users from accessing this view
@@ -199,7 +199,7 @@ class MembershipView(FormView):
             messages.add_message(
                 self.request, messages.INFO,
                 f"You have already requested Membership on {organization.name}.")
-            return HttpResponseRedirect(reverse('orgs:membership'))
+            return HttpResponseRedirect(reverse('orgs:request-membership'))
         else:
             messages.add_message(
                 self.request, messages.SUCCESS,
@@ -222,6 +222,30 @@ class CancelMembershipView(RedirectView):
         return super().dispatch(request, *args, **kwargs)
 
 
+# Base settings shared by CreateOrganizationView and EditOrganizationView
+class EventMixin(object):
+    template_name = 'orgs/event/change_form.html'
+    model = Event
+    model_name = "Event"
+    fields = ("name", "parent_org", "information", "is_public")
+    context_object_name = 'organization'
+
+    def __init__(self):
+        self.object = None
+        self.user_membership = None
+
+    def get_success_url(self):
+        return reverse_lazy('orgs:view-event', kwargs={'pk': self.object.pk})
+
+
+class CreateEventView(CreateView):
+    pass
+
+
+class DetailEventView(DetailView):
+    pass
+
+
 __all__ = (
     'IndexView',
     'RegistrationView',
@@ -237,4 +261,6 @@ __all__ = (
     'RedirectMyProfileView',
     'CancelMembershipView',
     'RequestPasswordRecoveryView',
+    'CreateEventView',
+    'DetailEventView',
 )
