@@ -1,0 +1,11 @@
+{% extends 'orgs/change_form.html' %}
+
+{% block actiontitle %}
+    {% if object %}
+        <h1>Edit {{ view.model_name }}
+            <small>{{ view.organization.name }}</small></h1>
+    {% else %}
+        <h1>Create {{ view.model_name }}
+            <small>{{ view.organization.name }}</small></h1>
+    {% endif %}
+{% endblock %}

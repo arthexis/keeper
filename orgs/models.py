@@ -146,21 +146,21 @@ class Event(Model):
     organization = ForeignKey(Organization, CASCADE, null=True, related_name='events')
     event_date = DateField(null=True, blank=True)
     information = TextField(blank=True)
-    seq = SmallIntegerField(null=True, editable=False)
+    # seq = SmallIntegerField(null=True, editable=False)
 
     def __str__(self):
         return self.name
 
-    def last_org_event(self):
-        return Event.objects.filter(organization=self.organization).latest('event_date')
+    # def last_org_event(self):
+    #     return Event.objects.filter(organization=self.organization).latest('event_date')
 
-    def save(self, **kwargs):
-        if not self.seq:
-            try:
-                self.seq = self.last_org_event().seq + 1
-            except Event.DoesNotExist:
-                self.seq = 1
-        super().save(**kwargs)
+    # def save(self, **kwargs):
+    #     if not self.seq:
+    #         try:
+    #             self.seq = self.last_org_event().seq + 1
+    #         except Event.DoesNotExist:
+    #             self.seq = 1
+    #     super().save(**kwargs)
 
     def is_upcoming(self):
         return self.event_date >= timezone.now().date()

@@ -68,8 +68,16 @@ class PasswordRecoveryForm(Form):
     email = EmailField(required=True)
 
 
+class EventForm(ModelForm):
+
+    class Meta:
+        model = Event
+        fields = ("name", "event_date", "information",)
+
+
 __all__ = (
     'RegistrationForm',
     'RequestMembershipForm',
     'PasswordRecoveryForm',
+    'EventForm',
 )

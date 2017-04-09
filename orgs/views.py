@@ -8,7 +8,6 @@ from django.core.urlresolvers import reverse_lazy, reverse
 from django.http.response import HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
-from django.contrib.auth.models import User
 
 import logging
 logger = logging.getLogger(__name__)
@@ -227,23 +226,40 @@ class EventMixin(object):
     template_name = 'orgs/event/change_form.html'
     model = Event
     model_name = "Event"
-    fields = ("name", "parent_org", "information", "is_public")
-    context_object_name = 'organization'
+    context_object_name = 'event'
+    form_class = EventForm
 
     def __init__(self):
         self.object = None
+        self.organization = None
         self.user_membership = None
 
     def get_success_url(self):
         return reverse_lazy('orgs:view-event', kwargs={'pk': self.object.pk})
 
 
-class CreateEventView(CreateView):
-    pass
+class CreateEventView(EventMixin, CreateView):
+    # TODO Check if the user is an officer of the org
+
+    def dispatch(self, request, *args, org_pk=None, **kwargs):
+        self.organization = get_object_or_404(Organization, pk=org_pk)
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.instance.organization = self.organization
+        return super().form_valid(form)
 
 
-class DetailEventView(DetailView):
+class DetailEventView(EventMixin, DetailView):
     pass
+
+    # def get_object(self, queryset=None):
+    #     # Prevent blocked users from accessing this view
+    #     obj = super().get_object(queryset)
+    #     self.user_membership = obj.organization.get_membership(self.request.user)
+    #     if self.user_membership and self.user_membership.is_blocked:
+    #         return Http404()
+    #     return obj
 
 
 __all__ = (
