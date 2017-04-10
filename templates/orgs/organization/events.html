@@ -10,10 +10,19 @@
 
 <h2>Upcoming Events</h2>
 <hr>
-{% if organization.events.upcoming.exists %}
-    {% for event in organization.events.upcoming %}
-
-    {% endfor %}
+{% if organization.upcoming_events %}
+    <table class="table">
+        <thead><tr>
+            <th>Name</th>
+        </tr></thead>
+        <tbody>
+            {% for event in organization.upcoming_events %}<tr>
+                <td>
+                    {{ event.name }}
+                </td>
+            </tr>{% endfor %}
+        </tbody>
+    </table>
 {% else %}
     <p class="lead">No upcoming events yet. Go ahead and create some!</p>
 {% endif %}

@@ -50,6 +50,13 @@ class Profile(User):
             kwargs['html_message'] = render_to_string(template, context)
         send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [self.email], **kwargs)
 
+    def initiate_verification(self):
+        if not settings.ORGS_AUTO_VERIFY_USERS:
+            return self.send_verification_email()
+        logger.info("Skipping user verification per settings.")
+        self.is_verified = True
+        self.save()
+
     def send_verification_email(self):
         verification_url = self.make_verification_url()
         logger.info(f"Sending verification email to {self.username}. url={verification_url}")
@@ -60,8 +67,7 @@ class Profile(User):
                 "If you didn't request an account, please ignore this message."
             ),
             'orgs/email/verification.html',
-            {'profile': self, 'verification_url': verification_url},
-        )
+            {'profile': self, 'verification_url': verification_url})
 
     def send_recovery_email(self):
         verification_url = self.make_verification_url()
@@ -95,6 +101,9 @@ class Organization(Model):
 
     def get_membership(self, user):
         return self.memberships.get(user=user)
+
+    def upcoming_events(self):
+        return UpcomingEvent.objects.filter(organization=self)
 
 
 class PublicOrganizationManager(Manager):
@@ -133,34 +142,23 @@ class Membership(Model):
         return 'Active Member'
 
 
-class UpcomingEventManager(Manager):
-    def get_queryset(self):
-        return super().get_queryset().filter(event_date__gte=timezone.now().date())
-
-
 # Organizations can create events in the event calendar
 class Event(Model):
-    upcoming = UpcomingEventManager()
 
     name = CharField(max_length=40)
-    organization = ForeignKey(Organization, CASCADE, null=True, related_name='events')
+    organization = ForeignKey(Organization, CASCADE, null=True, related_name='events', editable=False)
     event_date = DateField(null=True, blank=True)
-    information = TextField(blank=True)
-    # seq = SmallIntegerField(null=True, editable=False)
+    information = TextField(
+        blank=True,
+        help_text='Optional. Basic summary about the event that all users should know.')
+    external_url = URLField(
+        null=True, blank=True,
+        help_text='Optional. External link containing additional event information.')
+    is_public = BooleanField(default=False)
+    is_published = BooleanField(default=True)
 
     def __str__(self):
         return self.name
-
-    # def last_org_event(self):
-    #     return Event.objects.filter(organization=self.organization).latest('event_date')
-
-    # def save(self, **kwargs):
-    #     if not self.seq:
-    #         try:
-    #             self.seq = self.last_org_event().seq + 1
-    #         except Event.DoesNotExist:
-    #             self.seq = 1
-    #     super().save(**kwargs)
 
     def is_upcoming(self):
         return self.event_date >= timezone.now().date()
@@ -168,6 +166,18 @@ class Event(Model):
 
     class Meta:
         ordering = ('-event_date',)
+
+
+class UpcomingEventManager(Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(event_date__gte=timezone.now().date())
+
+
+class UpcomingEvent(Event):
+    upcoming = UpcomingEventManager()
+    
+    class Meta:
+        proxy = True
 
 
 __all__ = (

@@ -1,11 +1,14 @@
+from django.views import View
 from django.views.generic import \
     TemplateView, CreateView, FormView, RedirectView, UpdateView, DetailView
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout
+from django.views.generic.detail import SingleObjectTemplateResponseMixin, SingleObjectMixin
+
 from orgs.models import *
 from orgs.forms import *
 from django.core.urlresolvers import reverse_lazy, reverse
-from django.http.response import HttpResponseRedirect, Http404
+from django.http.response import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
 
@@ -57,7 +60,7 @@ class RegistrationView(CreateView):
         username = form.cleaned_data['username']
         response = super().form_valid(form)
         profile = Profile.objects.get(username=username)
-        profile.send_verification_email()
+        profile.initiate_verification()
         return response
 
 
@@ -93,7 +96,7 @@ class RequestPasswordRecoveryView(FormView):
         email = form.cleaned_data.get('email')
         try:
             profile = Profile.objects.get(email=email)
-
+            profile.send_recovery_email()
         except Profile.DoesNotExist:
             logger.warning(f"Recovery: No profile found with email={email}")
             pass
@@ -121,6 +124,32 @@ class RedirectMyProfileView(RedirectView):
         return reverse('orgs:edit-profile', kwargs={'pk': profile.pk})
 
 
+# Class used to make sure certain Membership privileges are required
+class MemberPermissionMixin(SingleObjectMixin, View):
+    def __init__(self):
+        self.user_membership = None
+        super().__init__()
+
+    def has_permission(self):
+        return True
+    
+    def get_membership(self, obj):
+        raise NotImplemented()
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        self.user_membership = self.get_membership(obj)
+        if not self.has_permission():
+            return Http404()
+        return obj
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["user_membership"] = self.user_membership
+        context["user_organization"] = self.user_membership.organization
+        return context
+
+
 # Base settings shared by CreateOrganizationView and EditOrganizationView
 class OrganizationMixin(object):
     template_name = 'orgs/organization/change_form.html'
@@ -131,7 +160,6 @@ class OrganizationMixin(object):
 
     def __init__(self):
         self.object = None
-        self.user_membership = None
 
     def get_success_url(self):
         return reverse_lazy('orgs:view-organization', kwargs={'pk': self.object.pk})
@@ -143,7 +171,8 @@ class CreateOrganizationView(OrganizationMixin, CreateView):
         form.instance.created_by = self.request.user
         response = super().form_valid(form)
         Membership.objects.create(
-            user=self.request.user, organization=form.instance, is_active=True, is_officer=True, is_owner=True)
+            user=self.request.user, organization=form.instance, title='Founder',
+            is_active=True, is_officer=True, is_owner=True)
         logger.info(f"Creating new organization <{name}>.")
         messages.add_message(
             self.request, messages.SUCCESS,
@@ -151,31 +180,21 @@ class CreateOrganizationView(OrganizationMixin, CreateView):
         return response
 
 
-class EditOrganizationView(OrganizationMixin, UpdateView):
-    def get_object(self, queryset=None):
-        # Prevent non-officers from accessing this view
-        obj = super().get_object(queryset)
-        self.user_membership = obj.get_membership(self.request.user)
-        if not self.user_membership or not self.user_membership.is_officer:
-            return Http404()
-        return obj
+class OrgMemberPermissionMixin(MemberPermissionMixin):
+    def get_membership(self, obj: Organization):
+        return obj.get_membership(self.request.user)
 
 
-class DetailOrganizationView(OrganizationMixin, DetailView):
+class EditOrganizationView(OrganizationMixin, OrgMemberPermissionMixin, UpdateView):
+    def has_permission(self):
+        return self.user_membership and self.user_membership.is_officer
+
+
+class DetailOrganizationView(OrganizationMixin, OrgMemberPermissionMixin, DetailView):
     template_name = 'orgs/organization/overview.html'
 
-    def get_object(self, queryset=None):
-        # Prevent blocked users from accessing this view
-        obj = super().get_object(queryset)
-        self.user_membership = obj.get_membership(self.request.user)
-        if self.user_membership and self.user_membership.is_blocked:
-            return Http404()
-        return obj
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["user_membership"] = self.user_membership
-        return context
+    def has_permission(self):
+        return not self.user_membership or not self.user_membership.is_blocked
 
 
 class MembershipView(FormView):
@@ -238,28 +257,35 @@ class EventMixin(object):
         return reverse_lazy('orgs:view-event', kwargs={'pk': self.object.pk})
 
 
-class CreateEventView(EventMixin, CreateView):
-    # TODO Check if the user is an officer of the org
+class CreateEventView(EventMixin, MemberPermissionMixin, CreateView):
 
     def dispatch(self, request, *args, org_pk=None, **kwargs):
         self.organization = get_object_or_404(Organization, pk=org_pk)
+        self.user_membership = self.organization.get_membership(self.request.user)
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
+        if not self.user_membership.is_officer:
+            return HttpResponse(status=403)  # Forbidden
         form.instance.organization = self.organization
         return super().form_valid(form)
 
 
-class DetailEventView(EventMixin, DetailView):
-    pass
+class EventMemberPermissionMixin(MemberPermissionMixin):
+    def get_membership(self, obj: Event):
+        return obj.organization.get_membership(self.request.user)
 
-    # def get_object(self, queryset=None):
-    #     # Prevent blocked users from accessing this view
-    #     obj = super().get_object(queryset)
-    #     self.user_membership = obj.organization.get_membership(self.request.user)
-    #     if self.user_membership and self.user_membership.is_blocked:
-    #         return Http404()
-    #     return obj
+
+class DetailEventView(EventMixin, EventMemberPermissionMixin, DetailView):
+    template_name = 'orgs/event/overview.html'
+
+    def has_permission(self):
+        return not self.user_membership or not self.user_membership.is_blocked
+
+
+class EditEventView(EventMixin, UpdateView):
+    def has_permission(self):
+        return self.user_membership and not self.user_membership.is_blocked
 
 
 __all__ = (
@@ -279,4 +305,5 @@ __all__ = (
     'RequestPasswordRecoveryView',
     'CreateEventView',
     'DetailEventView',
+    'EditEventView',
 )

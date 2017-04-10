@@ -35,5 +35,6 @@ urlpatterns = [
     # Create/edit event
     url(r'^org/(?P<org_pk>[0-9]+)/event/new/$', CreateEventView.as_view(), name='create-event'),
     url(r'^event/(?P<pk>[0-9]+)/$', DetailEventView.as_view(), name='view-event'),
+    url(r'^event/(?P<pk>[0-9]+)/edit/$', EditEventView.as_view(), name='edit-event'),
 
 ]

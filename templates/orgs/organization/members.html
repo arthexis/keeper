@@ -12,6 +12,7 @@
                 <th>Username</th>
                 <th>Full Name</th>
                 <th>Email</th>
+                <th>Title</th>
                 <th>Status</th>
             </tr>
             </thead>
@@ -25,6 +26,7 @@
                     </td>
                     <td>{{ membership.user.profile }}</td>
                     <td>{{ membership.user.email }}</td>
+                    <td>{{ membership.user.title }}</td>
                     <td>{{ membership.description }}</td>
                 </tr>{% endfor %}</tbody>
         </table>

@@ -1,0 +1,31 @@
+{% extends 'orgs/base.html' %}
+
+{% block content %}
+
+    {# Organization tools #}
+    {% block tools %}
+        <div class="pull-right">
+            <div class="btn-toolbar" role="toolbar">
+
+                {% if user_membership.is_officer %}
+                    <div class="btn-group"><a href="{% url 'orgs:edit-event' event.pk %}">
+                        <button type="button" class="btn btn-default">Configure Event</button>
+                    </a></div>
+                {% endif %}
+
+            </div>
+        </div>
+    {% endblock %}
+
+    <h1>{{ event.name }}
+        <small><a href="{% url 'orgs:view-organization' event.organization.pk %}">
+            {{ event.organization.name }}
+        </a></small>
+    </h1>
+    <hr>
+
+    <h4>Event Date:<small>{{ event.event_date }}</small></h4>
+
+    <p>{{ event.information }}</p>
+
+{% endblock %}

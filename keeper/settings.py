@@ -208,3 +208,9 @@ SELECT2_JS = 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.fu
 #     }
 # }
 
+
+# Some settings to make debugging easier
+
+ORGS_AUTO_VERIFY_USERS = bool(DEBUG)
+
+
