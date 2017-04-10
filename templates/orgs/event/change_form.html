@@ -9,3 +9,26 @@
             <small>{{ view.organization.name }}</small></h1>
     {% endif %}
 {% endblock %}
+
+{% block tools %}
+    <div class="pull-right">
+        <div class="btn-toolbar" role="toolbar">
+
+            <div class="btn-group"><a href="#">
+                <button id="delete-btn" type="button" class="btn btn-danger">Delete Event</button>
+            </a></div>
+            <script>
+                $(document).ready(function () {
+                    $("#delete-btn").on('click', function () {
+                        if (confirm("Are you sure you want to delete this event?")) {
+                            window.location.href =
+                                '{% url 'orgs:delete-event' event.organization.pk event.pk %}';
+                        }
+                    });
+                });
+            </script>
+
+        </div>
+    </div>
+{% endblock %}
+

@@ -25,10 +25,10 @@
     <hr>
 
     {# Tabs #}
-    <ul class="nav nav-tabs">
-        <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
-        <li><a data-toggle="tab" href="#events">Events</a></li>
-        <li><a data-toggle="tab" href="#members">Members</a></li>
+    <ul id="tab-list" class="nav nav-tabs" data-initial-tab="{{ active_tab }}">
+        <li class="active"><a id="summary-tab" data-toggle="tab" href="#summary">Summary</a></li>
+        <li><a id="events-tab" data-toggle="tab" href="#events">Events</a></li>
+        <li><a id="members-tab" data-toggle="tab" href="#members">Members</a></li>
     </ul>
 
     <div class="tab-content">
@@ -42,5 +42,18 @@
             {% include 'orgs/organization/members.html' %}
         </div>
     </div>
+
+    <script>
+    $(document).ready(function () {
+        switch($("#tab-list").data('initial-tab')) {
+            case 'events':
+                $("#events-tab").click();
+                break;
+            case 'members':
+                $("#members-tab").click();
+                break;
+        }
+    });
+    </script>
 
 {% endblock %}

@@ -2,6 +2,7 @@ from django.contrib.auth.hashers import make_password
 from django_select2.forms import ModelSelect2Widget
 from orgs.models import *
 from django.forms import *
+from datetimewidget.widgets import DateWidget
 
 
 class RequestFormMixin(Form):
@@ -69,6 +70,9 @@ class PasswordRecoveryForm(Form):
 
 
 class EventForm(ModelForm):
+    event_date = DateField(
+        widget=DateWidget(usel10n=True, bootstrap_version=3), required=True,
+        help_text="Required. Date of this event.")
 
     class Meta:
         model = Event

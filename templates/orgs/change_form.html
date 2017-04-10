@@ -9,6 +9,9 @@
 
 {% block content %}
 
+    {% block tools %}
+    {% endblock %}
+
     {% block actiontitle %}
         {% if object %}
             <h1>Edit {{ view.model_name }}</h1>
@@ -29,8 +32,10 @@
         <div class="row">
             <div class="col-md-6">
                 {% bootstrap_form form %}
-                <input class="btn btn-lg btn-primary" type="submit"
-                       value="{% if object %}Update{% else %}Create{% endif %}">
+                {% block submitrow %}
+                    <input class="btn btn-lg btn-primary" type="submit"
+                           value="{% if object %}Update{% else %}Create{% endif %}">
+                {% endblock %}
             </div>
             <div class="col-md-6">
                 {% block sidecontent %}{% endblock %}

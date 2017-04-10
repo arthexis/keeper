@@ -14,12 +14,14 @@
     <table class="table">
         <thead><tr>
             <th>Name</th>
+            <th>Event Date</th>
         </tr></thead>
         <tbody>
             {% for event in organization.upcoming_events %}<tr>
                 <td>
-                    {{ event.name }}
+                    <a href="{% url 'orgs:view-event' event.pk %}">{{ event.name }}</a>
                 </td>
+                <td>{{ event.event_date }}</td>
             </tr>{% endfor %}
         </tbody>
     </table>

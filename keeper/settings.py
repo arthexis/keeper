@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'bootstrap3',
     'webpack_loader',
     'whitenoise',
+    'datetimewidget',
     # 'bootstrap4',
 ]
 

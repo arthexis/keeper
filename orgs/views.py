@@ -1,16 +1,16 @@
 from django.views import View
 from django.views.generic import \
-    TemplateView, CreateView, FormView, RedirectView, UpdateView, DetailView
+    TemplateView, CreateView, FormView, RedirectView, UpdateView, DetailView, DeleteView
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout
-from django.views.generic.detail import SingleObjectTemplateResponseMixin, SingleObjectMixin
-
+from django.views.generic.detail import SingleObjectMixin
 from orgs.models import *
 from orgs.forms import *
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.http.response import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
+from django.utils.http import urlencode
 
 import logging
 logger = logging.getLogger(__name__)
@@ -139,7 +139,10 @@ class MemberPermissionMixin(SingleObjectMixin, View):
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
         self.user_membership = self.get_membership(obj)
-        if not self.has_permission():
+        try:
+            if not self.has_permission():
+                return Http404()
+        except AttributeError:
             return Http404()
         return obj
 
@@ -187,14 +190,16 @@ class OrgMemberPermissionMixin(MemberPermissionMixin):
 
 class EditOrganizationView(OrganizationMixin, OrgMemberPermissionMixin, UpdateView):
     def has_permission(self):
-        return self.user_membership and self.user_membership.is_officer
+        return self.user_membership.is_officer
 
 
 class DetailOrganizationView(OrganizationMixin, OrgMemberPermissionMixin, DetailView):
     template_name = 'orgs/organization/overview.html'
 
-    def has_permission(self):
-        return not self.user_membership or not self.user_membership.is_blocked
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['active_tab'] = self.request.GET.get('tab', None)
+        return context
 
 
 class MembershipView(FormView):
@@ -254,7 +259,7 @@ class EventMixin(object):
         self.user_membership = None
 
     def get_success_url(self):
-        return reverse_lazy('orgs:view-event', kwargs={'pk': self.object.pk})
+        return reverse('orgs:view-event', kwargs={'pk': self.object.pk})
 
 
 class CreateEventView(EventMixin, MemberPermissionMixin, CreateView):
@@ -279,13 +284,22 @@ class EventMemberPermissionMixin(MemberPermissionMixin):
 class DetailEventView(EventMixin, EventMemberPermissionMixin, DetailView):
     template_name = 'orgs/event/overview.html'
 
-    def has_permission(self):
-        return not self.user_membership or not self.user_membership.is_blocked
-
 
 class EditEventView(EventMixin, UpdateView):
     def has_permission(self):
-        return self.user_membership and not self.user_membership.is_blocked
+        return self.user_membership.is_officer
+
+
+class DeleteEventView(EventMixin, RedirectView):
+
+    def has_permission(self):
+        return self.user_membership.is_officer
+
+    def get_redirect_url(self, *args, **kwargs):
+        organization = get_object_or_404(Organization, pk=self.kwargs['org_pk'])
+        get_object_or_404(Event, pk=self.kwargs['pk']).delete()
+        messages.success(self.request, 'The event has been deleted.')
+        return reverse('orgs:view-organization', kwargs={'pk': organization.pk}) + '?' + urlencode({'tab': 'events'})
 
 
 __all__ = (
@@ -306,4 +320,5 @@ __all__ = (
     'CreateEventView',
     'DetailEventView',
     'EditEventView',
+    'DeleteEventView',
 )

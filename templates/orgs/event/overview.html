@@ -24,8 +24,19 @@
     </h1>
     <hr>
 
-    <h4>Event Date:<small>{{ event.event_date }}</small></h4>
+    <div class="row">
+        <div class="col-md-2">
+            <h4>Event Date</h4>
+            <p>{{ event.event_date }}</p>
+        </div>
+        <div class="col-md-10">
+            {% if event.information %}
+                <h4>Information</h4>
+                <p>{{ event.information }}</p>
+            {% endif %}
+        </div>
+    </div>
 
-    <p>{{ event.information }}</p>
+
 
 {% endblock %}
