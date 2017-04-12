@@ -35,9 +35,9 @@ class SplatCategoryAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(Template)
+@admin.register(CharacterTemplate)
 class TemplateAdmin(admin.ModelAdmin):
-    model = Template
+    model = CharacterTemplate
     list_display = ('name', 'power_stat_name', 'integrity_name', 'resource_name')
     fieldsets = (
         (None, {

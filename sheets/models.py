@@ -50,7 +50,7 @@ class Character(Model):
 
     # Character basic info
     name = CharField(max_length=40, verbose_name="Character")
-    template = ForeignKey(Template, PROTECT)
+    template = ForeignKey(CharacterTemplate, PROTECT)
     power_stat = DotsField(default=1, clear=False)
     integrity = DotsField(default=7)
     background = TextField(blank=True)

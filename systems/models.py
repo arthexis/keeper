@@ -9,7 +9,7 @@ class ReferenceMixin(models.Model):
         abstract = True
 
 
-class Template(models.Model):
+class CharacterTemplate(models.Model):
     name = models.CharField(max_length=20)
     alias = models.CharField(max_length=20, blank=True)
     integrity_name = models.CharField(max_length=20, verbose_name="Integrity", default="Integrity")
@@ -22,6 +22,9 @@ class Template(models.Model):
     def __str__(self):
         return str(self.name)
 
+    class Meta:
+        verbose_name = "Template"
+
 
 class Splat(models.Model):
     FLAVOR = (
@@ -30,7 +33,7 @@ class Splat(models.Model):
         ('tertiary', 'Tertiary (Attained)'),
     )
     name = models.CharField(max_length=20)
-    template = models.ForeignKey(Template, on_delete=models.CASCADE, related_name='splat_categories')
+    template = models.ForeignKey(CharacterTemplate, on_delete=models.CASCADE, related_name='splat_categories')
     flavor = models.CharField(max_length=10, choices=FLAVOR, null=True)
 
     class Meta:
@@ -67,7 +70,7 @@ class Merit(ReferenceMixin):
     )
     name = models.CharField(max_length=40)
     category = models.CharField(max_length=20, choices=CATEGORIES, null=True)
-    template = models.ForeignKey('Template', on_delete=models.CASCADE, null=True, blank=True)
+    template = models.ForeignKey('CharacterTemplate', on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
         ordering = ('template', 'category', 'name')
@@ -78,7 +81,7 @@ class Merit(ReferenceMixin):
 
 class PowerCategory(models.Model):
     name = models.CharField(max_length=20)
-    template = models.ForeignKey('Template', on_delete=models.PROTECT, related_name='power_categories', null=True)
+    template = models.ForeignKey('CharacterTemplate', on_delete=models.PROTECT, related_name='power_categories', null=True)
 
     class Meta:
         verbose_name = "Power Category"
@@ -105,7 +108,7 @@ class Power(ReferenceMixin):
 
 class AnchorCategory(models.Model):
     name = models.CharField(max_length=20)
-    template = models.ForeignKey(Template, on_delete=models.CASCADE, related_name='anchor_categories')
+    template = models.ForeignKey(CharacterTemplate, on_delete=models.CASCADE, related_name='anchor_categories')
     is_required = models.BooleanField(default=False)
     description = models.TextField()
 
@@ -117,3 +120,12 @@ class AnchorCategory(models.Model):
         return str(self.name)
 
 
+__all__ = (
+    "CharacterTemplate",
+    "Splat",
+    "SplatOption",
+    "Merit",
+    "PowerCategory",
+    "Power",
+    "AnchorCategory",
+)

@@ -1,7 +1,7 @@
 from django.db.models import *
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User, Group
-from systems.models import Template
+from systems.models import CharacterTemplate
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
