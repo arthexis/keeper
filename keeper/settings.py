@@ -2,6 +2,7 @@ import os
 import sys
 import dj_database_url
 from .log_settings import get_logging_config
+from .utils import getenv
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -214,4 +215,18 @@ SELECT2_JS = 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.fu
 
 ORGS_AUTO_VERIFY_USERS = bool(DEBUG)
 
+
+# Email settings, show below also defaults for sendgrid
+# https://sendgrid.com/docs/Integrate/Frameworks/django.html
+
+# EMAIL_HOST = 'smtp.sendgrid.net'
+# EMAIL_HOST_USER = 'sendgrid_username'
+# EMAIL_HOST_PASSWORD = 'sendgrid_password'
+# EMAIL_PORT = 587
+
+EMAIL_HOST = getenv('EMAIL_HOST', 'smtp.sendgrid.net')
+EMAIL_HOST_USER = getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = getenv('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = getenv('EMAIL_HOST_PORT', 587)
+EMAIL_USE_TLS = True
 

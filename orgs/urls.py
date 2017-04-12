@@ -1,5 +1,6 @@
 from django.conf.urls import url
 from orgs.views import *
+from django.views.generic import TemplateView
 
 
 urlpatterns = [
@@ -15,7 +16,7 @@ urlpatterns = [
     url(r'^profile/(?P<pk>[0-9]+)/edit/$', EditProfileView.as_view(), name="edit-profile"),
 
     # Pending Email Verification Screen
-    url(r'^verify/pending/$', PendingView.as_view(), name='pending'),
+    url(r'^verify/pending/$', TemplateView.as_view(template_name='orgs/pending.html'), name='pending'),
     url(r'^verify/(?P<pk>[0-9]+)/(?P<code>[a-zA-Z]+)/$', VerificationView.as_view(), name='verification'),
     url(r'^recover/$', RequestPasswordRecoveryView.as_view(), name='recovery'),
 
@@ -37,5 +38,8 @@ urlpatterns = [
     url(r'^event/(?P<pk>[0-9]+)/$', DetailEventView.as_view(), name='view-event'),
     url(r'^event/(?P<pk>[0-9]+)/edit/$', EditEventView.as_view(), name='edit-event'),
     url(r'^org/(?P<org_pk>[0-9]+)/event/(?P<pk>[0-9]+)/delete/$', DeleteEventView.as_view(), name='delete-event'),
+
+    # User's Upcoming Event Calendar
+    url(r'^calendar/$', MyCalendarView.as_view(), name='calendar'),
 
 ]

@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class Profile(User):
     VERIFICATION_CHARS = 14
 
-    user = OneToOneField(User, on_delete=PROTECT, related_name='profile', editable=False)
+    user = OneToOneField(User, on_delete=PROTECT, related_name='profile')
     phone = CharField(max_length=20, blank=True,
                       help_text="Optional. Only shared with Organizations you join.")
     is_verified = BooleanField(default=False, editable=False)
@@ -27,6 +27,9 @@ class Profile(User):
     information = TextField(
         blank=True, null=True,
         help_text="Optional. Personal information that you want to share with Orgs.")
+
+    class Meta:
+        verbose_name = 'Profile'
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
@@ -83,6 +86,11 @@ class Profile(User):
             'orgs/email/recovery.html',
             {'profile': self, 'verification_url': verification_url},
         )
+
+    def upcoming_events(self):
+        return Event.objects.filter(organization__memberships__user=self.user, event_date__gte=timezone.now().date())\
+            .exclude(organization__memberships__is_active=False, organization__memberships__is_blocked=True)\
+            .order_by('-event_date')
 
 
 # Users can create Organizations

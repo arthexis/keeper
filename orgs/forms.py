@@ -9,6 +9,10 @@ class RequestFormMixin(Form):
     def __init__(self, *args, request=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.request = request
+        self.configure()
+
+    def configure(self):
+        pass
 
 
 class RegistrationForm(ModelForm):
@@ -32,6 +36,7 @@ class RegistrationForm(ModelForm):
         required=False,
         help_text="Required. Only shared with Organizations you join."
     )
+    initial_org_pk = IntegerField(widget=HiddenInput, required=False)
 
     def clean(self):
         password = self.cleaned_data.get('password')
@@ -54,7 +59,7 @@ class RegistrationForm(ModelForm):
 
 
 class PublicOrganizationWidget(ModelSelect2Widget):
-    model = Organization
+    model = PublicOrganization
     search_fields = ['name__icontains']
 
     def label_from_instance(self, obj):
@@ -62,7 +67,11 @@ class PublicOrganizationWidget(ModelSelect2Widget):
 
 
 class RequestMembershipForm(RequestFormMixin):
-    organization = IntegerField(widget=PublicOrganizationWidget)
+    organization = IntegerField()
+
+    def configure(self):
+        self.fields['organization'].widget = PublicOrganizationWidget(
+            queryset=PublicOrganization.objects.exclude(memberships__user=self.request.user))
 
 
 class PasswordRecoveryForm(Form):

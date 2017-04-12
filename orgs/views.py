@@ -1,6 +1,6 @@
 from django.views import View
 from django.views.generic import \
-    TemplateView, CreateView, FormView, RedirectView, UpdateView, DetailView, DeleteView
+    TemplateView, CreateView, FormView, RedirectView, UpdateView, DetailView
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout
 from django.views.generic.detail import SingleObjectMixin
@@ -11,6 +11,7 @@ from django.http.response import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from django.utils.http import urlencode
+# from django.core.paginator import Paginator
 
 import logging
 logger = logging.getLogger(__name__)
@@ -26,16 +27,15 @@ class IndexView(TemplateView):
             context['form'] = AuthenticationForm()
         else:
             try:
-                context['profile'] = Profile.objects.get(user=user)
+                context['profile'] = profile = Profile.objects.get(user=user)
+                upcoming_events = profile.upcoming_events()
+                context['upcoming_events'] = upcoming_events[:5]
+                context['remaining_events'] = upcoming_events.count() - 5
             except Profile.DoesNotExist:
                 logger.error(f"User <{user}> is missing a Profile object.")
                 context['profile'] = None
             context['req_member_form'] = RequestMembershipForm(request=self.request)
         return context
-
-
-class PendingView(TemplateView):
-    template_name = 'orgs/pending.html'
 
 
 class VerificationView(TemplateView):
@@ -56,11 +56,28 @@ class RegistrationView(CreateView):
     model = Profile
     success_url = reverse_lazy('orgs:pending')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        org_pk = self.request.GET.get('org', None)
+        if org_pk:
+            try:
+                context["invite_org"] = Organization.objects.get(pk=org_pk)
+            except Organization.DoesNotExist:
+                logger.warning(f"User attempted to register with non-existent organization={org_pk}")
+        return context
+
     def form_valid(self, form):
         username = form.cleaned_data['username']
+        initial_org_pk = form.cleaned_data['initial_org_pk']
         response = super().form_valid(form)
         profile = Profile.objects.get(username=username)
         profile.initiate_verification()
+        if initial_org_pk:
+            try:
+                initial_org = Organization.objects.get(pk=initial_org_pk)
+                Membership.objects.create(user=profile.user, organization=initial_org)
+            except Organization.DoesNotExist:
+                logger.warning(f"Attempted to initial join invalid org={initial_org_pk}")
         return response
 
 
@@ -138,7 +155,10 @@ class MemberPermissionMixin(SingleObjectMixin, View):
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        self.user_membership = self.get_membership(obj)
+        if not self.request.user.is_anonymous():
+            self.user_membership = self.get_membership(obj)
+        else:
+            self.user_membership = None
         try:
             if not self.has_permission():
                 return Http404()
@@ -149,7 +169,8 @@ class MemberPermissionMixin(SingleObjectMixin, View):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["user_membership"] = self.user_membership
-        context["user_organization"] = self.user_membership.organization
+        if self.user_membership:
+            context["user_organization"] = self.user_membership.organization
         return context
 
 
@@ -273,7 +294,9 @@ class CreateEventView(EventMixin, MemberPermissionMixin, CreateView):
         if not self.user_membership.is_officer:
             return HttpResponse(status=403)  # Forbidden
         form.instance.organization = self.organization
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        messages.success(self.request, 'Event created. Now viewing your new event.')
+        return response
 
 
 class EventMemberPermissionMixin(MemberPermissionMixin):
@@ -289,6 +312,11 @@ class EditEventView(EventMixin, UpdateView):
     def has_permission(self):
         return self.user_membership.is_officer
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, 'Event updated. Now showing the modified event..')
+        return response
+
 
 class DeleteEventView(EventMixin, RedirectView):
 
@@ -302,11 +330,21 @@ class DeleteEventView(EventMixin, RedirectView):
         return reverse('orgs:view-organization', kwargs={'pk': organization.pk}) + '?' + urlencode({'tab': 'events'})
 
 
+class MyCalendarView(TemplateView):
+    template_name = 'orgs/calendar.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['profile'] = profile = Profile.objects.get(user=self.request.user)
+        context['upcoming_events'] = profile.upcoming_events()
+        context['full_calendar'] = True
+        return context
+
+
 __all__ = (
     'IndexView',
     'RegistrationView',
     'EditProfileView',
-    'PendingView',
     'LoginView',
     'LogoutView',
     'VerificationView',
@@ -321,4 +359,5 @@ __all__ = (
     'DetailEventView',
     'EditEventView',
     'DeleteEventView',
+    'MyCalendarView',
 )

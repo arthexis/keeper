@@ -34,6 +34,10 @@
                 <h4>Information</h4>
                 <p>{{ event.information }}</p>
             {% endif %}
+            {% if event.organization.parent_org %}
+                <h4>Parent Organization</h4>
+                <p>{{ event.organization.parent_org }}</p>
+            {% endif %}
         </div>
     </div>
 

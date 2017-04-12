@@ -1,22 +1,12 @@
 from django.contrib import admin
 from orgs.models import *
-# from sheets.models import Assistance
-
-
-# class PrestigeInline(admin.TabularInline):
-#     model = Prestige
-#     extra = 0
-#     fields = ('prestige_beats', 'details', 'awarded_on')
-#     readonly_fields = ('awarded_on',)
 
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
     model = Profile
-    fields = (
-        ('user', ),
-    )
-    list_display = ('user', )
+    fields = ('user', 'phone', 'information')
+    list_display = ('username', 'email', 'first_name', 'last_name')
 
 
 # class EventInline(admin.TabularInline):
@@ -47,9 +37,9 @@ class ProfileAdmin(admin.ModelAdmin):
 # #     extra = 0
 #
 #
-# @admin.register(Event)
-# class EventAdmin(admin.ModelAdmin):
-#     model = Event
-#     list_display = ('short_name', 'event_date', 'chronicle', 'name')
-#     # inlines = (EventAssistanceInline,)
+
+@admin.register(Event)
+class EventAdmin(admin.ModelAdmin):
+    model = Event
+    list_display = ('name', 'event_date')
 
