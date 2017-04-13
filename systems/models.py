@@ -28,9 +28,9 @@ class CharacterTemplate(models.Model):
 
 class Splat(models.Model):
     FLAVOR = (
-        ('primary', 'Primary (Nature)'),
-        ('secondary', 'Secondary (Faction)'),
-        ('tertiary', 'Tertiary (Attained)'),
+        ('1', 'Primary (Nature)'),
+        ('2', 'Secondary (Faction)'),
+        ('3', 'Tertiary (Attained)'),
     )
     name = models.CharField(max_length=20)
     template = models.ForeignKey(CharacterTemplate, on_delete=models.CASCADE, related_name='splat_categories')
@@ -44,6 +44,14 @@ class Splat(models.Model):
 
     def splat_names(self):
         return ', '.join(self.splats.values_list('name', flat=True))
+
+    def storage_column(self):
+        if self.flavor == '1':
+            return 'primary_splat'
+        elif self.flavor == '2':
+            return 'secondary_splat'
+        elif self.flavor == '3':
+            return 'tertiary_splat'
 
 
 class SplatOption(ReferenceMixin):

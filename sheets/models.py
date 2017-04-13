@@ -124,6 +124,7 @@ class Character(Model):
 
     # Derived traits, they are not handled automatically because in some situations
     # their values can be manually adjusted
+    size = DotsField(default=5, clear=False)
     health_levels = PositiveIntegerField(default=0)
     willpower = DotsField(default=1, clear=False)
 
@@ -145,9 +146,6 @@ class Character(Model):
     def defense_skill(self):
         return self.athletics
 
-    def size(self):
-        return 5
-
     def health(self):
         return self.size() + self.stamina
 
@@ -157,6 +155,23 @@ class Character(Model):
 
     def __str__(self):
         return str(self.name)
+
+    # The following methods are useful to have around for template rendering
+
+    def splat_1_pk(self):
+        return self.primary_splat.pk if self.primary_splat else ""
+
+    def splat_2_pk(self):
+        return self.secondary_splat.pk if self.secondary_splat else ""
+
+    def splat_3_pk(self):
+        return self.tertiary_splat.pk if self.tertiary_splat else ""
+
+    def primary_anchor_name(self):
+        return self.template.primary_anchor_name if self.template else "Virtue"
+
+    def secondary_anchor_name(self):
+        return self.template.secondary_anchor_name if self.template else "Vice"
 
 
 class CharacterElement(Model):

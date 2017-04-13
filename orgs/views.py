@@ -11,7 +11,6 @@ from django.http.response import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from django.utils.http import urlencode
-# from django.core.paginator import Paginator
 
 import logging
 logger = logging.getLogger(__name__)
@@ -240,14 +239,10 @@ class MembershipView(FormView):
         membership, created = Membership.objects.get_or_create(
             user=self.request.user, organization=organization)
         if not created:
-            messages.add_message(
-                self.request, messages.INFO,
-                f"You have already requested Membership on {organization.name}.")
+            messages.success(self.request, f"You have already requested to join {organization.name}.")
             return HttpResponseRedirect(reverse('orgs:request-membership'))
         else:
-            messages.add_message(
-                self.request, messages.SUCCESS,
-                f"Membership requested for {organization.name}. Pending organization approval.")
+            messages.success(self.request, "Membership requested. Pending organization approval.")
         return response
 
 

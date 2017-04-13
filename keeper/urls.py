@@ -10,6 +10,9 @@ urlpatterns = [
     # Organization and Membership namespace
     url(r'^o/', include('orgs.urls', namespace='orgs')),
 
+    # Character sheet stuff namespace
+    url(r'^s/', include('sheets.urls', namespace='sheets')),
+
     # Redirect main page to orgs:index
     url(r'^$', RedirectView.as_view(url=reverse_lazy('orgs:index')), name='index'),
 

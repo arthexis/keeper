@@ -1,14 +1,45 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-    <ul>
-    {% for character in object_list %}
-        <li><a href="{% url 'character_update' character.pk %}">{{ character.name }}</a> </li>
-    {% endfor %}
-    </ul>
-</body>
-</html>
+{% extends 'orgs/base.html' %}
+
+{% block content %}
+
+    {# Organization tools #}
+    {% block tools %}
+        <div class="pull-right">
+            <div class="btn-toolbar" role="toolbar">
+
+                <div class="btn-group"><a href="{% url 'sheets:create-character' %}">
+                    <button type="button" class="btn btn-default">Create Character</button>
+                </a></div>
+
+            </div>
+        </div>
+    {% endblock %}
+
+    <h1>Characters</h1>
+    <hr>
+
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th>Character Name</th>
+            <th>Template</th>
+            <th>Organization</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for character in characters %}<tr>
+                <td><a href="{% url 'sheets:edit-character' character.pk %}">{{ character.name }}</a></td>
+                <td>{{ character.template }}</td>
+                <td>
+                    {% if character.organization %}
+                        {{ character.organization }}
+                    {% else %}
+                        <span style="color: gray">Private</span>
+                    {% endif %}
+                </td>
+            </tr>{% endfor %}
+        </tbody>
+    </table>
+
+
+{% endblock %}

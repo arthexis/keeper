@@ -1,18 +1,249 @@
+{% extends 'orgs/base.html' %}
+{% load bootstrap3 %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-    <form action="{% if object %}
-            {% url 'character_update' object.pk %}{% else %}{% url 'character_create' %}
-        {% endif %}" method="post">
+{% block extrahead %}
+    {{ block.super }}
+    {{ form.media.css }}
+    {{ form.media.js }}
+    <style>
+        .inline-dots {
+            padding: 10px 10px;
+        }
+        .inline-dots label {
+            font-size: larger;
+            min-width: 160px;
+        }
+        .inline-dots div {
+            display: inline-block;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+
+    {% block actiontitle %}
+        {% if object %}
+            <h1>{{ character.name }}
+                <small>{{ character.template }}</small>
+            </h1>
+        {% else %}
+            <h1>New Character</h1>
+        {% endif %}
+        <hr>
+    {% endblock %}
+
+
+    <form method="post">
         {% csrf_token %}
-        {{ form }}
-        <input type="submit" value="{% if object %}Actualizar{% else %}Crear{% endif %}">
+        {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+
+        {# 1st row fields are name and template #}
+        <div class="row">
+            <div class="col-md-4">
+                {% bootstrap_field form.name %}
+            </div>
+            {% if not character.template %}
+                <div class="col-md-4">
+                    {% bootstrap_field form.template %}
+                </div>
+            {% endif %}
+        </div>
+        <hr>
+
+
+        {% if character.template %}
+
+            {# 2nd row contains the template-spacific splat selections #}
+            <div class="row">{% for splat in character.template.splat_categories.all %}
+                <div class="col-md-4"><div class="form-group">
+                    <label class="control-label" for="id_{{ splat.storage_column }}">{{ splat.name }}</label>
+                    <select class="form-control" id="id_{{ splat.storage_column }}" name="{{ splat.storage_column }}">
+                        <option value="">---------</option>
+                        {% for option in splat.splats.all %}
+                            <option value="{{ option.pk }}">{{ option.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <script>$(function () {
+                        $("#id_{{ splat.storage_column }}").val(
+                            "{% cycle character.splat_1_pk character.splat_2_pk character.splat_3_pk %}");
+                    });</script>
+                </div></div>
+            {% endfor %}</div>
+
+        {% endif %}
+
+
+        {# 3rd row, Virtue, Vice, Concept #}
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group"><label class="control-label" for="id_primary_anchor">
+                    {{ character.primary_anchor_name|default:"Virtue" }}</label>
+                <input class="form-control" id="id_primary_anchor" maxlength="40" name="primary_anchor"
+                       placeholder="Anchor" title="" type="text" value="{{ character.primary_anchor }}"></div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group"><label class="control-label" for="id_secondary_anchor">
+                    {{ character.secondary_anchor_name|default:"Vice" }}</label>
+                <input class="form-control" id="id_secondary_anchor" maxlength="40" name="secondary_anchor"
+                       placeholder="Anchor" title="" type="text" value="{{ character.secondary_anchor }}"></div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group"><label class="control-label" for="id_concept">Concept</label>
+                <input class="form-control" id="id_concept" maxlength="40" name="concept"
+                       placeholder="Concept" title="" type="text"
+                       value="{{ character.concept }}"></div>
+            </div>
+        </div>
+
+        <hr>
+
+        {# 4th row: Attributes #}
+        <div class="row">
+            <div class="col-md-4 col-xs-12">
+                <div class="panel panel-default inline-dots">
+                    {% bootstrap_field form.intelligence %}
+                    {% bootstrap_field form.wits %}
+                    {% bootstrap_field form.resolve %}
+                </div>
+            </div>
+            <div class="col-md-4 col-xs-12">
+                <div class="panel panel-default inline-dots">
+                    {% bootstrap_field form.strength %}
+                    {% bootstrap_field form.dexterity %}
+                    {% bootstrap_field form.stamina %}
+                </div>
+            </div>
+            <div class="col-md-4 col-xs-12">
+                <div class="panel panel-default inline-dots">
+                    {% bootstrap_field form.presence %}
+                    {% bootstrap_field form.manipulation %}
+                    {% bootstrap_field form.composure %}
+                </div>
+            </div>
+        </div>
+
+
+        {# 5th row: Skills #}
+        <div class="row">
+            <div class="col-md-4 col-xs-12">
+                <div class="panel panel-default inline-dots">
+                    {% bootstrap_field form.academics %}
+                    {% bootstrap_field form.computer %}
+                    {% bootstrap_field form.crafts %}
+                    {% bootstrap_field form.investigation %}
+                    {% bootstrap_field form.medicine %}
+                    {% bootstrap_field form.occult %}
+                    {% bootstrap_field form.politics %}
+                    {% bootstrap_field form.science %}
+                </div>
+            </div>
+            <div class="col-md-4 col-xs-12">
+                <div class="panel panel-default inline-dots">
+                    {% bootstrap_field form.athletics %}
+                    {% bootstrap_field form.brawl %}
+                    {% bootstrap_field form.drive %}
+                    {% bootstrap_field form.firearms %}
+                    {% bootstrap_field form.larceny %}
+                    {% bootstrap_field form.stealth %}
+                    {% bootstrap_field form.survival %}
+                    {% bootstrap_field form.weaponry %}
+                </div>
+            </div>
+            <div class="col-md-4 col-xs-12">
+                <div class="panel panel-default inline-dots">
+                    {% bootstrap_field form.animal_ken %}
+                    {% bootstrap_field form.empathy %}
+                    {% bootstrap_field form.expression %}
+                    {% bootstrap_field form.intimidation %}
+                    {% bootstrap_field form.persuasion %}
+                    {% bootstrap_field form.socialize %}
+                    {% bootstrap_field form.streetwise %}
+                    {% bootstrap_field form.subterfuge %}
+                </div>
+            </div>
+        </div>
+
+
+        {# 6th row: Power Stat, Integrity, Size #}
+        {% if character.template %}
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="inline-dots">
+                        {% bootstrap_field form.power_stat label_class="power-stat-label" %}
+                    </div>
+                    <script>$(function () {
+                        $(".power-stat-label").text("{{ character.template.power_stat_name }}");
+                    });</script>
+                </div>
+                <div class="col-md-4">
+                    <div class="inline-dots">
+                        {% bootstrap_field form.integrity label_class="integrity-label" %}
+                    </div>
+                    <script>$(function () {
+                        $(".integrity-label").text("{{ character.template.integrity_name }}");
+                    });</script>
+                </div>
+                <div class="col-md-4">
+                    <div class="inline-dots">
+                        {% bootstrap_field form.size %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <hr>
+
+        {# 7th Row: Split between merits and other boxes of calculated values #}
+        {% if character.template %}
+            <div class="row">
+
+                {# Merits #}
+                <div class="col-md-6">
+                    <div class="panel panel-default" style="padding: 10px">
+
+                        <h2>Merits</h2>
+                        <hr>
+                        <div class="merit-base">
+                            <div class="row">
+                                <div class="col-md-7">
+                                    <select class="form-control" id="id_primary_splat" name="primary_splat">
+                                        <option value="">---------</option>
+                                        <option value="2">Acanthus</option>
+                                        <option value="4">Mastigos</option>
+                                        <option value="3">Moros</option>
+                                        <option value="1">Obrimos</option>
+                                        <option value="5">Thyrsus</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="dots"><input type="hidden" name="merit-dots-base" value="1">
+                                        <input type="radio" value="1"><input type="radio" value="2"><input type="radio" value="3"><input type="radio" value="4"><input type="radio" value="5"><input type="radio" value="6"><input type="radio" value="7"><input type="radio" value="8"><input type="radio" value="9"><input type="radio" value="10">
+                                        <button class="clear" value="1">x</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        {% endif %}
+
+
+        {# Form submission #}
+        <br>
+        <div class="row">
+            <div class="col-md-12">
+                {% if object %}
+                    <input class="btn btn-lg btn-primary" type="submit" value="Save Changes">
+                {% else %}
+                    <input class="btn btn-lg btn-primary" type="submit" value="Create Character">
+                    <br><br>
+                    <p>You will be able to make changes and add supernatural template options after saving.</p>
+                {% endif %}
+            </div>
+        </div>
     </form>
-    <a href="{% url 'character_create' %}">Crear otro personaje nuevo</a>
-</body>
-</html>
+
+{% endblock %}
