@@ -1,14 +1,6 @@
 from django.db import models
 
 
-class ReferenceMixin(models.Model):
-    reference_book = models.CharField(max_length=100, blank=True)
-    reference_page = models.PositiveIntegerField(null=True, blank=True)
-
-    class Meta:
-        abstract = True
-
-
 class CharacterTemplate(models.Model):
     name = models.CharField(max_length=20)
     alias = models.CharField(max_length=20, blank=True)
@@ -54,7 +46,7 @@ class Splat(models.Model):
             return 'tertiary_splat'
 
 
-class SplatOption(ReferenceMixin):
+class SplatOption(models.Model):
     name = models.CharField(max_length=40)
     category = models.ForeignKey(Splat, on_delete=models.CASCADE, related_name='splats')
 
@@ -68,7 +60,7 @@ class SplatOption(ReferenceMixin):
         return self.category.template
 
 
-class Merit(ReferenceMixin):
+class Merit(models.Model):
     CATEGORIES = (
         ('mental', 'Mental'),
         ('physical', 'Physical'),
@@ -76,12 +68,11 @@ class Merit(ReferenceMixin):
         ('supernatural', 'Supernatural'),
         ('style', 'Style'),
     )
-    name = models.CharField(max_length=40)
-    category = models.CharField(max_length=20, choices=CATEGORIES, null=True)
+    name = models.CharField(max_length=40, unique=True)
     template = models.ForeignKey('CharacterTemplate', on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
-        ordering = ('template', 'category', 'name')
+        ordering = ('name', )
 
     def __str__(self):
         return str(self.name)
@@ -102,7 +93,7 @@ class PowerCategory(models.Model):
         return ', '.join(self.powers.values_list('name', flat=True))
 
 
-class Power(ReferenceMixin):
+class Power(models.Model):
     name = models.CharField(max_length=40)
     category = models.ForeignKey('PowerCategory', on_delete=models.PROTECT, related_name='powers')
 

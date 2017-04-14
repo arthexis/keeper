@@ -5,6 +5,8 @@
     {{ block.super }}
     {{ form.media.css }}
     {{ form.media.js }}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
     <style>
         .inline-dots {
             padding: 10px 10px;
@@ -16,11 +18,15 @@
         .inline-dots div {
             display: inline-block;
         }
+        .hidden {
+            display: none;
+        }
     </style>
 {% endblock %}
 
 {% block content %}
 
+    {# Page title (character name and template if it exists) #}
     {% block actiontitle %}
         {% if object %}
             <h1>{{ character.name }}
@@ -33,7 +39,7 @@
     {% endblock %}
 
 
-    <form method="post">
+    <form method="post" id="character-form">
         {% csrf_token %}
         {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
 
@@ -50,10 +56,8 @@
         </div>
         <hr>
 
-
+        {# 2nd row contains the template-spacific splat selections #}
         {% if character.template %}
-
-            {# 2nd row contains the template-spacific splat selections #}
             <div class="row">{% for splat in character.template.splat_categories.all %}
                 <div class="col-md-4"><div class="form-group">
                     <label class="control-label" for="id_{{ splat.storage_column }}">{{ splat.name }}</label>
@@ -69,7 +73,6 @@
                     });</script>
                 </div></div>
             {% endfor %}</div>
-
         {% endif %}
 
 
@@ -94,7 +97,6 @@
                        value="{{ character.concept }}"></div>
             </div>
         </div>
-
         <hr>
 
         {# 4th row: Attributes #}
@@ -201,28 +203,85 @@
                 <div class="col-md-6">
                     <div class="panel panel-default" style="padding: 10px">
 
-                        <h2>Merits</h2>
-                        <hr>
-                        <div class="merit-base">
-                            <div class="row">
-                                <div class="col-md-7">
-                                    <select class="form-control" id="id_primary_splat" name="primary_splat">
-                                        <option value="">---------</option>
-                                        <option value="2">Acanthus</option>
-                                        <option value="4">Mastigos</option>
-                                        <option value="3">Moros</option>
-                                        <option value="1">Obrimos</option>
-                                        <option value="5">Thyrsus</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-5">
-                                    <div class="dots"><input type="hidden" name="merit-dots-base" value="1">
-                                        <input type="radio" value="1"><input type="radio" value="2"><input type="radio" value="3"><input type="radio" value="4"><input type="radio" value="5"><input type="radio" value="6"><input type="radio" value="7"><input type="radio" value="8"><input type="radio" value="9"><input type="radio" value="10">
-                                        <button class="clear" value="1">x</button>
-                                    </div>
+                        {# Add another merit button toolbar #}
+                        <div class="pull-right">
+                            <div class="btn-toolbar" role="toolbar">
+                                <div class="btn-group">
+                                    <button id="add-merit-btn" type="button" class="btn btn-default">Add more</button>
                                 </div>
                             </div>
                         </div>
+
+                        <h3>Merits</h3>
+                        <hr>
+
+                        {# New merits get added to this div #}
+                        <div id="merit-container"></div>
+
+                        {# Base block used to create the rest of the instances #}
+                        <div id="merit-base" class="hidden">
+                            <div class="row merit-entry">
+                                <div class="col-md-7">
+                                    <select class="form-control" id="id_merit_base"></select>
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="dots"><input type="hidden" class="merit-dots-hidden" value="1">
+                                        {# Its important all the imputs stay on the same line (no spacing) #}
+                                        <input type="radio" value="1"><input type="radio" value="2"><input type="radio" value="3"><input type="radio" value="4"><input type="radio" value="5"><input type="radio" value="6"><input type="radio" value="7"><input type="radio" value="8"><input type="radio" value="9"><input type="radio" value="10">
+{#                                        <button class="clear" value="1">x</button>#}
+                                    </div>
+                                </div>
+                                <br><br>
+                            </div>
+                        </div>
+                        {# End of base block #}
+
+                        <script>$(function () {
+
+                            {# Setup the merit section by creating a function that clones a hidden base #}
+                            var meritN = 0;
+                            var addMerit = (function () {
+                                if (meritN >= 20) { return; }
+                                var created = $('#merit-base div.row').clone()
+                                    .removeClass("hidden").appendTo('#merit-container');
+                                created.find('select').attr('id', 'id_merit_' + meritN++)
+                                    .select2({
+                                        ajax: {
+                                            url: '{% url 'sheets:all-merits' %}',
+                                            dataType: 'json',
+                                            delay: 250,
+                                            data: function (params) {
+                                                return {
+                                                    term: params.term,
+                                                    template: '{{ character.template.pk }}'
+                                                }
+                                            },
+                                            processResults: function (data) { return {results: data.items}; }
+                                        }});
+                                return created;
+                            });
+                            $('#add-merit-btn').on('click', addMerit);
+
+                            addMerit();
+                            {# Run once on page load #}
+
+                            {# Load initial merit already in this character #}
+                            $.get('{% url 'sheets:character-merits' %}?char={{ character.pk }}')
+                                .done( function (data) {
+                                    for (var i=0; i<data.items.length; i++) {
+                                        var created = addMerit();
+                                        console.log(created);
+                                        created.find('select').select2("data", {
+                                            id: data.items[i].pk, text: data.items[i].text
+                                        });
+                                        created.find('select').val(data.items[i].pk);
+                                        created.find('input[type=radio][value=' + data.items[i].dots + ']').click();
+                                    }
+                                });
+
+                        });</script>
+
+
                     </div>
                 </div>
 
@@ -233,17 +292,33 @@
 
         {# Form submission #}
         <br>
-        <div class="row">
+        <div class="row submit-row">
             <div class="col-md-12">
                 {% if object %}
-                    <input class="btn btn-lg btn-primary" type="submit" value="Save Changes">
+                    <input id="save-btn" class="btn btn-lg btn-primary" type="submit" value="Save Changes">
                 {% else %}
                     <input class="btn btn-lg btn-primary" type="submit" value="Create Character">
                     <br><br>
                     <p>You will be able to make changes and add supernatural template options after saving.</p>
                 {% endif %}
             </div>
+
+            {# Save function, massage data before submitting the form #}
+            <script>$(function () {
+                $('#character-form').submit(function () {
+                    $(this).prop('disabled', true);
+                    {# On save retrieve all merits + dots and put them on id_merits as json #}
+                    var data = {};
+                    $('.merit-entry').each(function () {
+                        data[$(this).find('select').val()] = $(this).find('.merit-dots-hidden').val();
+                    });
+                    $('#id_merits').val(JSON.stringify(data));
+                    return true;
+                });
+            });</script>
+
         </div>
     </form>
+    <br><br><br><br>
 
 {% endblock %}

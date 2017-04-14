@@ -1,11 +1,10 @@
 from sheets.models import Character
-from systems.models import CharacterTemplate
-from django.contrib.auth.models import User
 from django.forms import *
-from systems.fields import DotsInput
 
 
 class BaseCharacterForm(ModelForm):
+    merits = CharField(required=False, widget=HiddenInput)
+
     class Meta:
         model = Character
         exclude = []
@@ -30,7 +29,7 @@ class EditCharacterForm(BaseCharacterForm):
     class Meta:
         model = Character
         exclude = [
-            'template', 'beats', 'experiences', 'organization', 'willpower',
+            'template', 'beats', 'experiences', 'organization', 'willpower', 'user',
             'template_beats', 'template_experiences', 'health_levels', 'resource',
         ]
 

@@ -147,7 +147,7 @@ class Character(Model):
         return self.athletics
 
     def health(self):
-        return self.size() + self.stamina
+        return self.size + self.stamina
 
     def merit_value(self, merit_name):
         qs = self.merits.filter(merit__name=merit_name)
@@ -191,9 +191,6 @@ class CharacterMerit(CharacterElement):
 
     class Meta:
         verbose_name = "Merit"
-
-    def category(self):
-        return self.merit.get_category_display()
 
     def origin(self):
         return self.merit.template.name if self.merit.template else 'Any'

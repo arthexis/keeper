@@ -1,8 +1,12 @@
+import json
 from django.urls import reverse
 from django.views.generic import CreateView, TemplateView, UpdateView
-from sheets.models import Character
+from sheets.models import Character, CharacterMerit
 from sheets.forms import CreateCharacterForm, EditCharacterForm
 from django.contrib import messages
+from django.http import JsonResponse
+from systems.models import Merit
+from django.shortcuts import get_object_or_404
 
 
 class CharacterMixin(object):
@@ -38,6 +42,22 @@ class EditCharacterView(CharacterMixin, UpdateView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
+
+        # Save merit data independently
+        merit_data = form.cleaned_data.get('merits', None)
+        if merit_data:
+            CharacterMerit.objects.filter(character=form.instance).delete()
+            for merit_pk, dots in json.loads(merit_data).items():
+                if merit_pk == 'null' or dots == 'null':
+                    # This happens when the user leaves merits blank
+                    continue
+                merit_pk, dots = int(merit_pk), int(dots)
+                if dots < 1:
+                    continue
+                CharacterMerit.objects.create(
+                    character=form.instance, rating=dots,
+                    merit=get_object_or_404(Merit, pk=merit_pk))
+
         return response
 
     def get_success_url(self):
@@ -54,3 +74,21 @@ class ListCharacterView(TemplateView):
         return context
 
 
+# Simple function view that returns merits in a JSON format
+def available_merits(request):
+    qs = Merit.objects.filter(name__icontains=request.GET.get('term', ''))
+
+    def pair(item):
+        return {'id': item['pk'], 'text': item['name']}
+
+    return JsonResponse({'items': [pair(i) for i in qs.values('pk', 'name')]})
+
+
+# Function view that returns merits a character already has in a JSON format
+def character_merits(request):
+    qs = CharacterMerit.objects.filter(character_id=int(request.GET.get('char')))
+
+    def bundle(item):
+        return {'pk': item['pk'], "text": item['merit__name'], 'dots': item['rating']}
+
+    return JsonResponse({'items': [bundle(i) for i in qs.values('pk', 'rating', 'merit__name')]})

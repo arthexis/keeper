@@ -54,13 +54,13 @@ class TemplateAdmin(admin.ModelAdmin):
 @admin.register(Merit)
 class MeritAdmin(admin.ModelAdmin):
     model = Merit
-    fields = ('name', 'category', 'template', 'reference_book', 'reference_page', )
-    list_display = ('name', 'category', 'template', )
+    fields = ('name', 'template', )
+    list_display = ('name', 'template', )
 
 
 class PowerInline(admin.TabularInline):
     model = Power
-    fields = ('name', 'reference_book', 'reference_page')
+    fields = ('name',)
     extra = 1
 
 
