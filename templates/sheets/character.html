@@ -228,7 +228,7 @@
                                     <div class="dots"><input type="hidden" class="merit-dots-hidden" value="1">
                                         {# Its important all the imputs stay on the same line (no spacing) #}
                                         <input type="radio" value="1"><input type="radio" value="2"><input type="radio" value="3"><input type="radio" value="4"><input type="radio" value="5"><input type="radio" value="6"><input type="radio" value="7"><input type="radio" value="8"><input type="radio" value="9"><input type="radio" value="10">
-{#                                        <button class="clear" value="1">x</button>#}
+                                        <button class="clear" value="1">x</button>
                                     </div>
                                 </div>
                                 <br><br>
@@ -262,20 +262,23 @@
                             });
                             $('#add-merit-btn').on('click', addMerit);
 
-                            addMerit();
-                            {# Run once on page load #}
-
                             {# Load initial merit already in this character #}
                             $.get('{% url 'sheets:character-merits' %}?char={{ character.pk }}')
                                 .done( function (data) {
                                     for (var i=0; i<data.items.length; i++) {
                                         var created = addMerit();
-                                        console.log(created);
-                                        created.find('select').select2("data", {
-                                            id: data.items[i].pk, text: data.items[i].text
+                                        created.find('select').select2({data:
+                                            [{id: data.items[i].pk, text: data.items[i].text}]
                                         });
                                         created.find('select').val(data.items[i].pk);
                                         created.find('input[type=radio][value=' + data.items[i].dots + ']').click();
+                                        created.prop("disabled", true);
+                                    }
+                                })
+                                .always(function () {
+                                    if (meritN < 1) {
+                                        {# Create blank entry if no data exists #}
+                                        addMerit();
                                     }
                                 });
 

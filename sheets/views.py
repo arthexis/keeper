@@ -76,19 +76,17 @@ class ListCharacterView(TemplateView):
 
 # Simple function view that returns merits in a JSON format
 def available_merits(request):
-    qs = Merit.objects.filter(name__icontains=request.GET.get('term', ''))
-
     def pair(item):
         return {'id': item['pk'], 'text': item['name']}
 
+    qs = Merit.objects.filter(name__icontains=request.GET.get('term', ''))
     return JsonResponse({'items': [pair(i) for i in qs.values('pk', 'name')]})
 
 
 # Function view that returns merits a character already has in a JSON format
 def character_merits(request):
-    qs = CharacterMerit.objects.filter(character_id=int(request.GET.get('char')))
-
     def bundle(item):
-        return {'pk': item['pk'], "text": item['merit__name'], 'dots': item['rating']}
+        return {'pk': item['merit__pk'], "text": item['merit__name'], 'dots': item['rating']}
 
-    return JsonResponse({'items': [bundle(i) for i in qs.values('pk', 'rating', 'merit__name')]})
+    qs = CharacterMerit.objects.filter(character_id=int(request.GET.get('char'))).order_by('merit__name')
+    return JsonResponse({'items': [bundle(i) for i in qs.values('merit__pk', 'rating', 'merit__name')]})
