@@ -4,6 +4,7 @@ from django.forms import *
 
 class BaseCharacterForm(ModelForm):
     merits = CharField(required=False, widget=HiddenInput)
+    specialities = CharField(required=False, widget=HiddenInput)
 
     class Meta:
         model = Character

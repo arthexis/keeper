@@ -1,7 +1,7 @@
 import json
 from django.urls import reverse
 from django.views.generic import CreateView, TemplateView, UpdateView
-from sheets.models import Character, CharacterMerit
+from sheets.models import Character, CharacterMerit, SkillSpeciality
 from sheets.forms import CreateCharacterForm, EditCharacterForm
 from django.contrib import messages
 from django.http import JsonResponse
@@ -58,6 +58,17 @@ class EditCharacterView(CharacterMixin, UpdateView):
                     character=form.instance, rating=dots,
                     merit=get_object_or_404(Merit, pk=merit_pk))
 
+        # Save speciality data independently
+        speciality_data = form.cleaned_data.get('specialities', None)
+        if speciality_data:
+            SkillSpeciality.objects.filter(character=form.instance).delete()
+            for skill, speciality in json.loads(speciality_data).items():
+                if skill == 'null' or speciality == 'null' or speciality == '':
+                    # This happens when the user leaves merits blank
+                    continue
+                SkillSpeciality.objects.create(
+                    character=form.instance, speciality=speciality, skill=skill)
+
         return response
 
     def get_success_url(self):
@@ -90,3 +101,13 @@ def character_merits(request):
 
     qs = CharacterMerit.objects.filter(character_id=int(request.GET.get('char'))).order_by('merit__name')
     return JsonResponse({'items': [bundle(i) for i in qs.values('merit__pk', 'rating', 'merit__name')]})
+
+
+# Function view that returns specialities a character already has in a JSON format
+def character_specialities(request):
+    def bundle(item):
+        return {'pk': item.skill, "text": item.get_skill_display(), 'detail': item.speciality}
+
+    qs = SkillSpeciality.objects.filter(character_id=int(request.GET.get('char'))).order_by('skill')
+    return JsonResponse({'items': [bundle(i) for i in qs.all()]})
+

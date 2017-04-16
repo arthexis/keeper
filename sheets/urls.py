@@ -1,6 +1,6 @@
 from django.conf.urls import url
 from sheets.views import ListCharacterView, EditCharacterView, CreateCharacterView, \
-    available_merits, character_merits
+    available_merits, character_merits, character_specialities
 
 
 urlpatterns = [
@@ -15,5 +15,8 @@ urlpatterns = [
     # List of a all merits that can be used when creating characters
     url(r'^merits/all/$', available_merits, name='all-merits'),
     url(r'^merits/character/$', character_merits, name='character-merits'),
+
+    # Lists of specialities for a character
+    url(r'^specialities/character/$', character_specialities, name='character-specialities'),
 
 ]

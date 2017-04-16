@@ -22,6 +22,61 @@
             display: none;
         }
     </style>
+    <script>
+        {# Creates clones of sections generically #}
+        function Cloner (options) {
+            this.clone = (function () {
+                if (this.counter >= options.maxNumber) { return; }
+                var cloned = $(options.base + ' div.row').clone()
+                    .removeClass("hidden").appendTo(options.container);
+                var select = cloned.find('select').attr('id', options.idPrefix + this.counter++);
+                if (options.selectUrl) {
+                    select.select2({
+                        ajax: {
+                            url: options.selectUrl,
+                            dataType: 'json',
+                            delay: 250,
+                            data: function (params) {
+                                return {
+                                    term: params.term,
+                                    template: '{{ character.template.pk }}'
+                                }
+                            },
+                            processResults: function (data) {
+                                return {results: data.items};
+                            }
+                        }
+                    });
+                }
+                return cloned;
+            });
+            this.counter = 0;
+            $(options.addBtn).on('click', this.clone);
+            var parent = this;
+            $.get(options.initialUrl)
+                .done(function (data) {
+                    for (var i = 0; i < data.items.length; i++) {
+                        var cloned = parent.clone();
+                        cloned.find('select')
+                            .select2({
+                                data: [{id: data.items[i].pk, text: data.items[i].text}]
+                            })
+                            .val(data.items[i].pk)
+                            .prop("disabled", true);
+                        if (options.afterLoad) {
+                            options.afterLoad(cloned, data.items[i]);
+                        }
+                    }
+                })
+                .always(function () {
+                    if (options.minNumber) {
+                        for (; parent.counter < options.minNumber;) {
+                            parent.clone();
+                        }
+                    }
+                });
+        }
+    </script>
 {% endblock %}
 
 {% block content %}
@@ -237,59 +292,105 @@
                         {# End of base block #}
 
                         <script>$(function () {
-
                             {# Setup the merit section by creating a function that clones a hidden base #}
-                            var meritN = 0;
-                            var addMerit = (function () {
-                                if (meritN >= 20) { return; }
-                                var created = $('#merit-base div.row').clone()
-                                    .removeClass("hidden").appendTo('#merit-container');
-                                created.find('select').attr('id', 'id_merit_' + meritN++)
-                                    .select2({
-                                        ajax: {
-                                            url: '{% url 'sheets:all-merits' %}',
-                                            dataType: 'json',
-                                            delay: 250,
-                                            data: function (params) {
-                                                return {
-                                                    term: params.term,
-                                                    template: '{{ character.template.pk }}'
-                                                }
-                                            },
-                                            processResults: function (data) { return {results: data.items}; }
-                                        }});
-                                return created;
+                            new Cloner({
+                                base: '#merit-base',
+                                container: '#merit-container',
+                                idPrefix: 'id_merit_',
+                                selectUrl: '{% url 'sheets:all-merits' %}',
+                                addBtn: "#add-merit-btn",
+                                maxNumber: 20,
+                                minNumber: 5,
+                                initialUrl: '{% url 'sheets:character-merits' %}?char={{ character.pk }}',
+                                afterLoad: function (cloned, val) {
+                                    cloned.find('input[type=radio][value=' + val.dots + ']').click();
+                                }
                             });
-                            $('#add-merit-btn').on('click', addMerit);
-
-                            {# Load initial merit already in this character #}
-                            $.get('{% url 'sheets:character-merits' %}?char={{ character.pk }}')
-                                .done( function (data) {
-                                    for (var i=0; i<data.items.length; i++) {
-                                        var created = addMerit();
-                                        created.find('select').select2({data:
-                                            [{id: data.items[i].pk, text: data.items[i].text}]
-                                        });
-                                        created.find('select').val(data.items[i].pk);
-                                        created.find('input[type=radio][value=' + data.items[i].dots + ']').click();
-                                        created.prop("disabled", true);
-                                    }
-                                })
-                                .always(function () {
-                                    if (meritN < 1) {
-                                        {# Create blank entry if no data exists #}
-                                        addMerit();
-                                    }
-                                });
-
                         });</script>
 
 
                     </div>
                 </div>
 
+                {#  Specialities #}
+                    <div class="col-md-6">
+                        <div class="panel panel-default" style="padding: 10px">
 
-            </div>
+                            {# Add another merit button toolbar #}
+                            <div class="pull-right">
+                                <div class="btn-toolbar" role="toolbar">
+                                    <div class="btn-group">
+                                        <button id="add-speciality-btn" type="button" class="btn btn-default">Add more</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h3>Specialties</h3>
+
+                            <hr>
+
+                            {# New specialities get added to this div #}
+                            <div id="speciality-container"></div>
+
+                            {# Base block used to create the rest of the instances #}
+                            <div id="speciality-base" class="hidden">
+                                <div class="row speciality-entry">
+                                    <div class="col-md-4">
+                                        <select class="form-control" id="id_speciality_base">
+                                            <option value="academics">Academics</option>
+                                            <option value="computer">Computer</option>
+                                            <option value="crafts">Crafts</option>
+                                            <option value="investigation">Investigation</option>
+                                            <option value="medicine">Medicine</option>
+                                            <option value="occult">Occult</option>
+                                            <option value="politics">Politics</option>
+                                            <option value="science">Science</option>
+                                            <option value="athletics">Athletics</option>
+                                            <option value="brawl">Brawl</option>
+                                            <option value="drive">Drive</option>
+                                            <option value="firearms">Firearms</option>
+                                            <option value="larceny">Larceny</option>
+                                            <option value="stealth">Stealth</option>
+                                            <option value="survival">Survival</option>
+                                            <option value="weaponry">Weaponry</option>
+                                            <option value="animal_ken">Animal Ken</option>
+                                            <option value="empathy">Empathy</option>
+                                            <option value="expression">Expression</option>
+                                            <option value="intimidation">Intimidation</option>
+                                            <option value="persuasion">Persuasion</option>
+                                            <option value="socialize">Socialize</option>
+                                            <option value="streetwise">Streetwise</option>
+                                            <option value="subterfuge">Subterfuge</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <input class="form-control speciality" type="text" style="width: 100%">
+                                    </div>
+                                    <br><br>
+                                </div>
+                            </div>
+                            {# End of base block #}
+
+                            <script>$(function () {
+                                {# Setup the merit section by creating a function that clones a hidden base #}
+                                new Cloner({
+                                    base: '#speciality-base',
+                                    container: '#speciality-container',
+                                    idPrefix: 'id_speciality_',
+                                    addBtn: "#add-speciality-btn",
+                                    maxNumber: 20,
+                                    initialUrl: '{% url 'sheets:character-specialities' %}?char={{ character.pk }}',
+                                    afterLoad: function (cloned, val) {
+                                        cloned.find('input[type=text]').text(val.details);
+                                    }
+                                });
+                            });</script>
+
+
+                        </div>
+                    </div>
+
+            </div> {# End of 7th row #}
         {% endif %}
 
 
@@ -310,12 +411,25 @@
             <script>$(function () {
                 $('#character-form').submit(function () {
                     $(this).prop('disabled', true);
+
                     {# On save retrieve all merits + dots and put them on id_merits as json #}
-                    var data = {};
-                    $('.merit-entry').each(function () {
-                        data[$(this).find('select').val()] = $(this).find('.merit-dots-hidden').val();
-                    });
-                    $('#id_merits').val(JSON.stringify(data));
+                    (function () {
+                        var data = {};
+                        $('.merit-entry').each(function () {
+                            data[$(this).find('select').val()] = $(this).find('.merit-dots-hidden').val();
+                        });
+                        $('#id_merits').val(JSON.stringify(data));
+                    })();
+
+                    {# On save retrieve all specialities and put them on id_specialities as json #}
+                    (function () {
+                        var data = {};
+                        $('.speciality-entry').each(function () {
+                            data[$(this).find('select').val()] = $(this).find('.speciality').text();
+                        });
+                        $('#id_specialities').val(JSON.stringify(data));
+                    })();
+
                     return true;
                 });
             });</script>
