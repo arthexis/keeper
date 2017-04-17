@@ -35,6 +35,11 @@ class CreateCharacterView(CharacterMixin, CreateView):
 class EditCharacterView(CharacterMixin, UpdateView):
     form_class = EditCharacterForm
 
+    def get_template_names(self):
+        if self.object and self.object.template:
+            return [f'sheets/custom/{self.object.template.name}.html', 'sheets/character.html']
+        return super().get_template_names()
+
     def form_invalid(self, form):
         response = super().form_invalid(form)
         messages.error(self.request, "There was an error saving the character.")

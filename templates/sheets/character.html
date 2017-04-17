@@ -21,6 +21,10 @@
         .hidden {
             display: none;
         }
+        .small-num {
+            display: inline-block;
+            width: 70px;
+        }
     </style>
     <script>
         {# Creates clones of sections generically #}
@@ -242,9 +246,28 @@
             </div>
         {% endif %}
 
+        {# 6th row: Resource, Willpower, Health #}
+        {% if character.template %}
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group inline-dots">
+                        <label for="id_resource" class="control-label">{{ character.template.resource_name }}</label>
+                        <input type="number" class="form-control small-num" id="id_resource" name="resource"> /
+                        <input type="number" class="form-control small-num" id="id_resource_max" name="resource_max">
+                    </div>
+                </div>
+                <div class="col-md-4">
+
+                </div>
+                <div class="col-md-4">
+
+                </div>
+            </div>
+        {% endif %}
+
         <hr>
 
-        {# 7th Row: Split between merits and other boxes of calculated values #}
+        {# 8th Row: Split between merits and other boxes of calculated values #}
         {% if character.template %}
             <div class="row">
 
@@ -379,6 +402,7 @@
                                     idPrefix: 'id_speciality_',
                                     addBtn: "#add-speciality-btn",
                                     maxNumber: 20,
+                                    minNumber: 3,
                                     initialUrl: '{% url 'sheets:character-specialities' %}?char={{ character.pk }}',
                                     afterLoad: function (cloned, val) {
                                         cloned.find('select')

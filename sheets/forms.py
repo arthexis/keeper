@@ -31,6 +31,6 @@ class EditCharacterForm(BaseCharacterForm):
         model = Character
         exclude = [
             'template', 'beats', 'experiences', 'organization', 'willpower', 'user',
-            'template_beats', 'template_experiences', 'health_levels', 'resource',
+            'template_beats', 'template_experiences', 'health_levels',
         ]
 
