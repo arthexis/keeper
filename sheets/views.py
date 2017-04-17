@@ -106,7 +106,7 @@ def character_merits(request):
 # Function view that returns specialities a character already has in a JSON format
 def character_specialities(request):
     def bundle(item):
-        return {'pk': item.skill, "text": item.get_skill_display(), 'detail': item.speciality}
+        return {'skill': item.skill, 'speciality': item.speciality}
 
     qs = SkillSpeciality.objects.filter(character_id=int(request.GET.get('char'))).order_by('skill')
     return JsonResponse({'items': [bundle(i) for i in qs.all()]})

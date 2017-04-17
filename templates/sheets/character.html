@@ -57,12 +57,6 @@
                 .done(function (data) {
                     for (var i = 0; i < data.items.length; i++) {
                         var cloned = parent.clone();
-                        cloned.find('select')
-                            .select2({
-                                data: [{id: data.items[i].pk, text: data.items[i].text}]
-                            })
-                            .val(data.items[i].pk)
-                            .prop("disabled", true);
                         if (options.afterLoad) {
                             options.afterLoad(cloned, data.items[i]);
                         }
@@ -303,6 +297,12 @@
                                 minNumber: 5,
                                 initialUrl: '{% url 'sheets:character-merits' %}?char={{ character.pk }}',
                                 afterLoad: function (cloned, val) {
+                                    cloned.find('select')
+                                        .select2({
+                                            data: [{id: val.pk, text: val.text}]
+                                        })
+                                        .val(val.pk)
+                                        .prop("disabled", true);
                                     cloned.find('input[type=radio][value=' + val.dots + ']').click();
                                 }
                             });
@@ -381,7 +381,10 @@
                                     maxNumber: 20,
                                     initialUrl: '{% url 'sheets:character-specialities' %}?char={{ character.pk }}',
                                     afterLoad: function (cloned, val) {
-                                        cloned.find('input[type=text]').text(val.details);
+                                        cloned.find('select')
+                                            .val(val.skill)
+                                            .prop("disabled", true);
+                                        cloned.find('input[type=text]').val(val.speciality);
                                     }
                                 });
                             });</script>
@@ -415,7 +418,7 @@
                     {# On save retrieve all merits + dots and put them on id_merits as json #}
                     (function () {
                         var data = {};
-                        $('.merit-entry').each(function () {
+                        $('#merit-container .merit-entry').each(function () {
                             data[$(this).find('select').val()] = $(this).find('.merit-dots-hidden').val();
                         });
                         $('#id_merits').val(JSON.stringify(data));
@@ -424,8 +427,8 @@
                     {# On save retrieve all specialities and put them on id_specialities as json #}
                     (function () {
                         var data = {};
-                        $('.speciality-entry').each(function () {
-                            data[$(this).find('select').val()] = $(this).find('.speciality').text();
+                        $('#speciality-container .speciality-entry').each(function () {
+                            data[$(this).find('select').val()] = $(this).find('.speciality').val();
                         });
                         $('#id_specialities').val(JSON.stringify(data));
                     })();
