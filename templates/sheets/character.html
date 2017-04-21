@@ -113,7 +113,7 @@
         {% if character.template %}
             <div class="row">{% for splat in character.template.splat_categories.all %}
                 <div class="col-md-4"><div class="form-group">
-                    <label class="control-label" for="id_{{ splat.storage_column }}">{{ splat.name }}</label>
+                    {% bootstrap_label splat.name label_for="id_{{ splat.storage_column }}" %}
                     <select class="form-control" id="id_{{ splat.storage_column }}" name="{{ splat.storage_column }}">
                         <option value="">---------</option>
                         {% for option in splat.splats.all %}

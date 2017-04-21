@@ -26,7 +26,7 @@ urlpatterns = [
     # REST Framework
     # http://www.django-rest-framework.org/
 
-    url(r'^r/', include(router.urls)),
+    url(r'^r/', include(router.urls, namespace='rest')),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 
 

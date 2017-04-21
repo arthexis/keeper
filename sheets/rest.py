@@ -6,7 +6,10 @@ from rest_framework import routers, serializers, viewsets
 class CharacterSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Character
-        fields = ('name', 'power_stat', 'template__name')
+        fields = (
+            'name', 'power_stat',
+            'strength', 'dexterity', 'stamina',
+        )
 
 
 # ViewSets define the view behavior.

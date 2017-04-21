@@ -17,7 +17,7 @@
             <li><a href="{% url 'orgs:profile' %}">Profile</a></li>
             {% if user.is_staff %}
                 <li><a target="_blank" href="{% url 'admin:index' %}">Admin</a></li>
-                <li><a target="_blank" href="#">API</a></li>
+                <li><a target="_blank" href="{% url 'rest:api-root' %}">API</a></li>
             {% endif %}
             <li><a href="{% url 'orgs:logout' %}">Logout</a></li>
         </ul>
