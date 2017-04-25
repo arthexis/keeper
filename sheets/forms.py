@@ -5,6 +5,14 @@ from django.forms import *
 class BaseCharacterForm(ModelForm):
     merits = CharField(required=False, widget=HiddenInput)
     specialities = CharField(required=False, widget=HiddenInput)
+    resource = IntegerField(required=False, widget=HiddenInput)
+    willpower = IntegerField(required=False, widget=HiddenInput)
+    damage_track = CharField(required=False, widget=HiddenInput)
+    beats = IntegerField(required=False, widget=HiddenInput)
+    experiences = IntegerField(required=False, widget=HiddenInput)
+
+    def clean_beats(self):
+        return int(self.cleaned_data['beats'])
 
     class Meta:
         model = Character
@@ -30,7 +38,7 @@ class EditCharacterForm(BaseCharacterForm):
     class Meta:
         model = Character
         exclude = [
-            'template', 'beats', 'experiences', 'organization', 'willpower', 'user',
+            'template', 'organization', 'user',
             'template_beats', 'template_experiences', 'health_levels',
         ]
 

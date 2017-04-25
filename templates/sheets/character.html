@@ -7,6 +7,7 @@
     {{ form.media.js }}
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
+    {# Character-sheet specific styles (generic sheets) #}
     <style>
         .inline-dots {
             padding: 10px 10px;
@@ -21,9 +22,25 @@
         .hidden {
             display: none;
         }
-        .small-num {
-            display: inline-block;
-            width: 70px;
+        .resource-num,
+        .willpower-num,
+        .health-levels-num {
+            display: inline;
+            width: 80px;
+            font-size: x-large;
+            text-align: center;
+        }
+        .submit-row .btn {
+            width: 200px;
+        }
+        .track-btn {
+            width: 34px;
+            font-size: x-large;
+            padding: 0;
+            max-height: 34px;
+        }
+        .track-btn.xx-large {
+            font-size: xx-large;
         }
     </style>
     <script>
@@ -246,22 +263,128 @@
             </div>
         {% endif %}
 
-        {# 6th row: Resource, Willpower, Health #}
+        {# 6th row: Resources, Willpower, Health #}
         {% if character.template %}
             <div class="row">
                 <div class="col-md-4">
-                    <div class="form-group inline-dots">
-                        <label for="id_resource" class="control-label">{{ character.template.resource_name }}</label>
-                        <input type="number" class="form-control small-num" id="id_resource" name="resource"> /
-                        <input type="number" class="form-control small-num" id="id_resource_max" name="resource_max">
+                    {# Primary supernatural resource (Mana, Vitae, Essence, etc) #}
+                    <div class="form-group inline-dots resource">
+                        <label class="control-label">{{ character.template.resource_name }}</label>
+                        <div class="resource-num">{{ character.resource }} / {{ character.resource_max }}</div>
+                        <button class="btn btn-default add-btn">+</button>
+                        <button class="btn btn-default sub-btn">-</button>
                     </div>
                 </div>
                 <div class="col-md-4">
-
+                    {# Willpower #}
+                    <div class="form-group inline-dots willpower">
+                        <label class="control-label">Willpower</label>
+                        <div class="willpower-num">{{ character.willpower }} / {{ character.willpower_max }}</div>
+                        <button class="btn btn-default add-btn">+</button>
+                        <button class="btn btn-default sub-btn">-</button>
+                    </div>
                 </div>
                 <div class="col-md-4">
-
+                    {# Primary exp and beats container #}
+                    <div class="row exp-container">
+                        <div class="col-md-4">
+                            <label class="control-label" style="padding-left: 10px">Experiences</label>
+                            <div class="experiences" style="padding-left: 10px">{{ character.experiences }}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="control-label">Beats</label>
+                            <div class="beats">{{ character.beats }}</div>
+                        </div>
+                        <div class="col-md-4" style="padding-top: 15px">
+                            <button class="btn btn-default add-btn">+</button>
+                            <button class="btn btn-default sub-btn">-</button>
+                        </div>
+                    </div>
                 </div>
+                <script>
+                    $(function () {
+                        var experiences = $('#id_experiences');
+                        var beats = $('#id_beats');
+                        {# Add beats, +1 exp on 5 beats #}
+                        $('.exp-container .add-btn').on('click', function (event) {
+                            event.preventDefault();
+                            var expNum = parseInt($(experiences).val()) || 0;
+                            var beatNum = (parseInt($(beats).val()) || 0) + 1;
+                            if (beatNum >= 5) {
+                                expNum++;
+                                beatNum = 0;
+                            }
+                            $('.exp-container .experiences').text(expNum);
+                            $('.exp-container .beats').text(beatNum);
+                            $(experiences).val(expNum);
+                            $(beats).val(beatNum);
+                        });
+                        {# Remove 1 exp, leave beats untouched #}
+                        $('.exp-container .sub-btn').on('click', function (event) {
+                            event.preventDefault();
+                            var expNum = (parseInt($(experiences).val()) || 0) - 1;
+                            if (expNum < 0) {
+                                expNum = 0;
+                            }
+                            $('.exp-container .experiences').text(expNum);
+                            $(experiences).val(expNum);
+                        });
+                    });
+                </script>
+                <div class="col-md-8">
+                    <div class="form-group inline-dots damage-track">
+                        <label class="control-label">Health</label>
+                        {% for box in character.available_health_track  %}
+                            <div>
+                                <button class="btn btn-default track-btn">{{ box }}</button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <script> {# Beats, Exp & Health tracking scripts #}
+                    $(function () {
+                        var offsetRsc = function (offset, field, label, maxAmt) {
+                            var resourceField = $(field);
+                            return function (event) {
+                                event.preventDefault();
+                                var newVal = parseInt(resourceField.val() || 0) + offset;
+                                if (newVal >= 0 && newVal <= maxAmt) {
+                                    resourceField.val(newVal);
+                                    $(label).text(newVal + ' / ' + maxAmt);
+                                }
+                            }
+                        };
+                        var registerRsc = function (name, maxAmt) {
+                            $('div.' + name + ' .add-btn').on(
+                                'click', offsetRsc(1, '#id_' + name, '.' + name + '-num', maxAmt));
+                            $('div.' + name + ' .sub-btn').on(
+                                'click', offsetRsc(-1, '#id_' + name, '.' + name + '-num', maxAmt));
+                        };
+                        registerRsc('resource', {{ character.resource_max }});
+                        registerRsc('willpower', {{ character.willpower_max }});
+
+                        {# Health Tracking #}
+                        $('.track-btn').on('click', function (event) {
+                            event.preventDefault();
+                            var txt = $(this).text();
+                            switch (txt) {
+                                case '╱':
+                                    txt = '╳';
+                                    break;
+                                case '╳':
+                                    txt = '⏹';
+                                    break;
+                                case '⏹':
+                                    txt = '_';
+                                    break;
+                                default:
+                                    txt = '╱';
+                            }
+                            $(this).text(txt);
+                        });
+                    })
+                </script>
+
             </div>
         {% endif %}
 
@@ -427,6 +550,14 @@
             <div class="col-md-12">
                 {% if object %}
                     <input id="save-btn" class="btn btn-lg btn-primary" type="submit" value="Save Changes">
+                    <input id="revert-btn" class="btn btn-lg btn-default" value="Revert Changes">
+                    <script>
+                    $(function () {
+                       $("#revert-btn").on('click', function () {
+                          location.reload()
+                       });
+                    });
+                    </script>
                 {% else %}
                     <input class="btn btn-lg btn-primary" type="submit" value="Create Character">
                     <br><br>
@@ -455,6 +586,15 @@
                             data[$(this).find('select').val()] = $(this).find('.speciality').val();
                         });
                         $('#id_specialities').val(JSON.stringify(data));
+                    })();
+
+                    {# Save Health Track #}
+                    (function () {
+                        var dmgTrack = '';
+                        $('.track-btn').each(function () {
+                            dmgTrack = dmgTrack.concat($(this).text());
+                        });
+                        $('#id_damage_track').val(dmgTrack);
                     })();
 
                     return true;

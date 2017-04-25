@@ -111,7 +111,7 @@ class Character(Model):
     tertiary_splat = ForeignKey(SplatOption, PROTECT, related_name='+', null=True, blank=True)
 
     # Character Advancement related
-    beats = DotsField()
+    beats = PositiveIntegerField(default=0)
     experiences = PositiveIntegerField(default=0)
     template_beats = DotsField()
     template_experiences = PositiveIntegerField(default=0)
@@ -127,7 +127,10 @@ class Character(Model):
     # their values can be manually adjusted
     size = DotsField(default=5, clear=False)
     health_levels = PositiveIntegerField(default=0)
-    willpower = DotsField(default=1, clear=False)
+    damage_track = CharField(max_length=100, blank=True, null=True)
+    willpower = PositiveIntegerField(blank=True, null=True)
+    willpower_max = PositiveIntegerField(blank=True, null=True, editable=False)
+    perm_willpower_spent = PositiveIntegerField(blank=True, null=True)
 
     # Character Anchors (ie. Virtue / Vice)
     primary_anchor = CharField(max_length=40, blank=True)
@@ -146,9 +149,6 @@ class Character(Model):
 
     def defense_skill(self):
         return self.athletics
-
-    def health(self):
-        return self.size + self.stamina
 
     def merit_value(self, merit_name):
         qs = self.merits.filter(merit__name=merit_name)
@@ -173,6 +173,20 @@ class Character(Model):
 
     def secondary_anchor_name(self):
         return self.template.secondary_anchor_name if self.template else "Vice"
+
+    def available_health_track(self):
+        return str(self.damage_track)[:int(self.health_levels)] + \
+               ('_' * (self.health_levels - len(self.damage_track)))
+
+    # Calculate some stuff automatically on save
+    def save(self, **kwargs):
+        if self.power_stat:
+            self.resource_max = int(self.power_stat) + 10
+        self.willpower_max = int(self.resolve) + int(self.composure) - int(self.perm_willpower_spent or 0)
+        self.health_levels = int(self.stamina) + int(self.size)
+        if self.willpower is None:
+            self.willpower = self.willpower_max
+        super().save(**kwargs)
 
 
 class CharacterElement(Model):

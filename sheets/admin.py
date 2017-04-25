@@ -60,7 +60,7 @@ class CharacterAdmin(admin.ModelAdmin):
         ('Advantages', {
             'fields': (
                 ('power_stat', 'integrity', 'resource',),
-                ('size', 'health', 'defense', ),
+                ('size', 'health_levels', 'defense', ),
                 ('speed', 'initiative', )
             ),
         }),
@@ -74,7 +74,7 @@ class CharacterAdmin(admin.ModelAdmin):
     list_filter = ('template', )
     search_fields = ('name', 'user')
     readonly_fields = (
-        'template', 'size', 'health', 'speed', 'initiative', 'defense', 'created_on', 'modified_on',
+        'template', 'size', 'health_levels', 'speed', 'initiative', 'defense', 'created_on', 'modified_on',
     )
     readonly_fields_new = ('version', )
     formfield_overrides = {
