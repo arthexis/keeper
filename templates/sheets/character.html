@@ -37,10 +37,13 @@
             width: 34px;
             font-size: x-large;
             padding: 0;
-            max-height: 34px;
+{#            max-height: 34px;#}
         }
         .track-btn.xx-large {
             font-size: xx-large;
+        }
+        .sub-btn {
+            min-width: 34px;
         }
     </style>
     <script>
@@ -301,36 +304,6 @@
                         </div>
                     </div>
                 </div>
-                <script>
-                    $(function () {
-                        var experiences = $('#id_experiences');
-                        var beats = $('#id_beats');
-                        {# Add beats, +1 exp on 5 beats #}
-                        $('.exp-container .add-btn').on('click', function (event) {
-                            event.preventDefault();
-                            var expNum = parseInt($(experiences).val()) || 0;
-                            var beatNum = (parseInt($(beats).val()) || 0) + 1;
-                            if (beatNum >= 5) {
-                                expNum++;
-                                beatNum = 0;
-                            }
-                            $('.exp-container .experiences').text(expNum);
-                            $('.exp-container .beats').text(beatNum);
-                            $(experiences).val(expNum);
-                            $(beats).val(beatNum);
-                        });
-                        {# Remove 1 exp, leave beats untouched #}
-                        $('.exp-container .sub-btn').on('click', function (event) {
-                            event.preventDefault();
-                            var expNum = (parseInt($(experiences).val()) || 0) - 1;
-                            if (expNum < 0) {
-                                expNum = 0;
-                            }
-                            $('.exp-container .experiences').text(expNum);
-                            $(experiences).val(expNum);
-                        });
-                    });
-                </script>
                 <div class="col-md-8">
                     <div class="form-group inline-dots damage-track">
                         <label class="control-label">Health</label>
@@ -341,47 +314,114 @@
                         {% endfor %}
                     </div>
                 </div>
-                <script> {# Beats, Exp & Health tracking scripts #}
+                {% if character.template.experiences_prefix %}
+                    <div class="col-md-4">
+                        {# Template exp and beats container #}
+
+                        <div class="row temp-exp-container">
+                            <div class="col-md-4">
+                                <label class="control-label" style="padding-left: 10px">
+                                    {{ character.template.experiences_prefix }} Exp.
+                                </label>
+                                <div class="experiences" style="padding-left: 10px">
+                                    {{ character.template_experiences }}</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="control-label">
+                                    {{ character.template.experiences_prefix }} Beats
+                                </label>
+                                <div class="beats">{{ character.template_beats }}</div>
+                            </div>
+                            <div class="col-md-4" style="padding-top: 15px">
+                                <button class="btn btn-default add-btn">+</button>
+                                <button class="btn btn-default sub-btn">-</button>
+                            </div>
+                        </div>
+
+                    </div>
+                {% endif %}
+                <script>
                     $(function () {
-                        var offsetRsc = function (offset, field, label, maxAmt) {
-                            var resourceField = $(field);
-                            return function (event) {
-                                event.preventDefault();
-                                var newVal = parseInt(resourceField.val() || 0) + offset;
-                                if (newVal >= 0 && newVal <= maxAmt) {
-                                    resourceField.val(newVal);
-                                    $(label).text(newVal + ' / ' + maxAmt);
+
+                        {# Experience Tracking #}
+                        (function () {
+                            var handleExp = function (expLabel, beatLabel, contLabel) {
+                                var experiences = $('#id_' + expLabel);
+                                var beats = $('#id_' + beatLabel);
+                                {# Add beats, +1 exp on 5 beats #}
+                                $('.' + contLabel + ' .add-btn').on('click', function (event) {
+                                    event.preventDefault();
+                                    var expNum = parseInt($(experiences).val()) || 0;
+                                    var beatNum = (parseInt($(beats).val()) || 0) + 1;
+                                    if (beatNum >= 5) {
+                                        expNum++;
+                                        beatNum = 0;
+                                    }
+                                    $('.' + contLabel + ' .experiences').text(expNum);
+                                    $('.' + contLabel + ' .beats').text(beatNum);
+                                    $(experiences).val(expNum);
+                                    $(beats).val(beatNum);
+                                });
+                                {# Remove 1 exp, leave beats untouched #}
+                                $('.' + contLabel + ' .sub-btn').on('click', function (event) {
+                                    event.preventDefault();
+                                    var expNum = (parseInt($(experiences).val()) || 0) - 1;
+                                    if (expNum < 0) {
+                                        expNum = 0;
+                                    }
+                                    $('.' + contLabel + ' .experiences').text(expNum);
+                                    $(experiences).val(expNum);
+                                });
+                            };
+
+                            handleExp('experiences', 'beats', 'exp-container');
+                            handleExp('template_experiences', 'template_beats', 'temp-exp-container');
+                        })();
+
+                        {# Resource (Mana, Vitae, Essence) & Willpower Tracking #}
+                        (function () {
+                            var offsetRsc = function (offset, field, label, maxAmt) {
+                                var resourceField = $(field);
+                                return function (event) {
+                                    event.preventDefault();
+                                    var newVal = parseInt(resourceField.val() || 0) + offset;
+                                    if (newVal >= 0 && newVal <= maxAmt) {
+                                        resourceField.val(newVal);
+                                        $(label).text(newVal + ' / ' + maxAmt);
+                                    }
                                 }
-                            }
-                        };
-                        var registerRsc = function (name, maxAmt) {
-                            $('div.' + name + ' .add-btn').on(
-                                'click', offsetRsc(1, '#id_' + name, '.' + name + '-num', maxAmt));
-                            $('div.' + name + ' .sub-btn').on(
-                                'click', offsetRsc(-1, '#id_' + name, '.' + name + '-num', maxAmt));
-                        };
-                        registerRsc('resource', {{ character.resource_max }});
-                        registerRsc('willpower', {{ character.willpower_max }});
+                            };
+                            var registerRsc = function (name, maxAmt) {
+                                $('div.' + name + ' .add-btn').on(
+                                    'click', offsetRsc(1, '#id_' + name, '.' + name + '-num', maxAmt));
+                                $('div.' + name + ' .sub-btn').on(
+                                    'click', offsetRsc(-1, '#id_' + name, '.' + name + '-num', maxAmt));
+                            };
+                            registerRsc('resource', {{ character.resource_max }});
+                            registerRsc('willpower', {{ character.willpower_max }});
+                        })();
 
                         {# Health Tracking #}
-                        $('.track-btn').on('click', function (event) {
-                            event.preventDefault();
-                            var txt = $(this).text();
-                            switch (txt) {
-                                case '╱':
-                                    txt = '╳';
-                                    break;
-                                case '╳':
-                                    txt = '⏹';
-                                    break;
-                                case '⏹':
-                                    txt = '_';
-                                    break;
-                                default:
-                                    txt = '╱';
-                            }
-                            $(this).text(txt);
-                        });
+                        (function () {
+                            $('.track-btn').on('click', function (event) {
+                                event.preventDefault();
+                                var txt = $(this).text();
+                                switch (txt) {
+                                    case 'B':
+                                        txt = 'L';
+                                        break;
+                                    case 'L':
+                                        txt = 'A';
+                                        break;
+                                    case 'A':
+                                        txt = '_';
+                                        break;
+                                    default:
+                                        txt = 'B';
+                                }
+                                $(this).text(txt);
+                            });
+                        })();
                     })
                 </script>
 
@@ -540,7 +580,7 @@
                         </div>
                     </div>
 
-            </div> {# End of 7th row #}
+            </div> {# End of 8th row #}
         {% endif %}
 
 

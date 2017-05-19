@@ -10,6 +10,7 @@ class CharacterTemplate(models.Model):
     primary_anchor_name = models.CharField(max_length=20, verbose_name="Primary Anchor", default="Virtue")
     secondary_anchor_name = models.CharField(max_length=20, verbose_name="Secondary Anchor", default="Vice")
     character_group_name = models.CharField(max_length=20, verbose_name="Group Name", default="Group")
+    experiences_prefix = models.CharField(max_length=20, verbose_name="Experiences Prefix", blank=True, null=True)
 
     def __str__(self):
         return str(self.name)

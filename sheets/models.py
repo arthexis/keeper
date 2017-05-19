@@ -176,7 +176,7 @@ class Character(Model):
 
     def available_health_track(self):
         return str(self.damage_track)[:int(self.health_levels)] + \
-               ('_' * (self.health_levels - len(self.damage_track)))
+               ('_' * (self.health_levels - len(self.damage_track or '')))
 
     # Calculate some stuff automatically on save
     def save(self, **kwargs):

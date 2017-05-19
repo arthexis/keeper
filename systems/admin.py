@@ -46,6 +46,7 @@ class TemplateAdmin(admin.ModelAdmin):
                 ('integrity_name', 'power_stat_name',),
                 ('resource_name', 'character_group_name',),
                 ('primary_anchor_name', 'secondary_anchor_name',),
+                ('experiences_prefix', ),
             ),
         }),
     )

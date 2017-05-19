@@ -10,6 +10,8 @@ class BaseCharacterForm(ModelForm):
     damage_track = CharField(required=False, widget=HiddenInput)
     beats = IntegerField(required=False, widget=HiddenInput)
     experiences = IntegerField(required=False, widget=HiddenInput)
+    template_beats = IntegerField(required=False, widget=HiddenInput)
+    template_experiences = IntegerField(required=False, widget=HiddenInput)
 
     def clean_beats(self):
         return int(self.cleaned_data['beats'])
@@ -38,7 +40,6 @@ class EditCharacterForm(BaseCharacterForm):
     class Meta:
         model = Character
         exclude = [
-            'template', 'organization', 'user',
-            'template_beats', 'template_experiences', 'health_levels',
+            'template', 'organization', 'user', 'health_levels',
         ]
 
