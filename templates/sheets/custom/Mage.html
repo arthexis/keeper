@@ -6,3 +6,24 @@
 
     })</script>
 {% endblock %}
+
+{% block extraformsets %}
+    {# Arrange all ten Arcana in two columns #}
+    <hr>
+    <div class="row">
+        <div class="col-md-8 col-xw-12">
+            <div class="panel panel-default" style="padding: 10px">
+                <h3>Arcana</h3>
+                <hr>
+                <div class="row">
+                    <div class="col-md-6 col-xs-12">
+                        Matter
+                    </div>
+                    <div class="col-md-6 col-xs-12">
+                        Death
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

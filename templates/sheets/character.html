@@ -48,6 +48,7 @@
     </style>
     <script>
         {# Creates clones of sections generically #}
+        {# TODO Move to its own cloner.js script, decouple from character.template.pk #}
         function Cloner (options) {
             this.clone = (function () {
                 if (this.counter >= options.maxNumber) { return; }
@@ -522,32 +523,7 @@
                             <div id="speciality-base" class="hidden">
                                 <div class="row speciality-entry">
                                     <div class="col-md-4">
-                                        <select class="form-control" id="id_speciality_base">
-                                            <option value="academics">Academics</option>
-                                            <option value="computer">Computer</option>
-                                            <option value="crafts">Crafts</option>
-                                            <option value="investigation">Investigation</option>
-                                            <option value="medicine">Medicine</option>
-                                            <option value="occult">Occult</option>
-                                            <option value="politics">Politics</option>
-                                            <option value="science">Science</option>
-                                            <option value="athletics">Athletics</option>
-                                            <option value="brawl">Brawl</option>
-                                            <option value="drive">Drive</option>
-                                            <option value="firearms">Firearms</option>
-                                            <option value="larceny">Larceny</option>
-                                            <option value="stealth">Stealth</option>
-                                            <option value="survival">Survival</option>
-                                            <option value="weaponry">Weaponry</option>
-                                            <option value="animal_ken">Animal Ken</option>
-                                            <option value="empathy">Empathy</option>
-                                            <option value="expression">Expression</option>
-                                            <option value="intimidation">Intimidation</option>
-                                            <option value="persuasion">Persuasion</option>
-                                            <option value="socialize">Socialize</option>
-                                            <option value="streetwise">Streetwise</option>
-                                            <option value="subterfuge">Subterfuge</option>
-                                        </select>
+                                        {% include 'sheets/includes/select_skills.html' with id='id_speciality_base' %}
                                     </div>
                                     <div class="col-md-8">
                                         <input class="form-control speciality" type="text" style="width: 100%">
@@ -583,6 +559,8 @@
             </div> {# End of 8th row #}
         {% endif %}
 
+        {# Used to expand specific templates without overriding everything else #}
+        {% block extraformsets %}{% endblock %}
 
         {# Form submission #}
         <br>
