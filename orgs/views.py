@@ -319,8 +319,9 @@ class DeleteEventView(EventMixin, RedirectView):
         return self.user_membership.is_officer
 
     def get_redirect_url(self, *args, **kwargs):
-        organization = get_object_or_404(Organization, pk=self.kwargs['org_pk'])
-        get_object_or_404(Event, pk=self.kwargs['pk']).delete()
+        event = get_object_or_404(Event, pk=self.kwargs['pk'])
+        organization = event.organization
+        event.delete()
         messages.success(self.request, 'The event has been deleted.')
         return reverse('orgs:view-organization', kwargs={'pk': organization.pk}) + '?' + urlencode({'tab': 'events'})
 

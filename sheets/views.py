@@ -1,7 +1,7 @@
 import json
 from django.urls import reverse
 from django.views.generic import CreateView, TemplateView, UpdateView
-from sheets.models import Character, CharacterMerit, SkillSpeciality
+from sheets.models import Character, CharacterMerit, SkillSpeciality, CharacterPower
 from sheets.forms import CreateCharacterForm, EditCharacterForm
 from django.contrib import messages
 from django.http import JsonResponse
@@ -73,6 +73,13 @@ class EditCharacterView(CharacterMixin, UpdateView):
                     continue
                 SkillSpeciality.objects.create(
                     character=form.instance, speciality=speciality, skill=skill)
+
+        # Save power data independently
+        power_data = form.cleaned_data.get('powers', None)
+        if power_data:
+            CharacterPower.objects.filter(character=form.instance).delete()
+            for power_name, dots in json.loads(power_data).items():
+                pass
 
         return response
 

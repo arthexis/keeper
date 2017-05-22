@@ -37,7 +37,7 @@ urlpatterns = [
     url(r'^org/(?P<org_pk>[0-9]+)/event/new/$', CreateEventView.as_view(), name='create-event'),
     url(r'^event/(?P<pk>[0-9]+)/$', DetailEventView.as_view(), name='view-event'),
     url(r'^event/(?P<pk>[0-9]+)/edit/$', EditEventView.as_view(), name='edit-event'),
-    url(r'^org/(?P<org_pk>[0-9]+)/event/(?P<pk>[0-9]+)/delete/$', DeleteEventView.as_view(), name='delete-event'),
+    url(r'^event/(?P<pk>[0-9]+)/delete/$', DeleteEventView.as_view(), name='delete-event'),
 
     # User's Upcoming Event Calendar
     url(r'^calendar/$', MyCalendarView.as_view(), name='calendar'),

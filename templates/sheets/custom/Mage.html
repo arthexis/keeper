@@ -16,14 +16,34 @@
                 <h3>Arcana</h3>
                 <hr>
                 <div class="row">
-                    <div class="col-md-6 col-xs-12">
-                        Matter
-                    </div>
-                    <div class="col-md-6 col-xs-12">
-                        Death
-                    </div>
+                    {% include '../includes/arcanum.html' with name="Prime" %}
+                    {% include '../includes/arcanum.html' with name="Forces" %}
+                    {% include '../includes/arcanum.html' with name="Mind" %}
+                    {% include '../includes/arcanum.html' with name="Space" %}
+                    {% include '../includes/arcanum.html' with name="Fate" %}
+                    {% include '../includes/arcanum.html' with name="Time" %}
+                    {% include '../includes/arcanum.html' with name="Spirit" %}
+                    {% include '../includes/arcanum.html' with name="Life" %}
+                    {% include '../includes/arcanum.html' with name="Death" %}
+                    {% include '../includes/arcanum.html' with name="Matter" %}
                 </div>
             </div>
         </div>
     </div>
+    <script>
+        $(function () {
+
+            {# Save Arcana data to id_powers hidden field as JSON #}
+            $('#character-form').submit(function () {
+                console.log('Template pre-save');
+                $(this).prop('disabled', true);
+                var data = {};
+                $('.arcanum-entry').each(function () {
+                    data[$(this).find('.arcanum-name').val()] = $(this).find('.arcanum-dots-hidden').val();
+                });
+                $('#id_powers').val(JSON.stringify(data));
+            });
+
+        });
+    </script>
 {% endblock %}

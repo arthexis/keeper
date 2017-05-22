@@ -45,6 +45,9 @@
         .sub-btn {
             min-width: 34px;
         }
+    hr {
+        margin-top: 5px;
+    }
     </style>
     <script>
         {# Creates clones of sections generically #}
@@ -239,6 +242,7 @@
             </div>
         </div>
 
+        <hr >
 
         {# 6th row: Power Stat, Integrity, Size #}
         {% if character.template %}
@@ -584,40 +588,43 @@
             </div>
 
             {# Save function, massage data before submitting the form #}
-            <script>$(function () {
-                $('#character-form').submit(function () {
-                    $(this).prop('disabled', true);
+            <script>
+                $(function () {
+                    $('#character-form').submit(function () {
+                        console.log('Main pre-save');
+                        $(this).prop('disabled', true);
 
-                    {# On save retrieve all merits + dots and put them on id_merits as json #}
-                    (function () {
-                        var data = {};
-                        $('#merit-container .merit-entry').each(function () {
-                            data[$(this).find('select').val()] = $(this).find('.merit-dots-hidden').val();
-                        });
-                        $('#id_merits').val(JSON.stringify(data));
-                    })();
+                        {# On save retrieve all merits + dots and put them on id_merits as json #}
+                        (function () {
+                            var data = {};
+                            $('#merit-container .merit-entry').each(function () {
+                                data[$(this).find('select').val()] = $(this).find('.merit-dots-hidden').val();
+                            });
+                            $('#id_merits').val(JSON.stringify(data));
+                        })();
 
-                    {# On save retrieve all specialities and put them on id_specialities as json #}
-                    (function () {
-                        var data = {};
-                        $('#speciality-container .speciality-entry').each(function () {
-                            data[$(this).find('select').val()] = $(this).find('.speciality').val();
-                        });
-                        $('#id_specialities').val(JSON.stringify(data));
-                    })();
+                        {# On save retrieve all specialities and put them on id_specialities as json #}
+                        (function () {
+                            var data = {};
+                            $('#speciality-container .speciality-entry').each(function () {
+                                data[$(this).find('select').val()] = $(this).find('.speciality').val();
+                            });
+                            $('#id_specialities').val(JSON.stringify(data));
+                        })();
 
-                    {# Save Health Track #}
-                    (function () {
-                        var dmgTrack = '';
-                        $('.track-btn').each(function () {
-                            dmgTrack = dmgTrack.concat($(this).text());
-                        });
-                        $('#id_damage_track').val(dmgTrack);
-                    })();
+                        {# Save Health Track #}
+                        (function () {
+                            var dmgTrack = '';
+                            $('.track-btn').each(function () {
+                                dmgTrack = dmgTrack.concat($(this).text());
+                            });
+                            $('#id_damage_track').val(dmgTrack);
+                        })();
 
-                    return true;
+                        return true;
+                    });
                 });
-            });</script>
+            </script>
 
         </div>
     </form>

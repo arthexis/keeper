@@ -23,7 +23,7 @@
                         $("#delete-btn").on('click', function () {
                             if (confirm("Are you sure you want to delete this event?")) {
                                 window.location.href =
-                                    '{% url 'orgs:delete-event' event.organization.pk event.pk %}';
+                                    '{% url 'orgs:delete-event' event.pk %}';
                             }
                         });
                     });
