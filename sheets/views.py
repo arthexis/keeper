@@ -5,7 +5,7 @@ from sheets.models import Character, CharacterMerit, SkillSpeciality, CharacterP
 from sheets.forms import CreateCharacterForm, EditCharacterForm
 from django.contrib import messages
 from django.http import JsonResponse
-from systems.models import Merit
+from systems.models import Merit, Power
 from django.shortcuts import get_object_or_404
 
 
@@ -79,7 +79,8 @@ class EditCharacterView(CharacterMixin, UpdateView):
         if power_data:
             CharacterPower.objects.filter(character=form.instance).delete()
             for power_name, dots in json.loads(power_data).items():
-                pass
+                power = get_object_or_404(Power, name=power_name)
+                CharacterPower.objects.create(character=form.instance, power=power, rating=dots)
 
         return response
 

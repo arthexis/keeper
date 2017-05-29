@@ -218,16 +218,12 @@ class CharacterPower(CharacterElement):
     character = ForeignKey(Character, CASCADE, related_name='powers')
     power = ForeignKey(Power, PROTECT, related_name='+')
     rating = DotsField(default=1, clear=False)
-    details = CharField(max_length=200, blank=True)
 
     class Meta:
         verbose_name = "Power"
 
     def __str__(self):
-        if self.details:
-            return '{} {} ({})'.format(self.power.name, self.rating, self.details)
-        else:
-            return '{} {}'.format(self.power.name, self.rating)
+        return '{} {}'.format(self.power.name, self.rating)
 
     def category(self):
         return self.power.category.name

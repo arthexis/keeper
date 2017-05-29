@@ -81,7 +81,8 @@ class Merit(models.Model):
 
 class PowerCategory(models.Model):
     name = models.CharField(max_length=20)
-    template = models.ForeignKey('CharacterTemplate', on_delete=models.PROTECT, related_name='power_categories', null=True)
+    template = models.ForeignKey(
+        'CharacterTemplate', on_delete=models.PROTECT, related_name='power_categories', null=True)
 
     class Meta:
         verbose_name = "Power Category"
