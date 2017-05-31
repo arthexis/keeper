@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_select2',
     'bootstrap3',
-    'webpack_loader',
     'whitenoise',
     'datetimewidget',
     # 'bootstrap4',
@@ -156,24 +155,9 @@ STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Required to pick up the webpack bundles
-# http://owaislone.org/blog/webpack-plus-reactjs-and-django/
-
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'assets'),
-)
-
 # http://whitenoise.evans.io/en/stable/django.html
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-WEBPACK_LOADER = {
-    'DEFAULT': {
-        'CACHE': not DEBUG,
-        'BUNDLE_DIR_NAME': 'bundles/',
-        'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats.json'),
-    }
-}
 
 # Django Admin Bootstrapped
 

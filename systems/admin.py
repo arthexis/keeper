@@ -14,7 +14,7 @@ class ParentInlineMixin(admin.TabularInline):
 
 class SplatInline(admin.TabularInline):
     model = SplatOption
-    fields = ('name', 'reference_book', 'reference_page')
+    fields = ('name', )
     min_num = 1
     extra = 0
 
