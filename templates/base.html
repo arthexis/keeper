@@ -11,6 +11,7 @@
         src="https://code.jquery.com/jquery-3.2.1.min.js"
         integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
         crossorigin="anonymous"></script>
+{#    <link rel="stylesheet" type="text/css" href="{% static 'css/keeper.css' %}">#}
     {% bootstrap_javascript %}
     {% block extrahead %}{% endblock %}
 </head>
@@ -19,7 +20,7 @@
         {% if user.is_authenticated %}
 
             {% block navbar %}
-                {% include 'orgs/navbar.html' %}
+                {% include 'navbar.html' %}
             {% endblock %}
             {% block messages %}
                 {% bootstrap_messages %}

@@ -5,9 +5,6 @@ from django.views.generic import TemplateView
 
 urlpatterns = [
 
-    # Main view for the entire application
-    url(r'^$', IndexView.as_view(), name='index'),
-
     # Registration for new Members
     url(r'^register/$', RegistrationView.as_view(), name='register'),
 

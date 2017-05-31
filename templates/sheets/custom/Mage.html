@@ -33,6 +33,19 @@
     <script>
         $(function () {
 
+            {# Load existing arcana data #}
+            {% if character.pk %}
+                $.get('{% url 'sheets:character-powers' %}?char={{ character.pk }}&category=Arcana')
+                    .done(function (data) {
+                        for (var i = 0; i < data.items.length; i++) {
+                            var cloned = parent.clone();
+                            if (options.afterLoad) {
+                                options.afterLoad(cloned, data.items[i]);
+                            }
+                        }
+                    });
+            {% endif %}
+
             {# Save Arcana data to id_powers hidden field as JSON #}
             $('#character-form').submit(function () {
                 console.log('Template pre-save');

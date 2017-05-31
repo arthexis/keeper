@@ -124,3 +124,14 @@ def character_specialities(request):
     qs = SkillSpeciality.objects.filter(character_id=int(request.GET.get('char'))).order_by('skill')
     return JsonResponse({'items': [bundle(i) for i in qs.all()]})
 
+
+# Function view that returns specialities a character already has in a JSON format
+def character_powers(request):
+    def bundle(item):
+        return {'name': item.power.name, 'dots': item.rating}
+
+    qs = CharacterPower.objects.filter(
+        character_id=int(request.GET.get('char')),
+        power__category__name=request.GET.get('category'))
+    return JsonResponse({'powers': [bundle(i) for i in qs.all()]})
+

@@ -16,27 +16,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class IndexView(TemplateView):
-    template_name = 'orgs/index.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        user = self.request.user
-        if not user.is_authenticated:
-            context['form'] = AuthenticationForm()
-        else:
-            try:
-                context['profile'] = profile = Profile.objects.get(user=user)
-                upcoming_events = profile.upcoming_events()
-                context['upcoming_events'] = upcoming_events[:5]
-                context['remaining_events'] = upcoming_events.count() - 5
-            except Profile.DoesNotExist:
-                logger.error(f"User <{user}> is missing a Profile object.")
-                context['profile'] = None
-            context['req_member_form'] = RequestMembershipForm(request=self.request)
-        return context
-
-
 class VerificationView(TemplateView):
     template_name = 'orgs/verification.html'
 
@@ -81,7 +60,7 @@ class RegistrationView(CreateView):
 
 
 class LoginView(FormView):
-    template_name = 'orgs/index.html'
+    template_name = 'index.html'
     form_class = AuthenticationForm
     success_url = reverse_lazy('orgs:index')
 
@@ -335,25 +314,3 @@ class MyCalendarView(TemplateView):
         context['upcoming_events'] = profile.upcoming_events()
         context['full_calendar'] = True
         return context
-
-
-__all__ = (
-    'IndexView',
-    'RegistrationView',
-    'EditProfileView',
-    'LoginView',
-    'LogoutView',
-    'VerificationView',
-    'CreateOrganizationView',
-    'EditOrganizationView',
-    'DetailOrganizationView',
-    'MembershipView',
-    'RedirectMyProfileView',
-    'CancelMembershipView',
-    'RequestPasswordRecoveryView',
-    'CreateEventView',
-    'DetailEventView',
-    'EditEventView',
-    'DeleteEventView',
-    'MyCalendarView',
-)
