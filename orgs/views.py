@@ -62,7 +62,7 @@ class RegistrationView(CreateView):
 class LoginView(FormView):
     template_name = 'index.html'
     form_class = AuthenticationForm
-    success_url = reverse_lazy('orgs:index')
+    success_url = reverse_lazy('index')
 
     def form_invalid(self, form):
         username = form.cleaned_data['username']

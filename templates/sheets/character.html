@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load bootstrap3 %}
+{% load bootstrap3 static %}
 
 {% block extrahead %}
     {{ block.super }}
@@ -8,97 +8,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
     {# Character-sheet specific styles (generic sheets) #}
-    <style>
-        .inline-dots {
-            padding: 10px 10px;
-        }
-        .inline-dots label {
-            font-size: larger;
-            min-width: 160px;
-        }
-        .inline-dots div {
-            display: inline-block;
-        }
-        .hidden {
-            display: none;
-        }
-        .resource-num,
-        .willpower-num,
-        .health-levels-num {
-            display: inline;
-            width: 80px;
-            font-size: x-large;
-            text-align: center;
-        }
-        .submit-row .btn {
-            width: 200px;
-        }
-        .track-btn {
-            width: 34px;
-            font-size: x-large;
-            padding: 0;
-{#            max-height: 34px;#}
-        }
-        .track-btn.xx-large {
-            font-size: xx-large;
-        }
-        .sub-btn {
-            min-width: 34px;
-        }
-    hr {
-        margin-top: 5px;
-    }
-    </style>
-    <script>
-        {# Creates clones of sections generically #}
-        {# TODO Move to its own cloner.js script, decouple from character.template.pk #}
-        function Cloner (options) {
-            this.clone = (function () {
-                if (this.counter >= options.maxNumber) { return; }
-                var cloned = $(options.base + ' div.row').clone()
-                    .removeClass("hidden").appendTo(options.container);
-                var select = cloned.find('select').attr('id', options.idPrefix + this.counter++);
-                if (options.selectUrl) {
-                    select.select2({
-                        ajax: {
-                            url: options.selectUrl,
-                            dataType: 'json',
-                            delay: 250,
-                            data: function (params) {
-                                return {
-                                    term: params.term,
-                                    template: '{{ character.template.pk }}'
-                                }
-                            },
-                            processResults: function (data) {
-                                return {results: data.items};
-                            }
-                        }
-                    });
-                }
-                return cloned;
-            });
-            this.counter = 0;
-            $(options.addBtn).on('click', this.clone);
-            var parent = this;
-            $.get(options.initialUrl)
-                .done(function (data) {
-                    for (var i = 0; i < data.items.length; i++) {
-                        var cloned = parent.clone();
-                        if (options.afterLoad) {
-                            options.afterLoad(cloned, data.items[i]);
-                        }
-                    }
-                })
-                .always(function () {
-                    if (options.minNumber) {
-                        for (; parent.counter < options.minNumber;) {
-                            parent.clone();
-                        }
-                    }
-                });
-        }
-    </script>
+    <link href="{% static 'css/character.css' %}" rel="stylesheet"/>
+    <script src="{% static 'js/cloner.js' %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -155,24 +66,9 @@
 
         {# 3rd row, Virtue, Vice, Concept #}
         <div class="row">
-            <div class="col-md-4">
-                <div class="form-group"><label class="control-label" for="id_primary_anchor">
-                    {{ character.primary_anchor_name|default:"Virtue" }}</label>
-                <input class="form-control" id="id_primary_anchor" maxlength="40" name="primary_anchor"
-                       placeholder="Anchor" title="" type="text" value="{{ character.primary_anchor }}"></div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-group"><label class="control-label" for="id_secondary_anchor">
-                    {{ character.secondary_anchor_name|default:"Vice" }}</label>
-                <input class="form-control" id="id_secondary_anchor" maxlength="40" name="secondary_anchor"
-                       placeholder="Anchor" title="" type="text" value="{{ character.secondary_anchor }}"></div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-group"><label class="control-label" for="id_concept">Concept</label>
-                <input class="form-control" id="id_concept" maxlength="40" name="concept"
-                       placeholder="Concept" title="" type="text"
-                       value="{{ character.concept }}"></div>
-            </div>
+            {% include 'sheets/includes/field.html' with name='primary_anchor' value=character.primary_anchor label=character.primary_anchor_name %}
+            {% include 'sheets/includes/field.html' with name='secondary_anchor' value=character.secondary_anchor label=character.secondary_anchor_name %}
+            {% include 'sheets/includes/field.html' with name='concept' value=character.concept label="Concept" %}
         </div>
         <hr>
 
@@ -480,6 +376,7 @@
                             {# Setup the merit section by creating a function that clones a hidden base #}
                             new Cloner({
                                 base: '#merit-base',
+                                template: '{{ character.template.pk }}',
                                 container: '#merit-container',
                                 idPrefix: 'id_merit_',
                                 selectUrl: '{% url 'sheets:all-merits' %}',
@@ -541,6 +438,7 @@
                                 {# Setup the merit section by creating a function that clones a hidden base #}
                                 new Cloner({
                                     base: '#speciality-base',
+                                    template: '{{ character.template.pk }}',
                                     container: '#speciality-container',
                                     idPrefix: 'id_speciality_',
                                     addBtn: "#add-speciality-btn",
@@ -627,6 +525,10 @@
             </script>
 
         </div>
+
+
+        {{ formset }}
+
     </form>
     <br><br><br><br>
 

@@ -1,0 +1,47 @@
+.inline-dots {
+    padding: 10px 10px;
+}
+
+.inline-dots label {
+    font-size: larger;
+    min-width: 160px;
+}
+
+.inline-dots div {
+    display: inline-block;
+}
+
+.hidden {
+    display: none;
+}
+
+.resource-num,
+.willpower-num,
+.health-levels-num {
+    display: inline;
+    width: 80px;
+    font-size: x-large;
+    text-align: center;
+}
+
+.submit-row .btn {
+    width: 200px;
+}
+
+.track-btn {
+    width: 34px;
+    font-size: x-large;
+    padding: 0;
+}
+
+.track-btn.xx-large {
+    font-size: xx-large;
+}
+
+.sub-btn {
+    min-width: 34px;
+}
+
+hr {
+    margin-top: 5px;
+}
