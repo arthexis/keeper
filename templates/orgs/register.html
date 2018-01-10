@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load bootstrap3 %}
+
+{% block body %}
+
+    <form action="{% url 'orgs:register' %}" method="post">
+        {% csrf_token %}
+        <div class="row">
+
+            <div class="col-md-6 col-xs-12">
+                <h2>Register with Keeper</h2>
+                <p>Please complete the following information.</p>
+                <hr>
+                {% bootstrap_form form field_class='col-md-8' label_class='col-md-4' %}
+                <br>
+                <input id="register-btn" class="btn btn-lg btn-primary" type="submit" value="Register">
+                <hr>
+                <a href="{% url 'index' %}">Back to homepage.</a>
+            </div>
+
+            {% if invite_org %}
+                <div class="col-md-5 col-md-offset-1 col-xs-12">
+                    <br><br><br><br>
+                    <h2>Organization Membership</h2>
+                    <p>Upon registering with Keeper, you will be signed up for the following organization:</p>
+                    <p class="lead">{{ invite_org.name }}</p>
+                    <p>The officers at that Organization will review your membership request and if approved,
+                    you will be added to the group without further action being required.</p>
+                    <p>If you didn't intend to be part of that Organization, please un-check the box below
+                        before hitting Submit.</p>
+                    <input id="invite-chk" type="checkbox" value="{{ invite_org.pk }}">
+                    <label for="invite-chk">Request membership to {{ invite_org.name }}</label>
+                </div>
+                <script>
+                $(document).ready(function () {
+                   var inviteCheck = $("#invite-chk").click();
+                   $("#register-btn").on('click', function () {
+                       if ($(inviteCheck).is(':checked')) {
+                           $("#id_initial_org_pk").val('{{ invite_org.pk }}');
+                       }
+                   });
+                });
+                </script>
+            {% endif %}
+
+        </div>
+    </form>
+
+
+
+{% endblock %}

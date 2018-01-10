@@ -1,0 +1,34 @@
+{% load bootstrap3 static %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Keeper</title>
+    {% bootstrap_css %}
+    <script
+        src="https://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+        crossorigin="anonymous"></script>
+{#    <link rel="stylesheet" type="text/css" href="{% static 'css/keeper.css' %}">#}
+    {% bootstrap_javascript %}
+    {% block extrahead %}{% endblock %}
+</head>
+<body>
+    <div id="content" class="container">{% block body %}
+        {% if user.is_authenticated %}
+
+            {% block navbar %}
+                {% include 'navbar.html' %}
+            {% endblock %}
+            {% block messages %}
+                {% bootstrap_messages %}
+            {% endblock %}
+            {% block content %}{% endblock %}
+
+        {% else %}{# Not Authenticated #}
+            {% include 'orgs/login.html' %}
+        {% endif %}
+    {% endblock %}</div>
+</body>
+</html>

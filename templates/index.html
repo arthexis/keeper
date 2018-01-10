@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load bootstrap3 static %}
+
+{% block content %}
+    <h1>Overview</h1><hr>
+    {% if upcoming_events %}
+        <div class="panel panel-default">
+            <div class="panel-body">
+                {% include 'orgs/include/calendar.html' %}
+                <br>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+            {% include 'orgs/include/membership.html' with form=req_member_form %}
+            <br>
+        </div>
+    </div>
+{% endblock %}

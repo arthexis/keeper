@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+    <br>
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Email Account Verified</h2>
+            <hr>
+            <p class="lead">
+                Thanks for verifying your account.<br>
+                You will be redirected to the main page in 3 seconds...
+                <br><br>
+                <a href="{% url 'orgs:index' %}">Click here if you are not redirected.</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            setTimeout(function () { window.location.replace({% url 'orgs:index' %}); }, 3000);
+        });
+    </script>
+
+{% endblock %}

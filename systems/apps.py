@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class MechanicsConfig(AppConfig):
+class SystemsConfig(AppConfig):
     name = 'systems'
-    verbose_names = 'Dramatic Systems'
+    verbose_name = 'Dramatic Systems'

@@ -1,16 +1,7 @@
 from django.db import models
-from systems.fields import DotsField
 
 
-class ReferenceMixin(models.Model):
-    reference_book = models.CharField(max_length=100, blank=True)
-    reference_page = models.PositiveIntegerField(null=True, blank=True)
-
-    class Meta:
-        abstract = True
-
-
-class Template(models.Model):
+class CharacterTemplate(models.Model):
     name = models.CharField(max_length=20)
     alias = models.CharField(max_length=20, blank=True)
     integrity_name = models.CharField(max_length=20, verbose_name="Integrity", default="Integrity")
@@ -18,19 +9,24 @@ class Template(models.Model):
     resource_name = models.CharField(max_length=20, verbose_name="Resource")
     primary_anchor_name = models.CharField(max_length=20, verbose_name="Primary Anchor", default="Virtue")
     secondary_anchor_name = models.CharField(max_length=20, verbose_name="Secondary Anchor", default="Vice")
+    character_group_name = models.CharField(max_length=20, verbose_name="Group Name", default="Group")
+    experiences_prefix = models.CharField(max_length=20, verbose_name="Experiences Prefix", blank=True, null=True)
 
     def __str__(self):
         return str(self.name)
 
+    class Meta:
+        verbose_name = "Template"
+
 
 class Splat(models.Model):
     FLAVOR = (
-        ('primary', 'Primary (Must be chosen on character creation)'),
-        ('secondary', 'Secondary (Optional and can be changed later)'),
-        ('tertiary', 'Tertiary (Optional but cannot be changed once chosen )'),
+        ('1', 'Primary (Nature)'),
+        ('2', 'Secondary (Faction)'),
+        ('3', 'Tertiary (Attained)'),
     )
     name = models.CharField(max_length=20)
-    template = models.ForeignKey(Template, on_delete=models.CASCADE, related_name='splat_categories')
+    template = models.ForeignKey(CharacterTemplate, on_delete=models.CASCADE, related_name='splat_categories')
     flavor = models.CharField(max_length=10, choices=FLAVOR, null=True)
 
     class Meta:
@@ -42,8 +38,16 @@ class Splat(models.Model):
     def splat_names(self):
         return ', '.join(self.splats.values_list('name', flat=True))
 
+    def storage_column(self):
+        if self.flavor == '1':
+            return 'primary_splat'
+        elif self.flavor == '2':
+            return 'secondary_splat'
+        elif self.flavor == '3':
+            return 'tertiary_splat'
 
-class SplatOption(ReferenceMixin):
+
+class SplatOption(models.Model):
     name = models.CharField(max_length=40)
     category = models.ForeignKey(Splat, on_delete=models.CASCADE, related_name='splats')
 
@@ -57,7 +61,7 @@ class SplatOption(ReferenceMixin):
         return self.category.template
 
 
-class Merit(ReferenceMixin):
+class Merit(models.Model):
     CATEGORIES = (
         ('mental', 'Mental'),
         ('physical', 'Physical'),
@@ -65,12 +69,11 @@ class Merit(ReferenceMixin):
         ('supernatural', 'Supernatural'),
         ('style', 'Style'),
     )
-    name = models.CharField(max_length=40)
-    category = models.CharField(max_length=20, choices=CATEGORIES, null=True)
-    template = models.ForeignKey('Template', on_delete=models.CASCADE, null=True, blank=True)
+    name = models.CharField(max_length=40, unique=True)
+    template = models.ForeignKey('CharacterTemplate', on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
-        ordering = ('template', 'category', 'name')
+        ordering = ('name', )
 
     def __str__(self):
         return str(self.name)
@@ -78,7 +81,8 @@ class Merit(ReferenceMixin):
 
 class PowerCategory(models.Model):
     name = models.CharField(max_length=20)
-    template = models.ForeignKey('Template', on_delete=models.PROTECT, related_name='power_categories', null=True)
+    template = models.ForeignKey(
+        'CharacterTemplate', on_delete=models.PROTECT, related_name='power_categories', null=True)
 
     class Meta:
         verbose_name = "Power Category"
@@ -91,7 +95,7 @@ class PowerCategory(models.Model):
         return ', '.join(self.powers.values_list('name', flat=True))
 
 
-class Power(ReferenceMixin):
+class Power(models.Model):
     name = models.CharField(max_length=40)
     category = models.ForeignKey('PowerCategory', on_delete=models.PROTECT, related_name='powers')
 
@@ -105,7 +109,7 @@ class Power(ReferenceMixin):
 
 class AnchorCategory(models.Model):
     name = models.CharField(max_length=20)
-    template = models.ForeignKey(Template, on_delete=models.CASCADE, related_name='anchor_categories')
+    template = models.ForeignKey(CharacterTemplate, on_delete=models.CASCADE, related_name='anchor_categories')
     is_required = models.BooleanField(default=False)
     description = models.TextField()
 
@@ -117,3 +121,12 @@ class AnchorCategory(models.Model):
         return str(self.name)
 
 
+__all__ = (
+    "CharacterTemplate",
+    "Splat",
+    "SplatOption",
+    "Merit",
+    "PowerCategory",
+    "Power",
+    "AnchorCategory",
+)

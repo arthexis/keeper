@@ -1,0 +1,53 @@
+.field-description textarea {
+    height: 3em;
+}
+.form-control {
+    font-size: 13px;
+}
+.field-box {
+    padding-right: 0;
+}
+select.form-control {
+    width: 180px;
+}
+textarea.form-control {
+    min-width: 700px;
+    height: 100px;
+    text-overflow: ellipsis;
+}
+table textarea.form-control {
+    min-width: 500px;
+    max-width: 500px;
+    min-height: 60px;
+    height: 60px!important;
+}
+#membership_form table textarea.form-control {
+    min-width: 700px;
+    max-width: 700px;
+    min-height: 35px;
+    height: 35px;
+}
+.form-actions {
+    padding-top: 15px;
+}
+.dynamic-approval_requests .field-status select.form-control,
+table .field-status input {
+    width: 120px;
+}
+.field-spent_experience input.form-control,
+.field-storyteller_beats input.form-control,
+.field-coordinator_beats input.form-control,
+.field-member_beats input.form-control {
+    width: 60px;
+}
+.dynamic-approval_requests .field-details input.form-control,
+#event_form .field-details input.form-control {
+    width: 400px;
+}
+.form-group {
+    margin-bottom: 5px!important;
+}
+.table > tbody > tr > td {
+    padding: 4px!important;
+}
+

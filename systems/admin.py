@@ -1,11 +1,20 @@
 from django.contrib import admin
-
 from systems.models import *
+
+
+class ParentInlineMixin(admin.TabularInline):
+    def __init__(self, parent_mode, admin_site):
+        super().__init__(parent_mode, admin_site)
+        self.parent_obj = None
+
+    def get_formset(self, request, obj=None, **kwargs):
+        self.parent_obj = obj
+        return super().get_formset(request, obj, **kwargs)
 
 
 class SplatInline(admin.TabularInline):
     model = SplatOption
-    fields = ('name', 'reference_book', 'reference_page', 'is_playable')
+    fields = ('name', )
     min_num = 1
     extra = 0
 
@@ -19,22 +28,25 @@ class SplatCategoryAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {
             'fields': (
-                ('name', 'template', 'flavor', ),
+                ('name',),
+                ('template', 'flavor', ),
             ),
         }),
     )
 
 
-@admin.register(Template)
+@admin.register(CharacterTemplate)
 class TemplateAdmin(admin.ModelAdmin):
-    model = Template
+    model = CharacterTemplate
     list_display = ('name', 'power_stat_name', 'integrity_name', 'resource_name')
     fieldsets = (
         (None, {
             'fields': (
-                ('name', 'alias'),
-                ('integrity_name', 'power_stat_name', 'resource_name'),
-                ('primary_anchor_name', 'secondary_anchor_name'),
+                ('name', 'alias',),
+                ('integrity_name', 'power_stat_name',),
+                ('resource_name', 'character_group_name',),
+                ('primary_anchor_name', 'secondary_anchor_name',),
+                ('experiences_prefix', ),
             ),
         }),
     )
@@ -43,13 +55,13 @@ class TemplateAdmin(admin.ModelAdmin):
 @admin.register(Merit)
 class MeritAdmin(admin.ModelAdmin):
     model = Merit
-    fields = ('name', 'category', 'template', 'reference_book', 'reference_page', )
-    list_display = ('name', 'category', 'template', )
+    fields = ('name', 'template', )
+    list_display = ('name', 'template', )
 
 
 class PowerInline(admin.TabularInline):
     model = Power
-    fields = ('name', 'reference_book', 'reference_page')
+    fields = ('name',)
     extra = 1
 
 

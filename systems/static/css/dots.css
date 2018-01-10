@@ -1,9 +1,4 @@
-div.dots {
-    display: block;
-    min-width: 370px;
-    padding-top: 0.4em;
-}
-div.dots button.clear {
+.dots button.clear {
     background: none;
     border: none;
     color: #003366;
@@ -11,6 +6,10 @@ div.dots button.clear {
     cursor: hand;
     outline: none;
 }
-div.dots input[type='radio'] {
-    transform: scale(1.2);
+.dots input[type='radio'] {
+    transform: scale(1.3);
+    margin-right: 3px;
+}
+.dots {
+    padding-top: 6px;
 }
