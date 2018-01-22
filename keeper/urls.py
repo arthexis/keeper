@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.conf.urls import include, url
+from django.urls import include, path
 from django.contrib import admin
 from django.contrib.auth.forms import AuthenticationForm
 from django.views.generic import TemplateView
@@ -29,9 +29,10 @@ class IndexView(TemplateView):
                 context['upcoming_events'] = upcoming_events[:5]
                 context['remaining_events'] = upcoming_events.count() - 5
             except Profile.DoesNotExist:
-                logger.error(f"User <{user}> is missing a Profile object.")
+                logger.error(f"User <{user}> is missing a Profile.")
                 context['profile'] = None
-            context['req_member_form'] = RequestMembershipForm(request=self.request)
+            context['req_member_form'] = \
+                RequestMembershipForm(request=self.request)
         return context
 
 
@@ -40,32 +41,31 @@ class IndexView(TemplateView):
 urlpatterns = [
 
     # Organization and Membership namespace
-    url(r'^o/', include('orgs.urls', namespace='orgs')),
+    path('orgs/', include('orgs.urls', namespace='orgs')),
 
     # Character sheet stuff namespace
-    url(r'^s/', include('sheets.urls', namespace='sheets')),
+    path('sheets/', include('sheets.urls')),
 
     # Character sheet stuff namespace
-    url(r'^y/', include('systems.urls', namespace='systems')),
+    path('systems/', include('systems.urls')),
 
     # Main IndexView (homepage)
-    url(r'^$', IndexView.as_view(), name='index'),
+    path('', IndexView.as_view(), name='index'),
 
     # Authentication
-    url('^', include('django.contrib.auth.urls')),
+    path('auth/', include('django.contrib.auth.urls')),
 
     # Admin
-    url(r'^a/', admin.site.urls),
+    path('admin/', admin.site.urls),
 
     # REST Framework
     # http://www.django-rest-framework.org/
 
-    url(r'^r/', include(router.urls, namespace='rest')),
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-
+    path('rest/', include(router.urls)),
+    path('api-auth/', include('rest_framework.urls')),
 
     # Django-Select2
-    url(r'^select2/', include('django_select2.urls')),
+    path('select2/', include('django_select2.urls')),
 
 ]
 
@@ -73,6 +73,6 @@ if settings.DEBUG:
     import debug_toolbar
 
     urlpatterns += [
-        url(r'^__debug__/', include(debug_toolbar.urls)),
+        path('__debug__/', include(debug_toolbar.urls)),
     ]
 

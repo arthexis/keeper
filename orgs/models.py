@@ -1,5 +1,5 @@
 from django.db.models import *
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib.auth.models import User, Group
 from systems.models import CharacterTemplate
 from django.core.mail import send_mail
@@ -12,21 +12,34 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+__all__ = (
+    'Profile',
+    'Organization',
+    'Membership',
+    'Event',
+    'UpcomingEvent',
+    'PublicOrganization',
+)
+
+
 # Each individual user has a Profile
 class Profile(User):
     VERIFICATION_CHARS = 14
 
-    user = OneToOneField(User, on_delete=PROTECT, related_name='profile')
-    phone = CharField(max_length=20, blank=True,
-                      help_text="Optional. Only shared with Organizations you join.")
+    user = OneToOneField(
+        User, on_delete=PROTECT, related_name='profile', parent_link=True)
+    phone = CharField(
+        max_length=20, blank=True,
+        help_text="Optional. Only shared with Organizations you join.")
     is_verified = BooleanField(default=False, editable=False)
     last_visit = DateTimeField(blank=True, null=True, editable=False)
-    verification_code = CharField(max_length=VERIFICATION_CHARS, blank=True, null=True, editable=False)
+    verification_code = CharField(
+        max_length=VERIFICATION_CHARS, blank=True, null=True, editable=False)
     code_sent_on = DateTimeField(blank=True, null=True, editable=False)
     org_create_cap = SmallIntegerField(default=5, editable=False)
     information = TextField(
         blank=True, null=True,
-        help_text="Optional. Personal information that you want to share with Orgs.")
+        help_text="Optional. Personal information shared with others.")
 
     class Meta:
         verbose_name = 'Profile'
@@ -42,16 +55,21 @@ class Profile(User):
         self.verification_code = rand_string(self.VERIFICATION_CHARS)
         self.code_sent_on = timezone.now()
         self.save()
-        return reverse("orgs:verification", kwargs={'pk': self.pk, 'code': self.verification_code})
+        return reverse(
+            "orgs:verification",
+            kwargs={'pk': self.pk, 'code': self.verification_code})
 
     def send_mail(self, subject, message=None, template=None, context=None):
         if not self.email:
-            logger.error(f"Unable to send email to {self.username}; address missing.")
+            logger.error(
+                f"Unable to send email to {self.username}; address missing.")
             return
         kwargs = {'fail_silently': True}
         if template is not None:
             kwargs['html_message'] = render_to_string(template, context)
-        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [self.email], **kwargs)
+        send_mail(
+            subject, message, settings.DEFAULT_FROM_EMAIL,
+            [self.email], **kwargs)
 
     def initiate_verification(self):
         if not settings.ORGS_AUTO_VERIFY_USERS:
@@ -62,11 +80,12 @@ class Profile(User):
 
     def send_verification_email(self):
         verification_url = self.make_verification_url()
-        logger.info(f"Sending verification email to {self.username}. url={verification_url}")
+        logger.info(
+            f"Send verification to {self.username}. url={verification_url}")
         self.send_mail(
             'Keeper Email Verification', (
                 "Keeper Email Verification\n\n"
-                f"Please enter this URL into your browser's navigation bar: \n{verification_url}\n"
+                f"Please click the following link: \n{verification_url}\n"
                 "If you didn't request an account, please ignore this message."
             ),
             'orgs/email/verification.html',
@@ -74,7 +93,8 @@ class Profile(User):
 
     def send_recovery_email(self):
         verification_url = self.make_verification_url()
-        logger.info(f"Sending recovery email to {self.username}. url={verification_url}")
+        logger.info(
+            f"Send recovery email to {self.username}. url={verification_url}")
         self.send_mail(
             'Keeper Password Recovery', (
                 "Keeper Password Recovery\n\n"
@@ -88,21 +108,28 @@ class Profile(User):
         )
 
     def upcoming_events(self):
-        return Event.objects.filter(organization__memberships__user=self.user, event_date__gte=timezone.now().date())\
-            .exclude(organization__memberships__is_active=False, organization__memberships__is_blocked=True)\
-            .order_by('-event_date')
+        return Event.objects.filter(
+            organization__memberships__user=self.user,
+            event_date__gte=timezone.now().date()
+        ).exclude(
+            organization__memberships__is_active=False,
+            organization__memberships__is_blocked=True
+        ).order_by('-event_date')
 
 
 # Users can create Organizations
 class Organization(Model):
-    name = CharField(max_length=200, help_text="Required. Must be unique across all Organizations.", unique=True)
+    name = CharField(
+        max_length=200, unique=True,
+        help_text="Required. Must be unique across all Organizations.")
     parent_org = ForeignKey(
-        'Organization', SET_NULL, verbose_name="Parent Organization", blank=True, null=True,
-        help_text="Optional. If set, you will inherit settings and staff from this organization.")
+        'Organization', SET_NULL, verbose_name="Parent Organization",
+        blank=True, null=True,
+        help_text="Optional. If set, you will inherit settings and staff.")
     information = TextField(blank=True)
     is_public = BooleanField(
         default=True, verbose_name="Open to the Public",
-        help_text="Allow others to search and find this organization and request membership.")
+        help_text="Allow finding the organization and requesting membership.")
 
     def __str__(self):
         return self.name
@@ -154,14 +181,15 @@ class Membership(Model):
 class Event(Model):
 
     name = CharField(max_length=40)
-    organization = ForeignKey(Organization, CASCADE, null=True, related_name='events', editable=False)
+    organization = ForeignKey(
+        Organization, CASCADE, null=True, related_name='events', editable=False)
     event_date = DateField(null=True, blank=True)
     information = TextField(
         blank=True,
-        help_text='Optional. Basic summary about the event that all users should know.')
+        help_text='Optional. Basic summary about the event.')
     external_url = URLField(
         null=True, blank=True,
-        help_text='Optional. External link containing additional event information.')
+        help_text='Optional. External link containing additional information.')
     is_public = BooleanField(default=False)
     is_published = BooleanField(default=True)
 
@@ -178,7 +206,8 @@ class Event(Model):
 
 class UpcomingEventManager(Manager):
     def get_queryset(self):
-        return super().get_queryset().filter(event_date__gte=timezone.now().date())
+        return super().get_queryset().filter(
+            event_date__gte=timezone.now().date())
 
 
 class UpcomingEvent(Event):
@@ -187,11 +216,3 @@ class UpcomingEvent(Event):
     class Meta:
         proxy = True
 
-
-__all__ = (
-    'Profile',
-    'Organization',
-    'PublicOrganization',
-    'Membership',
-    'Event',
-)
