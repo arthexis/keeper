@@ -5,6 +5,17 @@ from systems.models import *
 from orgs.models import *
 from systems.fields import DotsField
 
+import logging
+logger = logging.getLogger(__name__)
+
+
+__all__ = (
+    "Character",
+    "CharacterMerit",
+    "CharacterPower",
+    "SkillSpeciality",
+)
+
 
 SKILLS = (
     ("academics", "Academics"),
@@ -32,6 +43,7 @@ SKILLS = (
     ("streetwise", "Streetwise"),
     ("subterfuge", "Subterfuge"),
 )
+
 
 ATTRIBUTES = (
     ("strength", "Strength"),
@@ -106,9 +118,12 @@ class Character(Model):
     subterfuge = DotsField()
 
     # Splat foreign Keys
-    primary_splat = ForeignKey(SplatOption, PROTECT, related_name='+', null=True, blank=True)
-    secondary_splat = ForeignKey(SplatOption, PROTECT, related_name='+', null=True, blank=True)
-    tertiary_splat = ForeignKey(SplatOption, PROTECT, related_name='+', null=True, blank=True)
+    primary_splat = ForeignKey(
+        SplatOption, PROTECT, related_name='+', null=True, blank=True)
+    secondary_splat = ForeignKey(
+        SplatOption, PROTECT, related_name='+', null=True, blank=True)
+    tertiary_splat = ForeignKey(
+        SplatOption, PROTECT, related_name='+', null=True, blank=True)
 
     # Character Advancement related
     beats = PositiveIntegerField(default=0)
@@ -123,7 +138,7 @@ class Character(Model):
     created_on = DateField(auto_now_add=True, editable=False)
     modified_on = DateField(auto_now=True, editable=False)
 
-    # Derived traits, they are not handled automatically because in some situations
+    # Derived traits, they are not handled automatically because
     # their values can be manually adjusted
     size = DotsField(default=5, clear=False)
     health_levels = PositiveIntegerField(default=0)
@@ -182,7 +197,8 @@ class Character(Model):
     def save(self, **kwargs):
         if self.power_stat:
             self.resource_max = int(self.power_stat) + 10
-        self.willpower_max = int(self.resolve) + int(self.composure) - int(self.perm_willpower_spent or 0)
+        self.willpower_max = int(self.resolve) + int(self.composure) \
+                             - int(self.perm_willpower_spent or 0)
         self.health_levels = int(self.stamina) + int(self.size)
         if self.willpower is None:
             self.willpower = self.willpower_max
@@ -241,10 +257,3 @@ class SkillSpeciality(CharacterElement):
         verbose_name = "Skill Speciality"
         verbose_name_plural = "Skill Specialities"
 
-
-__all__ = (
-    "Character",
-    "CharacterMerit",
-    "CharacterPower",
-    "SkillSpeciality",
-)

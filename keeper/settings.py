@@ -50,14 +50,13 @@ INSTALLED_APPS = [
     # 'bootstrap4',
 ]
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
@@ -161,7 +160,8 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Django Admin Bootstrapped
 
-DAB_FIELD_RENDERER = 'django_admin_bootstrapped.renderers.BootstrapFieldRenderer'
+DAB_FIELD_RENDERER = \
+    'django_admin_bootstrapped.renderers.BootstrapFieldRenderer'
 
 # Keeper system specific settings
 
@@ -184,7 +184,8 @@ if DEBUG:
 # Django-Select2 Configuration
 # http://django-select2.readthedocs.io/en/latest/django_select2.html#module-django_select2.conf
 
-SELECT2_JS = 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.full.min.js'
+SELECT2_JS = \
+    'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.full.min.js'
 
 
 # CACHES = {

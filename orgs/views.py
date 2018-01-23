@@ -6,7 +6,7 @@ from django.contrib.auth import login, logout
 from django.views.generic.detail import SingleObjectMixin
 from orgs.models import *
 from orgs.forms import *
-from django.core.urlresolvers import reverse_lazy, reverse
+from django.urls import reverse_lazy, reverse
 from django.http.response import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
