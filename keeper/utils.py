@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 __all__ = (
     'getenv',
-    'missing',
+    'otherwise',
     'path',
     'rand_string'
 )
@@ -43,10 +43,14 @@ def getenv(var, default=None):
     return r
 
 
-# A decorator that returns a default value when ValueError is caught
-# in the decorated function This is intended for use with getters on Models
+def otherwise(f, default=None, exceptions=None):
+    """ Decorator that makes a function catch ValueError and return a value instead.
 
-def missing(f, exceptions=None, default=None):
+    :param f: The function being decorated.
+    :param default: Value to return when the exceptions are caught, defaults to None
+    :param exceptions: A sequence of exceptions to catch, defaults to (AttributeError, )
+    :return: A decorated function.
+    """
     exceptions = exceptions or (AttributeError,)
 
     def inner(*args, **kwargs):

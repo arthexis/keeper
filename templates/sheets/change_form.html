@@ -1,9 +1,10 @@
-{% extends 'admin/change_form.html' %}{% load i18n admin_urls admin_static admin_modify bootstrapped_goodies_tags %}
+{% extends 'admin/change_form.html' %}
+{% load i18n admin_urls admin_static admin_modify bootstrapped_goodies_tags %}
 
 {% block field_sets %}
 
   {% for fieldset in adminform %}
-    {% include "sheets/includes/fieldset.html" with group_column_width=adminform|form_fieldset_column_width %}
+    {% include "sheets/component/fieldset.html" with group_column_width=adminform|form_fieldset_column_width %}
   {% endfor %}
 {% endblock %}
 

@@ -10,7 +10,7 @@ from .utils import getenv
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = getenv('DEBUG', True)
 
 LOGGING = get_logging_config(DEBUG)
 
@@ -19,7 +19,7 @@ LOGGING = get_logging_config(DEBUG)
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '*9w$$hwtmu*o_-6g8-qppf^&&b5esec8(@cjy%ays285=cvsi*'
+SECRET_KEY = getenv('SECRET_KEY', '*9w$$hwtmu*o_-6g8-qppf^&&b5esec8(@cjy%ays285=cvsi*')
 
 
 ALLOWED_HOSTS = ['*']
@@ -158,17 +158,14 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+
 # Django Admin Bootstrapped
 
 DAB_FIELD_RENDERER = \
     'django_admin_bootstrapped.renderers.BootstrapFieldRenderer'
 
-# Keeper system specific settings
 
-BEATS_PER_EXPERIENCE = 10
-BEATS_PER_PRESTIGE = 50
-
-SITE_HEADER = "Keeper"
+SITE_HEADER = getenv('SITE_HEADER', "Keeper")
 
 # Email address used as the default from_email for send_mail
 
@@ -188,27 +185,36 @@ SELECT2_JS = \
     'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.full.min.js'
 
 
-# CACHES = {
-#     'select2': {
-#         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-#         'LOCATION': '127.0.0.1:11211',
-#     }
-# }
+# SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 
+# SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 
-# Some settings to make debugging easier
+SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
-ORGS_AUTO_VERIFY_USERS = bool(DEBUG)
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    },
+    # 'select2': {
+    #     'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+    #     'LOCATION': '127.0.0.1:11211',
+    # }
+}
 
 
 # Email settings, show below also defaults for sendgrid
 # https://sendgrid.com/docs/Integrate/Frameworks/django.html
 
 EMAIL_HOST = getenv('EMAIL_HOST', 'smtp.sendgrid.net')
+
 EMAIL_HOST_USER = getenv('EMAIL_HOST_USER')
+
 EMAIL_HOST_PASSWORD = getenv('EMAIL_HOST_PASSWORD')
+
 EMAIL_PORT = getenv('EMAIL_HOST_PORT', 587)
+
 EMAIL_USE_TLS = True
+
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
@@ -217,4 +223,8 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ]
 }
+
+# Some settings to make debugging easier
+
+ORGS_AUTO_VERIFY_USERS = bool(DEBUG)
 

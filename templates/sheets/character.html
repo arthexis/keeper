@@ -66,9 +66,9 @@
 
         {# 3rd row, Virtue, Vice, Concept #}
         <div class="row">
-            {% include 'sheets/includes/field.html' with name='primary_anchor' value=character.primary_anchor label=character.primary_anchor_name %}
-            {% include 'sheets/includes/field.html' with name='secondary_anchor' value=character.secondary_anchor label=character.secondary_anchor_name %}
-            {% include 'sheets/includes/field.html' with name='concept' value=character.concept label="Concept" %}
+            {% include 'sheets/component/field.html' with name='primary_anchor' value=character.primary_anchor label=character.primary_anchor_name %}
+            {% include 'sheets/component/field.html' with name='secondary_anchor' value=character.secondary_anchor label=character.secondary_anchor_name %}
+            {% include 'sheets/component/field.html' with name='concept' value=character.concept label="Concept" %}
         </div>
         <hr>
 
@@ -424,7 +424,7 @@
                             <div id="speciality-base" class="hidden">
                                 <div class="row speciality-entry">
                                     <div class="col-md-4">
-                                        {% include 'sheets/includes/select_skills.html' with id='id_speciality_base' %}
+                                        {% include 'sheets/component/select_skills.html' with id='id_speciality_base' %}
                                     </div>
                                     <div class="col-md-8">
                                         <input class="form-control speciality" type="text" style="width: 100%">
