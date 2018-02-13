@@ -1,12 +1,14 @@
 import json
+
 from django.urls import reverse
 from django.views.generic import CreateView, TemplateView, UpdateView
-from sheets.models import Character, CharacterMerit, SkillSpeciality, CharacterPower
-from sheets.forms import CreateCharacterForm, EditCharacterForm
 from django.contrib import messages
 from django.http import JsonResponse
-from systems.models import Merit, Power
 from django.shortcuts import get_object_or_404
+
+from systems.models import Merit, Power
+from sheets.models import *
+from sheets.forms import *
 
 
 class CharacterMixin(object):
@@ -15,12 +17,13 @@ class CharacterMixin(object):
     context_object_name = 'character'
 
 
-class CreateCharacterView(CharacterMixin, CreateView):
+class CreateCharacter(CharacterMixin, CreateView):
     form_class = CreateCharacterForm
 
     def form_invalid(self, form):
         response = super().form_invalid(form)
-        messages.error(self.request, "There was an error creating the character.")
+        messages.error(
+            self.request, "There was an error creating the character.")
         return response
 
     def form_valid(self, form):
@@ -32,12 +35,14 @@ class CreateCharacterView(CharacterMixin, CreateView):
         return reverse("sheets:edit-character", kwargs={'pk': self.object.pk})
 
 
-class EditCharacterView(CharacterMixin, UpdateView):
+class EditCharacter(CharacterMixin, UpdateView):
     form_class = EditCharacterForm
 
     def get_template_names(self):
         if self.object and self.object.template:
-            return [f'sheets/custom/{self.object.template.name}.html', 'sheets/character.html']
+            return [
+                f'sheets/custom/{self.object.template.name}.html',
+                'sheets/character.html']
         return super().get_template_names()
 
     def form_invalid(self, form):

@@ -1,6 +1,7 @@
 import os
 import sys
 import dj_database_url
+
 from .log_settings import get_logging_config
 from .utils import getenv
 
@@ -37,9 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
-    'systems',
-    'sheets',
-    'orgs',
     'debug_toolbar',
     'django_extensions',
     'rest_framework',
@@ -47,7 +45,9 @@ INSTALLED_APPS = [
     'bootstrap3',
     'whitenoise',
     'datetimewidget',
-    # 'bootstrap4',
+    'systems',
+    'sheets',
+    'orgs',
 ]
 
 MIDDLEWARE = [
@@ -182,7 +182,7 @@ if DEBUG:
 
 
 # Django-Select2 Configuration
-# http://django-select2.readthedocs.io/en/latest/django_select2.html#module-django_select2.conf
+# http://django-select2.readthedocs.io/en/latest/django_select2.html
 
 SELECT2_JS = \
     'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.full.min.js'
@@ -203,11 +203,6 @@ ORGS_AUTO_VERIFY_USERS = bool(DEBUG)
 
 # Email settings, show below also defaults for sendgrid
 # https://sendgrid.com/docs/Integrate/Frameworks/django.html
-
-# EMAIL_HOST = 'smtp.sendgrid.net'
-# EMAIL_HOST_USER = 'sendgrid_username'
-# EMAIL_HOST_PASSWORD = 'sendgrid_password'
-# EMAIL_PORT = 587
 
 EMAIL_HOST = getenv('EMAIL_HOST', 'smtp.sendgrid.net')
 EMAIL_HOST_USER = getenv('EMAIL_HOST_USER')

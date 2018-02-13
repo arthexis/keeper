@@ -10,8 +10,9 @@ def get_logging_config(debug=False):
         'disable_existing_loggers': True,
         'formatters': {
             'verbose': {
-                'format': ('at=%(levelname)s logger="%(name)s" lineno=%(lineno)s ' +
-                           'funcname="%(funcName)s" msg="%(message)s"'),
+                'format': (
+                    'at=%(levelname)s logger="%(name)s" lineno=%(lineno)s ' +
+                    'funcname="%(funcName)s" msg="%(message)s"'),
                 'datefmt': '%Y-%m-%d %H:%M:%S'
             },
             'simple': {

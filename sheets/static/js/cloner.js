@@ -7,9 +7,13 @@ function Cloner(options) {
         if (this.counter >= options.maxNumber) {
             return;
         }
-        var cloned = $(options.base + ' div.row').clone()
-            .removeClass("hidden").appendTo(options.container);
-        var select = cloned.find('select').attr('id', options.idPrefix + this.counter++);
+        var cloned = $(options.base + ' div.row')
+            .clone()
+            .removeClass("hidden")
+            .appendTo(options.container);
+        var select = cloned
+            .find('select')
+            .attr('id', options.idPrefix + this.counter++);
         if (options.selectUrl) {
             select.select2({
                 ajax: {
