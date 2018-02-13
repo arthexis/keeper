@@ -3,9 +3,11 @@ import logging
 from django.conf import settings
 from django.urls import include, path
 from django.contrib import admin
-from sheets.rest import router
 
-from .views import Index
+import django.contrib.auth.views as auth_views
+
+from sheets.rest import router
+from orgs.views import Index
 
 logger = logging.getLogger(__name__)
 
@@ -23,11 +25,9 @@ urlpatterns = [
     # Character sheet stuff namespace
     path('systems/', include('systems.urls')),
 
-    # Main IndexView (homepage)
-    path('', Index.as_view(), name='index'),
-
-    # Authentication
-    path('auth/', include('django.contrib.auth.urls')),
+    # Authentication views (default with custom templates)
+    path('accounts/login/', auth_views.LoginView.as_view(template_name="index.html"), name="login"),
+    path('accounts/logout/', auth_views.LogoutView.as_view(), name="logout"),
 
     # Admin
     path('admin/', admin.site.urls),
@@ -41,6 +41,8 @@ urlpatterns = [
     # Django-Select2
     path('select2/', include('django_select2.urls')),
 
+    # Main IndexView (homepage)
+    path('', Index.as_view(), name='index'),
 ]
 
 if settings.DEBUG:

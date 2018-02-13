@@ -5,7 +5,7 @@ app_name = "sheets"
 urlpatterns = [
 
     # Character list for a single user
-    path('char/list/', ListCharacterView, 'list-char'),
+    path('char/list/', ListCharacters, 'list-char'),
 
     # Create / update character sheets
     path('char/<int:pk>/edit/', EditCharacter, 'edit-char'),

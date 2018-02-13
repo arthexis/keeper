@@ -77,9 +77,7 @@ class DeleteEvent(_EventMixin, RedirectView):
         organization = event.organization
         event.delete()
         messages.success(self.request, 'The event has been deleted.')
-        return reverse(
-            'orgs:view-organization',
-            kwargs={'pk': organization.pk}) + '?' + urlencode({'tab': 'events'})
+        return reverse('orgs:view-org', kwargs={'pk': organization.pk}) + '?' + urlencode({'tab': 'events'})
 
 
 class ViewEvent(_EventMixin, EventMemberPermission, DetailView):

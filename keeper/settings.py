@@ -185,11 +185,13 @@ SELECT2_JS = \
     'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.full.min.js'
 
 
-# SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 
-# SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+# Redirect back to index after login if no next URL parameter
 
-SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
+LOGIN_REDIRECT_URL = 'index'
+
+LOGOUT_REDIRECT_URL = 'index'
 
 CACHES = {
     'default': {

@@ -36,7 +36,7 @@ class MemberPermission(SingleObjectMixin, View):
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        if not self.request.user.is_anonymous():
+        if not self.request.user.is_anonymous:
             self.user_membership = self.get_membership(obj)
         else:
             self.user_membership = None

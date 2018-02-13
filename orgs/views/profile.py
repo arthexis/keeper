@@ -1,9 +1,9 @@
 import logging
 
-from django.views.generic import *
+from django.views.generic import UpdateView, RedirectView
 from django.urls import reverse
 
-from orgs.models import *
+from orgs.models import Profile
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,9 @@ __all__ = (
 class EditProfile(UpdateView):
     template_name = 'orgs/profile.html'
     model = Profile
-    fields = ("email", "first_name", "last_name", "phone", "information")
+    fields = (
+        "username", "email", "first_name", "last_name", "phone", "information"
+    )
     model_name = "Profile"
 
 

@@ -1,7 +1,7 @@
 import logging
 
 from django.views.generic import CreateView, UpdateView, DetailView
-from django.urls import reverse_lazy
+from django.urls import reverse
 from django.contrib import messages
 
 from orgs.models import Organization, Membership
@@ -28,8 +28,7 @@ class _OrganizationMixin:
         self.object = None
 
     def get_success_url(self):
-        return reverse_lazy(
-            'orgs:view-organization', kwargs={'pk': self.object.pk})
+        return reverse('orgs:view-org', kwargs={'pk': self.object.pk})
 
 
 class CreateOrganization(_OrganizationMixin, CreateView):
@@ -53,7 +52,7 @@ class EditOrganization(_OrganizationMixin, OrgMemberPermission, UpdateView):
 
 
 class ViewOrganization(_OrganizationMixin, OrgMemberPermission, DetailView):
-    template_name = 'orgs/organization/overview.html'
+    template_name = 'orgs/org/overview.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

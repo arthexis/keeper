@@ -3,14 +3,18 @@
 <div class="pull-right">
   <div class="btn-toolbar" role="toolbar">
     <div class="btn-group">
-      <a href="{% url 'orgs:create-event' organization.pk %}">
-        <button type="button" class="btn btn-default">Create Event</button>
-      </a></div>
+      {% if organization %}
+        <a href="{% url 'orgs:create-event' organization.pk %}">
+          <button type="button" class="btn btn-default">Create Event</button>
+        </a>
+      {% endif %}
+    </div>
   </div>
 </div>
 
 <h2>Upcoming Events</h2>
 <hr>
+
 {% if organization.upcoming_events %}
   <table class="table">
     <thead>
@@ -32,3 +36,6 @@
 {% else %}
   <p class="lead">No upcoming events yet. Go ahead and create some!</p>
 {% endif %}
+
+
+

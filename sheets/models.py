@@ -197,8 +197,7 @@ class Character(Model):
     def save(self, **kwargs):
         if self.power_stat:
             self.resource_max = int(self.power_stat) + 10
-        self.willpower_max = int(self.resolve) + int(self.composure) \
-                             - int(self.perm_willpower_spent or 0)
+        self.willpower_max = int(self.resolve) + int(self.composure) - int(self.perm_willpower_spent or 0)
         self.health_levels = int(self.stamina) + int(self.size)
         if self.willpower is None:
             self.willpower = self.willpower_max

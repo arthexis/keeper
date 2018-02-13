@@ -19,7 +19,7 @@ __all__ = (
 
 class ViewMembership(FormView):
     template_name = 'orgs/membership.html'
-    success_url = reverse_lazy('orgs:index')
+    success_url = reverse_lazy('index')
 
     def form_invalid(self, form):
         return super().form_invalid(form)
@@ -46,7 +46,7 @@ class ViewMembership(FormView):
 
 
 class CancelMembership(RedirectView):
-    url = reverse_lazy('orgs:index')
+    url = reverse_lazy('index')
 
     def dispatch(self, request, *args, pk=None, **kwargs):
         membership = get_object_or_404(Membership, pk=pk)

@@ -1,5 +1,5 @@
 from sheets.models import Character
-from django.forms import *
+from django.forms import ModelForm, CharField, IntegerField, HiddenInput
 
 
 class BaseCharacterForm(ModelForm):
@@ -15,7 +15,10 @@ class BaseCharacterForm(ModelForm):
     template_experiences = IntegerField(required=False, widget=HiddenInput)
 
     def clean_beats(self):
-        return int(self.cleaned_data['beats'])
+        beats = self.cleaned_data['beats']
+        if beats:
+            return int(beats)
+        return 0
 
     class Meta:
         model = Character

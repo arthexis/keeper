@@ -3,27 +3,32 @@ import json
 from django.urls import reverse
 from django.views.generic import CreateView, TemplateView, UpdateView
 from django.contrib import messages
-from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 
 from systems.models import Merit, Power
-from sheets.models import *
-from sheets.forms import *
+from sheets.models import Character, CharacterMerit, SkillSpeciality, CharacterPower
+from sheets.forms import CreateCharacterForm, EditCharacterForm
 
 
-class CharacterMixin(object):
+__all__ = (
+    'CreateCharacter',
+    'EditCharacter',
+    'ListCharacters',
+)
+
+
+class _CharacterMixin(object):
     template_name = "sheets/character.html"
     model = Character
     context_object_name = 'character'
 
 
-class CreateCharacter(CharacterMixin, CreateView):
+class CreateCharacter(_CharacterMixin, CreateView):
     form_class = CreateCharacterForm
 
     def form_invalid(self, form):
         response = super().form_invalid(form)
-        messages.error(
-            self.request, "There was an error creating the character.")
+        messages.error(self.request, "There was an error creating the character.")
         return response
 
     def form_valid(self, form):
@@ -32,10 +37,10 @@ class CreateCharacter(CharacterMixin, CreateView):
         return response
 
     def get_success_url(self):
-        return reverse("sheets:edit-character", kwargs={'pk': self.object.pk})
+        return reverse("sheets:edit-char", kwargs={'pk': self.object.pk})
 
 
-class EditCharacter(CharacterMixin, UpdateView):
+class EditCharacter(_CharacterMixin, UpdateView):
     form_class = EditCharacterForm
 
     def get_template_names(self):
@@ -91,52 +96,13 @@ class EditCharacter(CharacterMixin, UpdateView):
 
     def get_success_url(self):
         messages.success(self.request, "Your character has been updated, you can make additional changes below.")
-        return reverse("sheets:edit-character", kwargs={'pk': self.object.pk})
+        return reverse("sheets:edit-char", kwargs={'pk': self.object.pk})
 
 
-class ListCharacterView(TemplateView):
+class ListCharacters(TemplateView):
     template_name = "sheets/character_list.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['characters'] = Character.objects.filter(user=self.request.user)
         return context
-
-
-# Simple function view that returns merits in a JSON format
-def available_merits(request):
-    def pair(item):
-        return {'id': item['pk'], 'text': item['name']}
-
-    qs = Merit.objects.filter(name__icontains=request.GET.get('term', ''))
-    return JsonResponse({'items': [pair(i) for i in qs.values('pk', 'name')]})
-
-
-# Function view that returns merits a character already has in a JSON format
-def character_merits(request):
-    def bundle(item):
-        return {'pk': item['merit__pk'], "text": item['merit__name'], 'dots': item['rating']}
-
-    qs = CharacterMerit.objects.filter(character_id=int(request.GET.get('char'))).order_by('merit__name')
-    return JsonResponse({'items': [bundle(i) for i in qs.values('merit__pk', 'rating', 'merit__name')]})
-
-
-# Function view that returns specialities a character already has in a JSON format
-def character_specialities(request):
-    def bundle(item):
-        return {'skill': item.skill, 'speciality': item.speciality}
-
-    qs = SkillSpeciality.objects.filter(character_id=int(request.GET.get('char'))).order_by('skill')
-    return JsonResponse({'items': [bundle(i) for i in qs.all()]})
-
-
-# Function view that returns specialities a character already has in a JSON format
-def character_powers(request):
-    def bundle(item):
-        return {'name': item.power.name, 'dots': item.rating}
-
-    qs = CharacterPower.objects.filter(
-        character_id=int(request.GET.get('char')),
-        power__category__name=request.GET.get('category'))
-    return JsonResponse({'powers': [bundle(i) for i in qs.all()]})
-
