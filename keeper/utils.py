@@ -1,36 +1,50 @@
 import os
 import random
 import string
-
 import logging
+
+from django.urls import path as _path
+from django.views.generic import TemplateView, View
+
 logger = logging.getLogger(__name__)
 
 
-# Return an environment variable by name.
-# Allows "plain text" booleans and comma-separated lists.
+__all__ = (
+    'getenv',
+    'missing',
+    'path',
+    'rand_string'
+)
+
 
 def getenv(var, default=None):
-    result = os.environ.get(var, default)
-    logger.debug("[ENV] {}={}".format(var, result))
-    if isinstance(result, (bool, int, list, tuple)) or not result:
-        return result
-    if result.upper() == "TRUE":
+    """ Fetches an environment variable and coerces it into a Python type.
+
+    :param var: Name of the OS environment variable.
+    :param default: Value to return if the variable is not found.
+    :return:
+    """
+    r = os.environ.get(var, default)
+    logger.debug("[ENV] {}={}".format(var, r))
+    if isinstance(r, (bool, int, list, tuple)) or not r:
+        return r
+    if r.upper() == "TRUE":
         return True
-    elif result.upper() == "FALSE":
+    elif r.upper() == "FALSE":
         return False
-    elif result.upper() == "NONE" or result.strip() == "":
+    elif r.upper() == "NONE" or r.strip() == "":
         return None
-    if ',' in result:
-        return list(filter(lambda x: x, (i.strip() for i in result.split(','))))
+    if ',' in r:
+        return list(filter(lambda x: x, (i.strip() for i in r.split(','))))
     try:
-        return int(result)
+        return int(r)
     except ValueError:
         pass
-    return result
+    return r
 
 
-# A decorator that returns a default value when ValueError is caught in the decorated function
-# This is intended for use with getters on Django Models
+# A decorator that returns a default value when ValueError is caught
+# in the decorated function This is intended for use with getters on Models
 
 def missing(f, exceptions=None, default=None):
     exceptions = exceptions or (AttributeError,)
@@ -44,8 +58,38 @@ def missing(f, exceptions=None, default=None):
     return inner
 
 
+def path(pattern, view, name=None, **kwargs):
+    """ Simplifies django.urls.path
+
+    :param pattern: URL pattern, same syntax as django.urls.path
+    :param view: View, can be class or function
+    :param name: Name used for reverse, defaults to view.name if exists
+    :param kwargs: Keyword arguments for the view
+    :return: An object that can be added to urlpatterns
+    """
+
+    if name is None:
+        try:
+            name = view.name
+        except AttributeError:
+            pass
+
+    if name is None:
+        logger.warning(f'Path {pattern} to view {view} missing name.')
+
+    try:
+        if issubclass(view, View):
+            # logger.debug(f'URL View {view} = {name}')
+            return _path(pattern, view.as_view(), kwargs=kwargs, name=name)
+    except TypeError:
+        pass
+    if isinstance(view, str):
+        return _path(
+            pattern, TemplateView.as_view(template_name=view),
+            kwargs=kwargs, name=name)
+    return _path(pattern, view, name=name, kwargs=kwargs)
+
+
 def rand_string(chars):
     return ''.join(random.choice(string.ascii_letters) for _ in range(chars))
 
-
-__all__ = ('getenv', 'missing', 'rand_string')
