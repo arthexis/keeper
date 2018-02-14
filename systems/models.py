@@ -3,7 +3,7 @@ from django.db import models
 
 class CharacterTemplate(models.Model):
     name = models.CharField(max_length=20)
-    alias = models.CharField(max_length=20, blank=True)
+    game_line = models.CharField(max_length=20)
     integrity_name = models.CharField(max_length=20, verbose_name="Integrity", default="Integrity")
     power_stat_name = models.CharField(max_length=20, verbose_name="Power Stat")
     resource_name = models.CharField(max_length=20, verbose_name="Resource")
@@ -12,11 +12,14 @@ class CharacterTemplate(models.Model):
     character_group_name = models.CharField(max_length=20, verbose_name="Group Name", default="Group")
     experiences_prefix = models.CharField(max_length=20, verbose_name="Experiences Prefix", blank=True, null=True)
 
-    def __str__(self):
-        return str(self.name)
+    # Used for seed data storage
+    reference_code = models.SlugField('Code')
 
     class Meta:
-        verbose_name = "Template"
+        verbose_name = "Character Template"
+
+    def __str__(self):
+        return str(self.name)
 
 
 class Splat(models.Model):
@@ -31,9 +34,14 @@ class Splat(models.Model):
 
     class Meta:
         ordering = ('template', 'flavor', )
+        unique_together = ('template', 'flavor', )
 
     def __str__(self):
         return str(self.name)
+
+    def get_options_str(self):
+        options = SplatOption.objects.filter(category=self).values_list('name', flat=True)
+        return ', '.join(options)
 
     def splat_names(self):
         return ', '.join(self.splats.values_list('name', flat=True))

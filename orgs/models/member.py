@@ -26,6 +26,9 @@ class Membership(Model):
         unique_together = ('user', 'organization',)
         ordering = ('organization__name',)
 
+    def __str__(self):
+        return f'{self.pk}'
+
     def description(self):
         if not self.is_active:
             if self.is_blocked:

@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'systems',
     'sheets',
     'orgs',
+    'seed_data',
 ]
 
 MIDDLEWARE = [
@@ -197,10 +198,6 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     },
-    # 'select2': {
-    #     'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-    #     'LOCATION': '127.0.0.1:11211',
-    # }
 }
 
 
@@ -225,6 +222,33 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ]
 }
+
+# Seed data configuration
+# This sets which Models can be seeded and which Serializer is used
+
+SEED_DATA_SERIALIZERS = {
+    'Template': (
+        'systems.models.CharacterTemplate',
+        'systems.serializers.TemplateSerializer'
+    )
+}
+
+# When generating and installing seed data, this dictionary determines
+# what model instances are seeded. The order is preserved when generating and installing.
+# Each entry will generate exactly one zipfile.
+
+SEED_DATA_PLAN = {
+    'Template': ('mage-awakening', 'vampire-requiem'),
+}
+
+# Directory that will store the seed data
+
+SEED_DATA_DIRECTORY = os.path.join(BASE_DIR, 'content')
+
+# IF True, always run 'migrate' before executing 'seed install'
+
+SEED_DATA_MIGRATE = True
+
 
 # Some settings to make debugging easier
 

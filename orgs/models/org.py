@@ -19,7 +19,10 @@ class Organization(Model):
         'Organization', SET_NULL, verbose_name="Parent Organization",
         blank=True, null=True,
         help_text="Optional. If set, you will inherit settings and staff.")
-    information = TextField(blank=True)
+    information = TextField(
+        blank=True,
+        help_text="Information about your organization. If you set this Organization to be "
+        "public, everyone will be able to see this information.")
     is_public = BooleanField(
         default=True, verbose_name="Open to the Public",
         help_text="Allow finding the organization and requesting membership.")
@@ -45,3 +48,5 @@ class PublicOrganization(Organization):
 
     class Meta:
         proxy = True
+
+
