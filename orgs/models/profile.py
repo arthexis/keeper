@@ -36,9 +36,6 @@ class Profile(User):
         blank=True, null=True,
         help_text="Optional. Personal information shared with others.")
 
-    class Meta:
-        verbose_name = 'Profile'
-
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 

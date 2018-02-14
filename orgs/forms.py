@@ -1,8 +1,17 @@
 from django.contrib.auth.hashers import make_password
 from django_select2.forms import ModelSelect2Widget
-from orgs.models import *
-from django.forms import *
+from django.forms import Form, ModelForm, CharField, PasswordInput, IntegerField, HiddenInput, EmailField, DateField
 from datetimewidget.widgets import DateWidget
+
+from orgs.models import Profile, PublicOrganization, Event
+from keeper.utils import exists
+
+__all__ = (
+    'RegistrationForm',
+    'RequestMembershipForm',
+    'PasswordRecoveryForm',
+    'EventForm',
+)
 
 
 class RequestFormMixin(Form):
@@ -38,11 +47,21 @@ class RegistrationForm(ModelForm):
     )
     initial_org_pk = IntegerField(widget=HiddenInput, required=False)
 
+    # TODO Fix clean for email and username
+
     def clean(self):
+        if exists(Profile, self.instance, email=self.cleaned_data['email']):
+            self.add_error('email', 'This email address is already in use.')
+
+        if exists(Profile, self.instance, username=self.cleaned_data['username']):
+            self.add_error('username', 'This username is already in use.')
+
         password = self.cleaned_data.get('password')
         confirm_password = self.cleaned_data.get('confirm_password')
+
         if password != confirm_password:
-            raise ValidationError('Passwords do not match.')
+            self.add_error('password', 'Passwords do not match.')
+            self.add_error('confirm_password', '')
 
     def save(self, commit=True):
         instance = super().save(commit=False)
@@ -87,10 +106,3 @@ class EventForm(ModelForm):
         model = Event
         fields = ("name", "event_date", "information",)
 
-
-__all__ = (
-    'RegistrationForm',
-    'RequestMembershipForm',
-    'PasswordRecoveryForm',
-    'EventForm',
-)

@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 __all__ = (
+    'exists',
     'getenv',
     'otherwise',
     'path',
@@ -96,4 +97,19 @@ def path(pattern, view, name=None, **kwargs):
 
 def rand_string(chars):
     return ''.join(random.choice(string.ascii_letters) for _ in range(chars))
+
+
+def exists(model, instance=None, **kwargs):
+    """ Finds is a model instance with certain values already exists.
+
+    :param model: Model class
+    :param instance: Optional instance to exclude, for example form.instance
+    :param kwargs: Query filters used to identify the instance.
+    :return: True if the instance exists, False otherwise.
+    """
+    qs = model.objects.filter(**kwargs)
+    if instance and instance.pk:
+        qs = qs.exclude(pk=instance.pk)
+    return qs.exists()
+
 

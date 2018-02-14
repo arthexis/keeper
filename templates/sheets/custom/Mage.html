@@ -16,16 +16,16 @@
                 <h3>Arcana</h3>
                 <hr>
                 <div class="row">
-                    {% include '../includes/arcanum.html' with name="Prime" %}
-                    {% include '../includes/arcanum.html' with name="Forces" %}
-                    {% include '../includes/arcanum.html' with name="Mind" %}
-                    {% include '../includes/arcanum.html' with name="Space" %}
-                    {% include '../includes/arcanum.html' with name="Fate" %}
-                    {% include '../includes/arcanum.html' with name="Time" %}
-                    {% include '../includes/arcanum.html' with name="Spirit" %}
-                    {% include '../includes/arcanum.html' with name="Life" %}
-                    {% include '../includes/arcanum.html' with name="Death" %}
-                    {% include '../includes/arcanum.html' with name="Matter" %}
+                    {% include '../comp/arcanum.html' with name="Prime" %}
+                    {% include '../comp/arcanum.html' with name="Forces" %}
+                    {% include '../comp/arcanum.html' with name="Mind" %}
+                    {% include '../comp/arcanum.html' with name="Space" %}
+                    {% include '../comp/arcanum.html' with name="Fate" %}
+                    {% include '../comp/arcanum.html' with name="Time" %}
+                    {% include '../comp/arcanum.html' with name="Spirit" %}
+                    {% include '../comp/arcanum.html' with name="Life" %}
+                    {% include '../comp/arcanum.html' with name="Death" %}
+                    {% include '../comp/arcanum.html' with name="Matter" %}
                 </div>
             </div>
         </div>
@@ -35,7 +35,7 @@
 
             {# Load existing arcana data #}
             {% if character.pk %}
-                $.get('{% url 'sheets:character-powers' %}?char={{ character.pk }}&category=Arcana')
+                $.get('{% url 'sheets:char-power' %}?char={{ character.pk }}&category=Arcana')
                     .done(function (data) {
                         for (var i = 0; i < data.items.length; i++) {
                             var cloned = parent.clone();

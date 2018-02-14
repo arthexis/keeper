@@ -18,7 +18,7 @@ urlpatterns = [
 
     # Forms for creating / modifying Organizations
     path('org/new/', CreateOrganization, 'create-org'),
-    path('org/<int:pk>/', ViewOrganization, 'view-orit-org'),
+    path('org/<int:pk>/', ViewOrganization, 'view-org'),
 
     # Requesting Membership
     path('member/new/', ViewMembership, "request-membership"),

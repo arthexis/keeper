@@ -16,9 +16,7 @@ class BaseCharacterForm(ModelForm):
 
     def clean_beats(self):
         beats = self.cleaned_data['beats']
-        if beats:
-            return int(beats)
-        return 0
+        return int(beats) if beats else 0
 
     class Meta:
         model = Character
@@ -31,7 +29,7 @@ class CreateCharacterForm(BaseCharacterForm):
         exclude = [
             'primary_splat', 'secondary_splat', 'tertiary_splat',
             'power_stat', 'primary_anchor', 'secondary_anchor',
-            'beats', 'experiences', 'organization',
+            'beats', 'experiences', 'organization', 'size', 'health_levels',
             'template_beats', 'template_experiences', 'integrity',
         ]
 
@@ -44,6 +42,6 @@ class EditCharacterForm(BaseCharacterForm):
     class Meta:
         model = Character
         exclude = [
-            'template', 'organization', 'user', 'health_levels',
+            'template', 'organization', 'user',
         ]
 

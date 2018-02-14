@@ -66,9 +66,11 @@
 
         {# 3rd row, Virtue, Vice, Concept #}
         <div class="row">
+          {% if character %}
             {% include 'sheets/comp/field.html' with name='primary_anchor' value=character.primary_anchor label=character.primary_anchor_name %}
             {% include 'sheets/comp/field.html' with name='secondary_anchor' value=character.secondary_anchor label=character.secondary_anchor_name %}
-            {% include 'sheets/comp/field.html' with name='concept' value=character.concept label="Concept" %}
+          {% endif %}
+          {% include 'sheets/comp/field.html' with name='concept' value=character.concept label="Concept" %}
         </div>
         <hr>
 
@@ -383,7 +385,7 @@
                                 addBtn: "#add-merit-btn",
                                 maxNumber: 20,
                                 minNumber: 5,
-                                initialUrl: '{% url 'sheets:character-merits' %}?char={{ character.pk }}',
+                                initialUrl: '{% url 'sheets:char-merits' %}?char={{ character.pk }}',
                                 afterLoad: function (cloned, val) {
                                     cloned.find('select')
                                         .select2({
@@ -444,7 +446,7 @@
                                     addBtn: "#add-speciality-btn",
                                     maxNumber: 20,
                                     minNumber: 3,
-                                    initialUrl: '{% url 'sheets:character-specialities' %}?char={{ character.pk }}',
+                                    initialUrl: '{% url 'sheets:char-specialty' %}?char={{ character.pk }}',
                                     afterLoad: function (cloned, val) {
                                         cloned.find('select')
                                             .val(val.skill)
