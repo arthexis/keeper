@@ -35,5 +35,16 @@ class TemplateSerializer(serializers.ModelSerializer):
             'splat_categories',
         )
 
+    def create(self, validated_data):
+        splat_categories = validated_data.pop('splat_categories', [])
+        template = CharacterTemplate.objects.create(**validated_data)
+        for sc_data in splat_categories:
+            sc_data['template'] = template
+            options = sc_data.pop('splats', [])
+            category = Splat.objects.create(**sc_data)
+            for so_data in options:
+                so_data['category'] = category
+                SplatOption.objects.create(**so_data)
+        return template
 
 
