@@ -49,8 +49,12 @@ class SplatCategoryAdmin(admin.ModelAdmin):
 @admin.register(Merit)
 class MeritAdmin(admin.ModelAdmin):
     model = Merit
-    fields = ('name', 'character_template', )
-    list_display = ('name', 'character_template', )
+    list_filter = ('category', 'character_template', )
+    fields = (('name', 'reference_code'), 'character_template', 'category')
+    list_display = ('name', 'category', 'character_template', )
+    # list_editable = ('category', 'character_template', )
+    # list_display_links = ('name', )
+    prepopulated_fields = {'reference_code': ('name', )}
 
 
 class PowerInline(admin.TabularInline):

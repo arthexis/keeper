@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'bootstrap3',
     'whitenoise',
     'datetimewidget',
+    'model_utils',
     'systems',
     'sheets',
     'orgs',
@@ -232,6 +233,9 @@ SEED_DATA_SERIALIZERS = {
     },
     'Organization': {
         'model': 'orgs.models.Organization',
+    },
+    'Merit': {
+        'model': 'systems.models.Merit',
     }
 }
 
@@ -240,9 +244,13 @@ SEED_DATA_SERIALIZERS = {
 # Each entry will generate exactly one zipfile.
 
 SEED_DATA_PLAN = {
-    'Template': ('geist-sin-eater', ),
+    'Template': (
+        'geist-sin-eater',
+        'mage-awakening',
+        'vampire-requiem'
+    ),
     'Merit': (lambda obj: True),
-    'Organization': ('tmnl', 'mage-awakening', ),
+    'Organization': ('tmnl', ),
 }
 
 # Directory that will store the seed data

@@ -3,7 +3,7 @@ from django_select2.forms import ModelSelect2Widget
 from django.forms import Form, ModelForm, CharField, PasswordInput, IntegerField, HiddenInput, EmailField, DateField
 from datetimewidget.widgets import DateWidget
 
-from orgs.models import Profile, PublicOrganization, Event
+from orgs.models import Profile, Event, Organization
 from keeper.utils import exists
 
 __all__ = (
@@ -78,8 +78,11 @@ class RegistrationForm(ModelForm):
 
 
 class PublicOrganizationWidget(ModelSelect2Widget):
-    model = PublicOrganization
+    model = Organization
     search_fields = ['name__icontains']
+
+    def get_queryset(self):
+        return Organization.public.all()
 
     def label_from_instance(self, obj):
         return obj.name
@@ -90,7 +93,7 @@ class RequestMembershipForm(RequestFormMixin):
 
     def configure(self):
         self.fields['organization'].widget = PublicOrganizationWidget(
-            queryset=PublicOrganization.objects.exclude(memberships__user=self.request.user))
+            queryset=Organization.public.exclude(memberships__user=self.request.user))
 
 
 class PasswordRecoveryForm(Form):

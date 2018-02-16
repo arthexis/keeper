@@ -1,5 +1,5 @@
 from django.db import models
-from systems.widgets import *
+from systems.widgets import DotsInput
 
 
 class DotsField(models.PositiveSmallIntegerField):
@@ -15,4 +15,13 @@ class DotsField(models.PositiveSmallIntegerField):
         field = super().formfield(**kwargs)
         field.widget = DotsInput(circles=self.circles, clear=self.clear)
         return field
+
+
+class BookReferenceField(models.CharField):
+
+    def __init__(self, *args, **kwargs):
+        kwargs['max_length'] = 10
+        super().__init__(*args, **kwargs)
+
+
 

@@ -1,4 +1,10 @@
+import logging
+
 from django.db import models
+from model_utils import Choices
+
+logger = logging.getLogger(__name__)
+
 
 __all__ = (
     "CharacterTemplate",
@@ -9,6 +15,14 @@ __all__ = (
     "Power",
     "AnchorCategory",
 )
+
+
+class ReferenceBook(models.Model):
+    name = models.CharField(max_length=100)
+    reference_code = models.SlugField('Code', max_length=10, unique=True)
+
+    class Meta:
+        verbose_name = "Reference Book"
 
 
 class CharacterTemplate(models.Model):
@@ -38,7 +52,7 @@ class CharacterTemplate(models.Model):
 
 
 class SplatCategory(models.Model):
-    FLAVOR = (
+    FLAVOR = Choices(
         ('1', 'Primary (Nature)'),
         ('2', 'Secondary (Faction)'),
         ('3', 'Tertiary (Attained)'),
@@ -46,7 +60,7 @@ class SplatCategory(models.Model):
     name = models.CharField(max_length=20)
     character_template = models.ForeignKey(
         CharacterTemplate, on_delete=models.CASCADE, related_name='splat_categories')
-    flavor = models.CharField(max_length=10, choices=FLAVOR, null=True)
+    flavor = models.CharField(max_length=1, choices=FLAVOR, null=True)
 
     class Meta:
         ordering = ('character_template', 'flavor', )
@@ -85,12 +99,13 @@ class Splat(models.Model):
 
 
 class Merit(models.Model):
-    CATEGORIES = (
+    CATEGORIES = Choices(
         ('mental', 'Mental'),
         ('physical', 'Physical'),
         ('social', 'Social'),
         ('supernatural', 'Supernatural'),
         ('style', 'Style'),
+        ('other', 'Other')
     )
     name = models.CharField(max_length=40, unique=True)
     category = models.CharField(max_length=20, choices=CATEGORIES)

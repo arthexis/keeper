@@ -1,17 +1,18 @@
 import logging
 
-from django.db.models import Model, CharField, ForeignKey, TextField, BooleanField, SET_NULL, Manager, SlugField
+from django.db.models import CharField, ForeignKey, TextField, BooleanField, SlugField, SET_NULL
+from model_utils.managers import QueryManager
+from model_utils.models import TimeStampedModel
 
 logger = logging.getLogger(__name__)
 
 __all__ = (
     'Organization',
-    'PublicOrganization',
 )
 
 
 # Users can create Organizations
-class Organization(Model):
+class Organization(TimeStampedModel):
     name = CharField(
         max_length=200, unique=True,
         help_text="Required. Must be unique across all Organizations.")
@@ -29,6 +30,8 @@ class Organization(Model):
 
     reference_code = SlugField('URL Prefix', unique=True)
 
+    public = QueryManager(is_public=True)
+
     def __str__(self):
         return self.name
 
@@ -39,16 +42,5 @@ class Organization(Model):
         from .event import UpcomingEvent
         return UpcomingEvent.objects.filter(organization=self)
 
-
-class PublicOrganizationManager(Manager):
-    def get_queryset(self):
-        return super().get_queryset().filter(is_public=True)
-
-
-class PublicOrganization(Organization):
-    objects = PublicOrganizationManager()
-
-    class Meta:
-        proxy = True
 
 
