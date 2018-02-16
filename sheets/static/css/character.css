@@ -11,6 +11,10 @@
     display: inline-block;
 }
 
+.inline-dots .form-group {
+    margin-bottom: 5px;
+}
+
 .hidden {
     display: none;
 }

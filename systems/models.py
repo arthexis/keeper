@@ -1,19 +1,29 @@
 from django.db import models
 
+__all__ = (
+    "CharacterTemplate",
+    "SplatCategory",
+    "Splat",
+    "Merit",
+    "PowerCategory",
+    "Power",
+    "AnchorCategory",
+)
+
 
 class CharacterTemplate(models.Model):
     name = models.CharField(max_length=20)
     game_line = models.CharField(max_length=20)
     integrity_name = models.CharField(max_length=20, verbose_name="Integrity", default="Integrity")
-    power_stat_name = models.CharField(max_length=20, verbose_name="Power Stat")
-    resource_name = models.CharField(max_length=20, verbose_name="Resource")
+    power_stat_name = models.CharField(max_length=20, verbose_name="Power Stat", blank=True)
+    resource_name = models.CharField(max_length=20, verbose_name="Resource", blank=True)
     primary_anchor_name = models.CharField(max_length=20, verbose_name="Primary Anchor", default="Virtue")
     secondary_anchor_name = models.CharField(max_length=20, verbose_name="Secondary Anchor", default="Vice")
     character_group_name = models.CharField(max_length=20, verbose_name="Group Name", default="Group")
     experiences_prefix = models.CharField(max_length=20, verbose_name="Experiences Prefix", blank=True, null=True)
 
     # Used for seed data storage
-    reference_code = models.SlugField('Code')
+    reference_code = models.SlugField('Code', unique=True)
 
     class Meta:
         verbose_name = "Character Template"
@@ -22,26 +32,25 @@ class CharacterTemplate(models.Model):
         return str(self.name)
 
 
-class Splat(models.Model):
+class SplatCategory(models.Model):
     FLAVOR = (
         ('1', 'Primary (Nature)'),
         ('2', 'Secondary (Faction)'),
         ('3', 'Tertiary (Attained)'),
     )
     name = models.CharField(max_length=20)
-    template = models.ForeignKey(CharacterTemplate, on_delete=models.CASCADE, related_name='splat_categories')
+    character_template = models.ForeignKey(
+        CharacterTemplate, on_delete=models.CASCADE, related_name='splat_categories')
     flavor = models.CharField(max_length=10, choices=FLAVOR, null=True)
 
     class Meta:
-        ordering = ('template', 'flavor', )
-        unique_together = ('template', 'flavor', )
+        ordering = ('character_template', 'flavor', )
+        unique_together = ('character_template', 'flavor', )
+        verbose_name = ('Splat Category')
+        verbose_name_plural = ('Splat Categories')
 
     def __str__(self):
         return str(self.name)
-
-    def get_options_str(self):
-        options = SplatOption.objects.filter(category=self).values_list('name', flat=True)
-        return ', '.join(options)
 
     def splat_names(self):
         return ', '.join(self.splats.values_list('name', flat=True))
@@ -55,18 +64,19 @@ class Splat(models.Model):
             return 'tertiary_splat'
 
 
-class SplatOption(models.Model):
+class Splat(models.Model):
     name = models.CharField(max_length=40)
-    category = models.ForeignKey(Splat, on_delete=models.CASCADE, related_name='splats')
+    splat_category = models.ForeignKey(
+        SplatCategory, on_delete=models.CASCADE, related_name='splats')
 
     class Meta:
-        ordering = ('category', 'name', )
+        ordering = ('splat_category', 'name', )
 
     def __str__(self):
         return str(self.name)
 
     def template(self):
-        return self.category.template
+        return self.splat_category.character_template
 
 
 class Merit(models.Model):
@@ -78,7 +88,8 @@ class Merit(models.Model):
         ('style', 'Style'),
     )
     name = models.CharField(max_length=40, unique=True)
-    template = models.ForeignKey('CharacterTemplate', on_delete=models.CASCADE, null=True, blank=True)
+    character_template = models.ForeignKey(
+        'CharacterTemplate', on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
         ordering = ('name', )
@@ -89,8 +100,8 @@ class Merit(models.Model):
 
 class PowerCategory(models.Model):
     name = models.CharField(max_length=20)
-    template = models.ForeignKey(
-        'CharacterTemplate', on_delete=models.PROTECT, related_name='power_categories', null=True)
+    character_template = models.ForeignKey(
+        'CharacterTemplate', on_delete=models.CASCADE, related_name='power_categories', null=True)
 
     class Meta:
         verbose_name = "Power Category"
@@ -105,11 +116,11 @@ class PowerCategory(models.Model):
 
 class Power(models.Model):
     name = models.CharField(max_length=40)
-    category = models.ForeignKey('PowerCategory', on_delete=models.PROTECT, related_name='powers')
+    power_category = models.ForeignKey('PowerCategory', on_delete=models.CASCADE, related_name='powers')
 
     class Meta:
-        unique_together = ('name', 'category', )
-        ordering = ('category', 'name', )
+        unique_together = ('name', 'power_category', )
+        ordering = ('power_category', 'name', )
 
     def __str__(self):
         return str(self.name)
@@ -117,7 +128,8 @@ class Power(models.Model):
 
 class AnchorCategory(models.Model):
     name = models.CharField(max_length=20)
-    template = models.ForeignKey(CharacterTemplate, on_delete=models.CASCADE, related_name='anchor_categories')
+    character_template = models.ForeignKey(
+        CharacterTemplate, on_delete=models.CASCADE, related_name='anchor_categories')
     is_required = models.BooleanField(default=False)
     description = models.TextField()
 
@@ -128,13 +140,3 @@ class AnchorCategory(models.Model):
     def __str__(self):
         return str(self.name)
 
-
-__all__ = (
-    "CharacterTemplate",
-    "Splat",
-    "SplatOption",
-    "Merit",
-    "PowerCategory",
-    "Power",
-    "AnchorCategory",
-)

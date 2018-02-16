@@ -5,11 +5,7 @@ from django.core.management.base import BaseCommand
 from rest_framework.renderers import JSONRenderer
 from zipfile import ZipFile
 
-from seed_data.utils import import_object
-
-SERIALIZERS = settings.SEED_DATA_SERIALIZERS
-
-REF_FIELD = getattr(settings, 'SEED_DATA_REF_FIELD', 'reference_code')
+from seed_data.utils import *
 
 
 class Command(BaseCommand):
@@ -27,7 +23,7 @@ class Command(BaseCommand):
 
         # Get the Model class and serializer for the specified entity
         entity = options['entity']
-        model_cls, serializer_cls = (import_object(i) for i in SERIALIZERS[entity])
+        model_cls, serializer_cls = get_model_serializer(entity)
 
         # Construct the queryset for export
         queryset = model_cls.objects.all()
@@ -78,7 +74,11 @@ class Command(BaseCommand):
                 print('Serializing:', str(obj))
                 serializer = serializer_cls(obj)
                 json_data = JSONRenderer().render(serializer.data)
-                name = f'{entity}_{obj.pk}.json'
+                if options['refs']:
+                    reference_code = getattr(obj, REF_FIELD)
+                    name = f'{entity}_{reference_code}.json'
+                else:
+                    name = f'{entity}_{obj.pk}.json'
                 print(f"- Extracting {entity} {obj.pk} - {obj}")
                 z.writestr(name, json_data)
 

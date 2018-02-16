@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from systems.models import PowerCategory, Power, Splat, SplatOption
+from systems.models import PowerCategory, Power, SplatCategory, Splat
 from sheets.models import *
 from django.forms.widgets import HiddenInput
 from systems.admin import ParentInlineMixin
@@ -136,12 +136,12 @@ class CharacterAdmin(admin.ModelAdmin):
             for flavor in ('primary', 'secondary', 'tertiary'):
                 field = form.base_fields[flavor + '_splat']
                 try:
-                    category = Splat.objects.get(flavor=flavor, template=obj.template)
-                    field.queryset = SplatOption.objects.filter(category=category)
+                    category = SplatCategory.objects.get(flavor=flavor, template=obj.template)
+                    field.queryset = Splat.objects.filter(category=category)
                     field.label = category.name
                     if flavor == 'primary' and obj.template:
                         field.required = True
-                except Splat.DoesNotExist:
+                except SplatCategory.DoesNotExist:
                     field.widget = HiddenInput()
             # Modify other template specific labels
             if obj.template:

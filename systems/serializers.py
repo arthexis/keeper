@@ -1,11 +1,15 @@
+import logging
+
 from rest_framework import serializers
 
-from .models import CharacterTemplate, Splat, SplatOption
+from .models import CharacterTemplate, SplatCategory, Splat
+
+logger = logging.getLogger(__name__)
 
 
 class SplatOptionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = SplatOption
+        model = Splat
         fields = ('name', )
 
 
@@ -13,7 +17,7 @@ class SplatSerializer(serializers.ModelSerializer):
     splats = SplatOptionSerializer(many=True, required=False)
 
     class Meta:
-        model = Splat
+        model = SplatCategory
         fields = ('name', 'flavor', 'splats')
 
 
@@ -33,18 +37,17 @@ class TemplateSerializer(serializers.ModelSerializer):
             'character_group_name',
             'experiences_prefix',
             'splat_categories',
+            'reference_code',
         )
 
     def create(self, validated_data):
-        splat_categories = validated_data.pop('splat_categories', [])
+        splat_categories_data = validated_data.pop('splat_categories', [])
         template = CharacterTemplate.objects.create(**validated_data)
-        for sc_data in splat_categories:
-            sc_data['template'] = template
-            options = sc_data.pop('splats', [])
-            category = Splat.objects.create(**sc_data)
-            for so_data in options:
-                so_data['category'] = category
-                SplatOption.objects.create(**so_data)
+        for splat_category_data in splat_categories_data:
+            splats_data = splat_category_data.pop('splats', [])
+            splat_category = SplatCategory.objects.create(template=template, **splat_category_data)
+            for splat_data in splats_data:
+                Splat.objects.create(category=splat_category, **splat_data)
         return template
 
 

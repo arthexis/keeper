@@ -61,7 +61,7 @@ ATTRIBUTES = (
 class Character(Model):
 
     # Character basic info
-    name = CharField(max_length=40, verbose_name="Character")
+    name = CharField(max_length=40, verbose_name="Character Name")
     template = ForeignKey(CharacterTemplate, PROTECT)
     power_stat = DotsField(default=1, clear=False)
     integrity = DotsField(default=7)
@@ -88,42 +88,42 @@ class Character(Model):
     composure = DotsField(default=1, clear=False)
 
     # Mental Skills
-    academics = DotsField()
-    computer = DotsField()
-    crafts = DotsField()
-    investigation = DotsField()
-    medicine = DotsField()
-    occult = DotsField()
-    politics = DotsField()
-    science = DotsField()
+    academics = DotsField(circles=5)
+    computer = DotsField(circles=5)
+    crafts = DotsField(circles=5)
+    investigation = DotsField(circles=5)
+    medicine = DotsField(circles=5)
+    occult = DotsField(circles=5)
+    politics = DotsField(circles=5)
+    science = DotsField(circles=5)
 
     # Physical Skills
-    athletics = DotsField()
-    brawl = DotsField()
-    drive = DotsField()
-    firearms = DotsField()
-    larceny = DotsField()
-    stealth = DotsField()
-    survival = DotsField()
-    weaponry = DotsField()
+    athletics = DotsField(circles=5)
+    brawl = DotsField(circles=5)
+    drive = DotsField(circles=5)
+    firearms = DotsField(circles=5)
+    larceny = DotsField(circles=5)
+    stealth = DotsField(circles=5)
+    survival = DotsField(circles=5)
+    weaponry = DotsField(circles=5)
 
     # Social Skills
-    animal_ken = DotsField()
-    empathy = DotsField()
-    expression = DotsField()
-    intimidation = DotsField()
-    persuasion = DotsField()
-    socialize = DotsField()
-    streetwise = DotsField()
-    subterfuge = DotsField()
+    animal_ken = DotsField(circles=5)
+    empathy = DotsField(circles=5)
+    expression = DotsField(circles=5)
+    intimidation = DotsField(circles=5)
+    persuasion = DotsField(circles=5)
+    socialize = DotsField(circles=5)
+    streetwise = DotsField(circles=5)
+    subterfuge = DotsField(circles=5)
 
     # Splat foreign Keys
     primary_splat = ForeignKey(
-        SplatOption, PROTECT, related_name='+', null=True, blank=True)
+        Splat, PROTECT, related_name='+', null=True, blank=True)
     secondary_splat = ForeignKey(
-        SplatOption, PROTECT, related_name='+', null=True, blank=True)
+        Splat, PROTECT, related_name='+', null=True, blank=True)
     tertiary_splat = ForeignKey(
-        SplatOption, PROTECT, related_name='+', null=True, blank=True)
+        Splat, PROTECT, related_name='+', null=True, blank=True)
 
     # Character Advancement related
     beats = PositiveIntegerField(default=0)
@@ -241,7 +241,7 @@ class CharacterPower(CharacterElement):
         return '{} {}'.format(self.power.name, self.rating)
 
     def category(self):
-        return self.power.category.name
+        return self.power.power_category.name
 
 
 class SkillSpeciality(CharacterElement):

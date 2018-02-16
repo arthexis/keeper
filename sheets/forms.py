@@ -42,6 +42,6 @@ class EditCharacterForm(BaseCharacterForm):
     class Meta:
         model = Character
         exclude = [
-            'template', 'organization', 'user',
+            "character_template", 'organization', 'user',
         ]
 

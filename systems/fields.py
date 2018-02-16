@@ -8,10 +8,11 @@ class DotsField(models.PositiveSmallIntegerField):
     def __init__(self, *args, **kwargs):
         kwargs['default'] = kwargs.get('default', 0)
         self.clear = kwargs.pop('clear', True)
+        self.circles = kwargs.pop('circles', 10)
         super().__init__(*args, **kwargs)
 
     def formfield(self, **kwargs):
         field = super().formfield(**kwargs)
-        field.widget = DotsInput(circles=10, clear=self.clear)
+        field.widget = DotsInput(circles=self.circles, clear=self.clear)
         return field
 

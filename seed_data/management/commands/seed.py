@@ -18,6 +18,7 @@ class Command(BaseCommand):
         parser.add_argument('--plan', default=None)
         parser.add_argument('--dir', default=None)
         parser.add_argument('--skip', action='store_true')
+        parser.add_argument('--update', action='store_true')
         parser.add_argument('--migrate', type=bool, default=settings.SEED_DATA_MIGRATE)
 
     def handle(self, *args, **options):
@@ -30,7 +31,7 @@ class Command(BaseCommand):
         elif options['action'] == 'install':
             if options['migrate']:
                 call_command('migrate')
-            self.install_data(options['skip'])
+            self.install_data(options['skip'], options['update'])
 
     def generate_data(self):
         for entity, refs in self.plan.items():
@@ -39,14 +40,16 @@ class Command(BaseCommand):
             call_command('export', entity, '-o', outfile, '--refs', *refs)
         print("All seed data generated.")
 
-    def install_data(self, skip=False):
+    def install_data(self, skip=False, update=False):
         # Ensure the imports are made in the correct order
         for entity in self.plan.keys():
             source = os.path.join(self.directory, entity)
             print("Seeding ", entity)
+            params = []
             if skip:
-                call_command('import', source, '--skip')
-            else:
-                call_command('import', source)
+                params.append('--skip')
+            if update:
+                params.append('--update')
+            call_command('import', source, *params)
         print("Missing seed data imported.")
 

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from systems.models import *
+from systems.models import Splat, SplatCategory, Merit, Power, PowerCategory, CharacterTemplate
 
 
 class ParentInlineMixin(admin.TabularInline):
@@ -12,36 +12,35 @@ class ParentInlineMixin(admin.TabularInline):
         return super().get_formset(request, obj, **kwargs)
 
 
-class SplatOptionInline(admin.TabularInline):
-    model = SplatOption
+class SplatInline(admin.TabularInline):
+    model = Splat
     fields = ('name', )
     min_num = 1
     extra = 0
 
 
-class SplatInline(admin.TabularInline):
-    model = Splat
-    fields = ('name', 'flavor', 'options')
-    readonly_fields = ('options', )
-    min_num = 1
+class SplatCategoryInline(admin.TabularInline):
+    model = SplatCategory
+    fields = ('name', 'flavor', 'splats')
+    readonly_fields = ('splats', )
     max_num = 3
     extra = 0
     show_change_link = True
 
-    def options(self, obj=None):
-        return obj.get_options_str()
+    def splats(self, obj=None):
+        return obj.splat_names()
 
 
-@admin.register(Splat)
+@admin.register(SplatCategory)
 class SplatCategoryAdmin(admin.ModelAdmin):
-    model = Splat
-    list_display = ('name', 'template', 'splat_names')
+    model = SplatCategory
+    list_display = ('name', 'character_template', 'splat_names')
     readonly_fields = ('splat_names', )
     fieldsets = (
         (None, {
             'fields': (
                 ('name',),
-                ('template', 'flavor', ),
+                ('character_template', 'flavor', ),
             ),
         }),
     )
@@ -50,8 +49,8 @@ class SplatCategoryAdmin(admin.ModelAdmin):
 @admin.register(Merit)
 class MeritAdmin(admin.ModelAdmin):
     model = Merit
-    fields = ('name', 'template', )
-    list_display = ('name', 'template', )
+    fields = ('name', 'character_template', )
+    list_display = ('name', 'character_template', )
 
 
 class PowerInline(admin.TabularInline):
@@ -64,8 +63,8 @@ class PowerInline(admin.TabularInline):
 @admin.register(PowerCategory)
 class PowerCategoryAdmin(admin.ModelAdmin):
     model = PowerCategory
-    fields = ('name', 'template')
-    list_display = ('name', 'template', 'power_names', )
+    fields = ('name', 'character_template')
+    list_display = ('name', 'character_template', 'power_names', )
     readonly_fields = ('power_names', )
     inlines = (PowerInline, )
 
@@ -95,6 +94,6 @@ class TemplateAdmin(admin.ModelAdmin):
             'fields': ('reference_code',)
         })
     )
-    inlines = (SplatInline, PowerCategoryInline)
+    inlines = (SplatCategoryInline, PowerCategoryInline)
     prepopulated_fields = {'reference_code': ('name', 'game_line')}
 

@@ -5,10 +5,9 @@ import sys
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from zipfile import ZipFile
+from django.db import transaction
 
-from seed_data.utils import import_object
-
-SERIALIZERS = settings.SEED_DATA_SERIALIZERS
+from seed_data.utils import *
 
 
 class Command(BaseCommand):
@@ -17,6 +16,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('filename')
         parser.add_argument('--skip', action='store_true')
+        parser.add_argument('--update', action='store_true')
 
     def handle(self, *args, **options):
 
@@ -35,7 +35,7 @@ class Command(BaseCommand):
                 # Prepare the serializer from the file name and contents
                 entity, pk = name.replace('.json', '').split('_')
 
-                model_cls, serializer_cls = (import_object(i) for i in SERIALIZERS[entity])
+                model_cls, serializer_cls = get_model_serializer(entity)
 
                 data = json.loads(z.read(name).decode(settings.DEFAULT_CHARSET))
                 serializer = serializer_cls(data=data)
@@ -43,13 +43,21 @@ class Command(BaseCommand):
                 # Validate and execute the individual import
 
                 if serializer.is_valid():
-                    print(f'- {entity} {pk} valid')
-                    serializer.save()
+                    print(f'Import {entity} {pk}: serialized data valid')
+                    with transaction.atomic():
+
+                        if options['update']:
+                            ref = data[REF_FIELD]
+                            instance = model_cls.objects.filter(**{REF_FIELD: ref})
+                            if instance.exists():
+                                instance.delete()
+
+                        serializer.save()
                 else:
                     print(f"Failed to import {name}:")
-                    for k, v in serializer.errors.items():
+                    for key, val in serializer.errors.items():
                         has_errors = True
-                        print(f"- {k}: {v}")
+                        print(f"- {key}: {val}")
 
         print("Import complete.")
         if has_errors and not options['skip']:

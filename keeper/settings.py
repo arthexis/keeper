@@ -227,10 +227,9 @@ REST_FRAMEWORK = {
 # This sets which Models can be seeded and which Serializer is used
 
 SEED_DATA_SERIALIZERS = {
-    'Template': (
-        'systems.models.CharacterTemplate',
-        'systems.serializers.TemplateSerializer'
-    )
+    'Template': {
+        'model': 'systems.models.CharacterTemplate',
+    }
 }
 
 # When generating and installing seed data, this dictionary determines
@@ -238,7 +237,8 @@ SEED_DATA_SERIALIZERS = {
 # Each entry will generate exactly one zipfile.
 
 SEED_DATA_PLAN = {
-    'Template': ('mage-awakening', 'vampire-requiem'),
+    # 'Template': ('mage-awakening', 'vampire-requiem'),
+    'Template': ('geist-sin-eater', ),
 }
 
 # Directory that will store the seed data
