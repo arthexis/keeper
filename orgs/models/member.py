@@ -1,6 +1,6 @@
 import logging
 
-from django.db.models import ForeignKey, CharField, BooleanField, CASCADE
+from django.db.models import ForeignKey, CharField, BooleanField, IntegerField, CASCADE, SET_NULL
 from django.contrib.auth.models import User
 from model_utils.models import TimeStampedModel
 
@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 __all__ = (
     'Membership',
+    'Prestige',
 )
 
 
@@ -39,3 +40,10 @@ class Membership(TimeStampedModel):
         if self.is_officer:
             return 'Active Officer'
         return 'Active Member'
+
+
+class Prestige(TimeStampedModel):
+    membership = ForeignKey('Membership', CASCADE, related_name='prestige')
+    amount = IntegerField()
+    notes = CharField(max_length=2000)
+    witness = ForeignKey(User, SET_NULL, null=True, related_name='+')

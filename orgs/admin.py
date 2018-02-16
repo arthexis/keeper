@@ -5,14 +5,34 @@ from orgs.models import *
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
     model = Profile
-    fields = ('user', 'phone', 'information')
-    list_display = ('username', 'email', 'first_name', 'last_name')
+    fields = (
+        ('username', 'email'),
+        ('first_name', 'last_name'),
+        'phone',
+        'information'
+    )
+    list_display = ('username', 'email', 'last_name', 'phone')
+    list_editable = ('email', 'last_name', 'phone')
+    list_display_links = ('username', )
 
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
     model = Event
     list_display = ('name', 'event_date')
+
+
+@admin.register(Membership)
+class MembershipAdmin(admin.ModelAdmin):
+    model = Membership
+    fields = (
+        'user', 'organization', 'title',
+        ('is_active', 'is_officer'), ('is_owner', 'is_blocked'),
+    )
+    list_display = ('user', 'organization', 'title', 'is_active', 'is_officer', 'is_owner', 'is_blocked')
+    list_editable = ('title', 'is_active', 'is_officer', 'is_owner', 'is_blocked')
+    list_display_links = ('user', 'organization')
+    list_filter = ('is_active', 'is_officer', 'is_owner', 'is_blocked')
 
 
 class MemberInline(admin.TabularInline):
