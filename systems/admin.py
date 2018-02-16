@@ -75,7 +75,8 @@ class PowerCategoryAdmin(admin.ModelAdmin):
 
 class PowerCategoryInline(admin.TabularInline):
     model = PowerCategory
-    fields = ('name',)
+    fields = ('name', 'power_names')
+    readonly_fields = ('power_names', )
     extra = 0
     show_change_link = True
 

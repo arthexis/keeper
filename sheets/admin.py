@@ -96,11 +96,11 @@ class CharacterAdmin(admin.ModelAdmin):
 
     def get_extra_inlines(self, request, obj: Character):
         extra_inlines = []
-        for category in PowerCategory.objects.filter(template=obj.template):
+        for category in PowerCategory.objects.filter(character_template=obj.template):
 
             class PowerInline(ParentInlineMixin):
                 model = CharacterPower
-                fields = ('power', 'rating', 'details', )
+                fields = ('power', 'rating', )
                 readonly_fields = ('category', )
                 power_category = category
                 verbose_name = category.name
@@ -108,13 +108,13 @@ class CharacterAdmin(admin.ModelAdmin):
                 extra = 0
 
                 def get_queryset(self, request):
-                    return CharacterPower.objects.filter(power__category=self.power_category)
+                    return CharacterPower.objects.filter(power__power_category=self.power_category)
 
                 def get_field_queryset(self, db, db_field, request):
                     self.formset.power_category = self.power_category
                     queryset = super().get_field_queryset(db, db_field, request)
                     if db_field.name == 'power' and self.parent_obj:
-                        return Power.objects.filter(category=self.power_category)
+                        return Power.objects.filter(power_category=self.power_category)
                     return queryset
 
             extra_inlines.append(PowerInline)
@@ -136,8 +136,8 @@ class CharacterAdmin(admin.ModelAdmin):
             for flavor in ('primary', 'secondary', 'tertiary'):
                 field = form.base_fields[flavor + '_splat']
                 try:
-                    category = SplatCategory.objects.get(flavor=flavor, template=obj.template)
-                    field.queryset = Splat.objects.filter(category=category)
+                    category = SplatCategory.objects.get(flavor=flavor, character_template=obj.template)
+                    field.queryset = Splat.objects.filter(splat_category=category)
                     field.label = category.name
                     if flavor == 'primary' and obj.template:
                         field.required = True
