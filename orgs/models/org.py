@@ -1,6 +1,6 @@
 import logging
 
-from django.db.models import *
+from django.db.models import Model, CharField, ForeignKey, TextField, BooleanField, SET_NULL, Manager, SlugField
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +26,8 @@ class Organization(Model):
     is_public = BooleanField(
         default=True, verbose_name="Open to the Public",
         help_text="Allow finding the organization and requesting membership.")
+
+    reference_code = SlugField('URL Prefix', unique=True)
 
     def __str__(self):
         return self.name

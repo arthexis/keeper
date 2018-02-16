@@ -14,13 +14,18 @@ __all__ = (
 class CharacterTemplate(models.Model):
     name = models.CharField(max_length=20)
     game_line = models.CharField(max_length=20)
-    integrity_name = models.CharField(max_length=20, verbose_name="Integrity", default="Integrity")
+    integrity_name = models.CharField(
+        max_length=20, verbose_name="Integrity", default="Integrity", blank=True)
     power_stat_name = models.CharField(max_length=20, verbose_name="Power Stat", blank=True)
     resource_name = models.CharField(max_length=20, verbose_name="Resource", blank=True)
-    primary_anchor_name = models.CharField(max_length=20, verbose_name="Primary Anchor", default="Virtue")
-    secondary_anchor_name = models.CharField(max_length=20, verbose_name="Secondary Anchor", default="Vice")
-    character_group_name = models.CharField(max_length=20, verbose_name="Group Name", default="Group")
-    experiences_prefix = models.CharField(max_length=20, verbose_name="Experiences Prefix", blank=True, null=True)
+    primary_anchor_name = models.CharField(
+        max_length=20, verbose_name="Primary Anchor", default="Virtue", blank=True)
+    secondary_anchor_name = models.CharField(
+        max_length=20, verbose_name="Secondary Anchor", default="Vice", blank=True)
+    character_group_name = models.CharField(
+        max_length=20, verbose_name="Group Name", default="Group", blank=True)
+    experiences_prefix = models.CharField(
+        max_length=20, verbose_name="Experiences Prefix", blank=True, null=True)
 
     # Used for seed data storage
     reference_code = models.SlugField('Code', unique=True)

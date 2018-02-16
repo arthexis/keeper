@@ -25,6 +25,7 @@ class MemberInline(admin.TabularInline):
 @admin.register(Organization)
 class OrganizationAdmin(admin.ModelAdmin):
     model = Organization
-    fields = ('name', 'parent_org', 'is_public', 'information')
+    fields = ('name', 'parent_org', 'is_public', 'information', 'reference_code')
     list_display = ('name', 'parent_org', 'is_public')
     inlines = (MemberInline, )
+    prepopulated_fields = {'reference_code': ('name', )}

@@ -229,6 +229,9 @@ REST_FRAMEWORK = {
 SEED_DATA_SERIALIZERS = {
     'Template': {
         'model': 'systems.models.CharacterTemplate',
+    },
+    'Organization': {
+        'model': 'orgs.models.Organization',
     }
 }
 
@@ -237,8 +240,8 @@ SEED_DATA_SERIALIZERS = {
 # Each entry will generate exactly one zipfile.
 
 SEED_DATA_PLAN = {
-    # 'Template': ('mage-awakening', 'vampire-requiem'),
     'Template': ('geist-sin-eater', ),
+    'Organization': ('tmnl', ),
 }
 
 # Directory that will store the seed data
