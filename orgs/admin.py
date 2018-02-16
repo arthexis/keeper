@@ -1,5 +1,5 @@
 from django.contrib import admin
-from orgs.models import *
+from orgs.models import Profile, Event, Prestige, Membership, Organization
 
 
 @admin.register(Profile)
@@ -22,9 +22,16 @@ class EventAdmin(admin.ModelAdmin):
     list_display = ('name', 'event_date')
 
 
+class PrestigeInline(admin.TabularInline):
+    model = Prestige
+    fields = ('notes', 'amount', 'witness')
+    extra = 0
+
+
 @admin.register(Membership)
 class MembershipAdmin(admin.ModelAdmin):
     model = Membership
+    inlines = (PrestigeInline, )
     fields = (
         'user', 'organization', 'title',
         ('is_active', 'is_officer'), ('is_owner', 'is_blocked'),
@@ -37,7 +44,7 @@ class MembershipAdmin(admin.ModelAdmin):
 
 class MemberInline(admin.TabularInline):
     model = Membership
-    fields = ('user', 'title', 'is_officer', 'is_active')
+    fields = ('user', 'title', 'is_officer', 'is_active', 'is_blocked', 'is_owner')
     extra = 1
     show_change_link = True
 

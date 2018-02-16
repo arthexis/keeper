@@ -47,3 +47,6 @@ class Prestige(TimeStampedModel):
     amount = IntegerField()
     notes = CharField(max_length=2000)
     witness = ForeignKey(User, SET_NULL, null=True, related_name='+')
+
+    class Meta:
+        verbose_name = 'Prestige Record'
