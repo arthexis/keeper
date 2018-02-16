@@ -93,8 +93,13 @@ class Merit(models.Model):
         ('style', 'Style'),
     )
     name = models.CharField(max_length=40, unique=True)
+    category = models.CharField(max_length=20, choices=CATEGORIES)
     character_template = models.ForeignKey(
-        'CharacterTemplate', on_delete=models.CASCADE, null=True, blank=True)
+        'CharacterTemplate', on_delete=models.CASCADE, null=True, blank=True, related_name='+',
+        verbose_name='Template Restriction', help_text='Optional. Restricts Merit to specific a Template.'
+    )
+
+    reference_code = models.SlugField('Code', unique=True)
 
     class Meta:
         ordering = ('name', )

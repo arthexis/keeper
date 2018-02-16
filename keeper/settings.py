@@ -241,7 +241,8 @@ SEED_DATA_SERIALIZERS = {
 
 SEED_DATA_PLAN = {
     'Template': ('geist-sin-eater', ),
-    'Organization': ('tmnl', ),
+    'Merit': (lambda obj: True),
+    'Organization': ('tmnl', 'mage-awakening', ),
 }
 
 # Directory that will store the seed data

@@ -4,6 +4,8 @@ from django.core.management.base import BaseCommand
 from django.core.management import call_command
 from django.conf import settings
 
+from seed_data.utils import import_object, REF_FIELD
+
 
 class Command(BaseCommand):
     help = 'Import seeded data from settings.SEED_DATA'
@@ -35,6 +37,9 @@ class Command(BaseCommand):
 
     def generate_data(self):
         for entity, refs in self.plan.items():
+            if callable(refs):
+                model_cls = import_object(settings.SEED_DATA_SERIALIZERS[entity]['model'])
+                refs = [getattr(obj, REF_FIELD) for obj in model_cls.objects.all() if refs(obj)]
             outfile = os.path.join(self.directory, entity)
             print("Seed", entity, "->", ", ".join(refs))
             call_command('export', entity, '-o', outfile, '--refs', *refs)
