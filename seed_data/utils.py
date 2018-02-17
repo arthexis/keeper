@@ -42,7 +42,7 @@ def get_model_serializer(entity: str) -> (Type[Model], Type[ModelSerializer]):
 
 
 def serializer_factory(
-        model_cls: Type[Model], create=True, nested=True, exclude=None) -> type:
+        model_cls: Type[Model], create=True, nested=True, exclude=None):
     attrs = {}
     class_name = f"{model_cls.__name__}Serializer"
 
