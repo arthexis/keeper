@@ -1,6 +1,10 @@
 from orgs.views import *
 from keeper.utils import path
 
+# noinspection PyUnresolvedReferences
+import orgs.signals
+
+
 app_name = 'orgs'
 urlpatterns = [
 
@@ -12,14 +16,9 @@ urlpatterns = [
     path('profile/', RedirectMyProfile, "profile"),
     path('profile/<int:pk>/edit/', EditProfile, "edit-profile"),
 
-    # Login for regular users
-    path('login/', Login, 'login'),
-    path('logout/', Logout, 'logout'),
-
     # Forms for creating / modifying Organizations
     path('org/new/', CreateOrganization, 'create-org'),
     path('org/<int:pk>/', ViewOrganization, 'view-org'),
-    path('org/<int:pk>/edit/', EditOrganization, 'edit-org'),
 
     # Requesting Membership
     path('member/new/', ViewMembership, "request-membership"),

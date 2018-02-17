@@ -8,6 +8,25 @@
   ],
   "repository": "https://github.com/arthexis/keeper",
   "addons": [
-    "heroku-postgresql"
-  ]
+    "heroku-postgresql",
+    "papertrail"
+  ],
+  "scripts": {
+    "postdeploy": "python manage.py seed install --migrate",
+    "pr-postdeploy": "python manage.py seed install --migrate"
+  },
+  "env": {
+    "DEBUG": {
+      "required": true
+    },
+    "HEROKU_APP_NAME": {
+      "required": true
+    },
+    "HEROKU_PARENT_APP_NAME": {
+      "required": true
+    },
+    "SECRET_KEY": {
+      "generator": "secret"
+    }
+  }
 }

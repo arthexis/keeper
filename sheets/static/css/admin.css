@@ -27,6 +27,11 @@ table textarea.form-control {
     min-height: 35px;
     height: 35px;
 }
+
+#membership_form #id_organization {
+    width: 300px;
+}
+
 .form-actions {
     padding-top: 15px;
 }
@@ -50,4 +55,18 @@ table .field-status input {
 .table > tbody > tr > td {
     padding: 4px!important;
 }
+
+.navbar {
+    margin-bottom: 5px!important;
+}
+
+.alert {
+    padding-top: 5px!important;
+    padding-bottom: 5px!important;
+}
+
+.breadcrumb {
+    margin-bottom: 10px!important;
+}
+
 

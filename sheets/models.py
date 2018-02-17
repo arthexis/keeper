@@ -1,11 +1,15 @@
-from django.db.models import *
-from django.contrib.auth.models import User, Group
-from systems.fields import *
-from systems.models import *
-from orgs.models import *
-from systems.fields import DotsField
-
 import logging
+
+from django.db.models import Model, CharField, ForeignKey, TextField, PositiveIntegerField, DateField, \
+    PROTECT, DO_NOTHING, CASCADE, BooleanField, F, Manager
+from django.contrib.auth.models import User, Group
+from model_utils.managers import InheritanceManager, QueryManager
+
+from orgs.models import Organization
+from systems.models import CharacterTemplate, Splat, Power, Merit
+from systems.fields import DotsField
+from model_utils import Choices
+
 logger = logging.getLogger(__name__)
 
 
@@ -17,7 +21,7 @@ __all__ = (
 )
 
 
-SKILLS = (
+SKILLS = Choices(
     ("academics", "Academics"),
     ("computer", "Computer"),
     ("crafts", "Crafts"),
@@ -45,7 +49,7 @@ SKILLS = (
 )
 
 
-ATTRIBUTES = (
+ATTRIBUTES = Choices(
     ("strength", "Strength"),
     ("dexterity", "Dexterity"),
     ("stamina", "Stamina"),
@@ -61,7 +65,7 @@ ATTRIBUTES = (
 class Character(Model):
 
     # Character basic info
-    name = CharField(max_length=40, verbose_name="Character")
+    name = CharField(max_length=40, verbose_name="Character Name")
     template = ForeignKey(CharacterTemplate, PROTECT)
     power_stat = DotsField(default=1, clear=False)
     integrity = DotsField(default=7)
@@ -88,42 +92,39 @@ class Character(Model):
     composure = DotsField(default=1, clear=False)
 
     # Mental Skills
-    academics = DotsField()
-    computer = DotsField()
-    crafts = DotsField()
-    investigation = DotsField()
-    medicine = DotsField()
-    occult = DotsField()
-    politics = DotsField()
-    science = DotsField()
+    academics = DotsField(circles=5)
+    computer = DotsField(circles=5)
+    crafts = DotsField(circles=5)
+    investigation = DotsField(circles=5)
+    medicine = DotsField(circles=5)
+    occult = DotsField(circles=5)
+    politics = DotsField(circles=5)
+    science = DotsField(circles=5)
 
     # Physical Skills
-    athletics = DotsField()
-    brawl = DotsField()
-    drive = DotsField()
-    firearms = DotsField()
-    larceny = DotsField()
-    stealth = DotsField()
-    survival = DotsField()
-    weaponry = DotsField()
+    athletics = DotsField(circles=5)
+    brawl = DotsField(circles=5)
+    drive = DotsField(circles=5)
+    firearms = DotsField(circles=5)
+    larceny = DotsField(circles=5)
+    stealth = DotsField(circles=5)
+    survival = DotsField(circles=5)
+    weaponry = DotsField(circles=5)
 
     # Social Skills
-    animal_ken = DotsField()
-    empathy = DotsField()
-    expression = DotsField()
-    intimidation = DotsField()
-    persuasion = DotsField()
-    socialize = DotsField()
-    streetwise = DotsField()
-    subterfuge = DotsField()
+    animal_ken = DotsField(circles=5)
+    empathy = DotsField(circles=5)
+    expression = DotsField(circles=5)
+    intimidation = DotsField(circles=5)
+    persuasion = DotsField(circles=5)
+    socialize = DotsField(circles=5)
+    streetwise = DotsField(circles=5)
+    subterfuge = DotsField(circles=5)
 
     # Splat foreign Keys
-    primary_splat = ForeignKey(
-        SplatOption, PROTECT, related_name='+', null=True, blank=True)
-    secondary_splat = ForeignKey(
-        SplatOption, PROTECT, related_name='+', null=True, blank=True)
-    tertiary_splat = ForeignKey(
-        SplatOption, PROTECT, related_name='+', null=True, blank=True)
+    primary_splat = ForeignKey(Splat, PROTECT, related_name='+', null=True, blank=True)
+    secondary_splat = ForeignKey(Splat, PROTECT, related_name='+', null=True, blank=True)
+    tertiary_splat = ForeignKey(Splat, PROTECT, related_name='+', null=True, blank=True)
 
     # Character Advancement related
     beats = PositiveIntegerField(default=0)
@@ -150,6 +151,12 @@ class Character(Model):
     # Character Anchors (ie. Virtue / Vice)
     primary_anchor = CharField(max_length=40, blank=True)
     secondary_anchor = CharField(max_length=40, blank=True)
+
+    version = PositiveIntegerField(default=0)
+    is_active = BooleanField(default=True)
+
+    objects = Manager()
+    active = QueryManager(is_active=True)
 
     # Derived Traits
 
@@ -197,15 +204,28 @@ class Character(Model):
     def save(self, **kwargs):
         if self.power_stat:
             self.resource_max = int(self.power_stat) + 10
-        self.willpower_max = int(self.resolve) + int(self.composure) \
-                             - int(self.perm_willpower_spent or 0)
+        self.willpower_max = int(self.resolve) + int(self.composure) - int(self.perm_willpower_spent or 0)
         self.health_levels = int(self.stamina) + int(self.size)
         if self.willpower is None:
             self.willpower = self.willpower_max
         super().save(**kwargs)
 
+    def create_revision(self):
+        self.is_active = False
+        self.save()
+
+        # By removing the PK a new instance is created on save()
+        old_pk, self.pk, self.is_active = self.pk, None, True
+        self.version = F('version') + 1
+        self.save()
+        for cls in (CharacterMerit, CharacterPower, SkillSpeciality):
+            for elem in cls.objects.filter(character_id=old_pk):
+                elem.pk, elem.character_id = None, self.pk
+                elem.save()
+
 
 class CharacterElement(Model):
+    objects = InheritanceManager()
 
     def save(self, **kwargs):
         super().save(**kwargs)
@@ -224,7 +244,7 @@ class CharacterMerit(CharacterElement):
         verbose_name = "Merit"
 
     def origin(self):
-        return self.merit.template.name if self.merit.template else 'Any'
+        return self.merit.character_template.name if self.merit.character_template else 'Any'
 
     def __str__(self):
         return '{} ({})'.format(self.merit.name, self.rating)
@@ -242,7 +262,7 @@ class CharacterPower(CharacterElement):
         return '{} {}'.format(self.power.name, self.rating)
 
     def category(self):
-        return self.power.category.name
+        return self.power.power_category.name
 
 
 class SkillSpeciality(CharacterElement):

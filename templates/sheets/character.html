@@ -66,9 +66,11 @@
 
         {# 3rd row, Virtue, Vice, Concept #}
         <div class="row">
-            {% include 'sheets/includes/field.html' with name='primary_anchor' value=character.primary_anchor label=character.primary_anchor_name %}
-            {% include 'sheets/includes/field.html' with name='secondary_anchor' value=character.secondary_anchor label=character.secondary_anchor_name %}
-            {% include 'sheets/includes/field.html' with name='concept' value=character.concept label="Concept" %}
+          {% if character %}
+            {% include 'sheets/comp/field.html' with name='primary_anchor' value=character.primary_anchor label=character.primary_anchor_name %}
+            {% include 'sheets/comp/field.html' with name='secondary_anchor' value=character.secondary_anchor label=character.secondary_anchor_name %}
+          {% endif %}
+          {% include 'sheets/comp/field.html' with name='concept' value=character.concept label="Concept" %}
         </div>
         <hr>
 
@@ -383,7 +385,7 @@
                                 addBtn: "#add-merit-btn",
                                 maxNumber: 20,
                                 minNumber: 5,
-                                initialUrl: '{% url 'sheets:character-merits' %}?char={{ character.pk }}',
+                                initialUrl: '{% url 'sheets:char-merits' %}?char={{ character.pk }}',
                                 afterLoad: function (cloned, val) {
                                     cloned.find('select')
                                         .select2({
@@ -424,7 +426,7 @@
                             <div id="speciality-base" class="hidden">
                                 <div class="row speciality-entry">
                                     <div class="col-md-4">
-                                        {% include 'sheets/includes/select_skills.html' with id='id_speciality_base' %}
+                                        {% include 'sheets/comp/select_skills.html' with id='id_speciality_base' %}
                                     </div>
                                     <div class="col-md-8">
                                         <input class="form-control speciality" type="text" style="width: 100%">
@@ -444,7 +446,7 @@
                                     addBtn: "#add-speciality-btn",
                                     maxNumber: 20,
                                     minNumber: 3,
-                                    initialUrl: '{% url 'sheets:character-specialities' %}?char={{ character.pk }}',
+                                    initialUrl: '{% url 'sheets:char-specialty' %}?char={{ character.pk }}',
                                     afterLoad: function (cloned, val) {
                                         cloned.find('select')
                                             .val(val.skill)

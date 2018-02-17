@@ -1,5 +1,5 @@
 from sheets.models import Character
-from django.forms import *
+from django.forms import ModelForm, CharField, IntegerField, HiddenInput
 
 
 class BaseCharacterForm(ModelForm):
@@ -15,7 +15,8 @@ class BaseCharacterForm(ModelForm):
     template_experiences = IntegerField(required=False, widget=HiddenInput)
 
     def clean_beats(self):
-        return int(self.cleaned_data['beats'])
+        beats = self.cleaned_data['beats']
+        return int(beats) if beats else 0
 
     class Meta:
         model = Character
@@ -28,7 +29,7 @@ class CreateCharacterForm(BaseCharacterForm):
         exclude = [
             'primary_splat', 'secondary_splat', 'tertiary_splat',
             'power_stat', 'primary_anchor', 'secondary_anchor',
-            'beats', 'experiences', 'organization',
+            'beats', 'experiences', 'organization', 'size', 'health_levels',
             'template_beats', 'template_experiences', 'integrity',
         ]
 
@@ -41,6 +42,6 @@ class EditCharacterForm(BaseCharacterForm):
     class Meta:
         model = Character
         exclude = [
-            'template', 'organization', 'user', 'health_levels',
+            "character_template", 'organization', 'user',
         ]
 

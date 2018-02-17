@@ -18,7 +18,7 @@
     {% endblock %}
 
     <h1>{{ event.name }}
-        <small><a href="{% url 'orgs:view-organization' event.organization.pk %}">
+        <small><a href="{% url 'orgs:view-org' event.organization.pk %}">
             {{ event.organization.name }}
         </a></small>
     </h1>

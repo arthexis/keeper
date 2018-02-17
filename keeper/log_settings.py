@@ -29,12 +29,12 @@ def get_logging_config(debug=False):
         },
         'loggers': {
             'root': {
-                'level': 'INFO',
+                'level': 'DEBUG',
                 'handlers': ['console'],
                 'propagate': True,
             },
             'django.server': {
-                'level': 'WARNING',
+                'level': 'DEBUG',
                 'handlers': ['console'],
             },
             'orgs': {

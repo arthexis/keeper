@@ -4,7 +4,11 @@
 {% block title %}Keeper{% endblock %}
 
 {% block branding %}
-    <a class="navbar-brand" href="{% url 'admin:index' %}">Keeper Admin</a>
+    <a class="navbar-brand" href="{% url 'admin:index' %}">
+      Keeper - Administration Console
+    </a>
 {% endblock %}
 
-{% block nav-global %}{% endblock %}
+{% block nav-global %}
+  {{ block.super }}
+{% endblock %}

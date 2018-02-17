@@ -11,7 +11,7 @@
                 Thanks for verifying your account.<br>
                 You will be redirected to the main page in 3 seconds...
                 <br><br>
-                <a href="{% url 'orgs:index' %}">
+                <a href="{% url 'index' %}">
                   Click here if you are not redirected.
                 </a>
             </p>
@@ -21,7 +21,7 @@
     <script>
         $(function () {
             setTimeout(function () {
-                window.location.replace("{% url 'orgs:index' %}");
+                window.location.replace("{% url 'index' %}");
             }, 3000);
         });
     </script>

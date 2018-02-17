@@ -12,14 +12,14 @@
 
     <div class="collapse navbar-collapse">
         <ul class="nav navbar-nav navbar-right">
-            <li><a href="{% url 'sheets:characters' %}">Characters</a></li>
+            <li><a href="{% url 'sheets:list-char' %}">Characters</a></li>
             <li><a href="{% url 'orgs:calendar' %}">Calendar</a></li>
             <li><a href="{% url 'orgs:profile' %}">Profile</a></li>
             {% if user.is_staff %}
                 <li><a target="_blank" href="{% url 'admin:index' %}">Admin</a></li>
-                <li><a target="_blank" href="{% url 'rest:api-root' %}">API</a></li>
+{#                <li><a target="_blank" href="{% url 'rest:api-root' %}">API</a></li>#}
             {% endif %}
-            <li><a href="{% url 'orgs:logout' %}">Logout</a></li>
+            <li><a href="{% url 'logout' %}">Logout</a></li>
         </ul>
     </div>
 

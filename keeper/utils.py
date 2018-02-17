@@ -10,8 +10,9 @@ logger = logging.getLogger(__name__)
 
 
 __all__ = (
+    'exists',
     'getenv',
-    'missing',
+    'otherwise',
     'path',
     'rand_string'
 )
@@ -43,10 +44,14 @@ def getenv(var, default=None):
     return r
 
 
-# A decorator that returns a default value when ValueError is caught
-# in the decorated function This is intended for use with getters on Models
+def otherwise(f, default=None, exceptions=None):
+    """ Decorator that makes a function catch ValueError and return a value instead.
 
-def missing(f, exceptions=None, default=None):
+    :param f: The function being decorated.
+    :param default: Value to return when the exceptions are caught, defaults to None
+    :param exceptions: A sequence of exceptions to catch, defaults to (AttributeError, )
+    :return: A decorated function.
+    """
     exceptions = exceptions or (AttributeError,)
 
     def inner(*args, **kwargs):
@@ -92,4 +97,19 @@ def path(pattern, view, name=None, **kwargs):
 
 def rand_string(chars):
     return ''.join(random.choice(string.ascii_letters) for _ in range(chars))
+
+
+def exists(model, instance=None, **kwargs):
+    """ Finds is a model instance with certain values already exists.
+
+    :param model: Model class
+    :param instance: Optional instance to exclude, for example form.instance
+    :param kwargs: Query filters used to identify the instance.
+    :return: True if the instance exists, False otherwise.
+    """
+    qs = model.objects.filter(**kwargs)
+    if instance and instance.pk:
+        qs = qs.exclude(pk=instance.pk)
+    return qs.exists()
+
 
