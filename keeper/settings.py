@@ -233,7 +233,7 @@ SEED_DATA_SERIALIZERS = {
     },
     'Organization': {
         'model': 'orgs.models.Organization',
-        'exclude': ('users',)
+        'exclude': ('memberships', 'events')
     },
     'Merit': {
         'model': 'systems.models.Merit',
@@ -252,7 +252,7 @@ SEED_DATA_PLAN = {
         'changeling-lost',
     ),
     'Merit': (lambda obj: True),
-    'Organization': ('tmnl', ),
+    'Organization': ('teatro-de-la-mente', ),
 }
 
 # Directory that will store the seed data

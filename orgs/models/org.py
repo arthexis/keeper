@@ -1,6 +1,6 @@
 import logging
 
-from django.db.models import CharField, ForeignKey, TextField, BooleanField, SlugField, SET_NULL
+from django.db.models import CharField, ForeignKey, TextField, BooleanField, SlugField, SET_NULL, Manager
 from model_utils.managers import QueryManager
 from model_utils.models import TimeStampedModel
 
@@ -30,6 +30,8 @@ class Organization(TimeStampedModel):
 
     reference_code = SlugField('URL Prefix', unique=True)
 
+    # Managers
+    objects = Manager()
     public = QueryManager(is_public=True)
 
     def __str__(self):

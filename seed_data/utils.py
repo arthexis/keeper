@@ -1,9 +1,10 @@
 import importlib
 import logging
 
-from django.db.models import Model, ManyToOneRel
+from django.db.models import Model, ManyToOneRel, ForeignKey
 from typing import Type
 from django.conf import settings
+from rest_framework.relations import SlugRelatedField
 from rest_framework.serializers import ModelSerializer
 
 __all__ = (
@@ -63,25 +64,36 @@ def serializer_factory(
             nested_fields[field.name] = field
         elif not field.serialize:
             continue
+        elif isinstance(field, ForeignKey):
+            # TODO Store the reference_code of the related instance instead o using PK
+            related_model = field.related_model
+            if hasattr(related_model, REF_FIELD):
+                attrs[field.name] = SlugRelatedField(slug_field=REF_FIELD, queryset=related_model.objects.all())
+            else:
+                continue  # Skip adding field if related model has no REF_FIELD
 
         field_names.append(field.name)
 
     if create:
         def _create(self, validated_data):
+
+            # Remove ManyToOneRel fields, each will be created separately after the object
             nested_data_map = {}
             for nested_field_name in self.nested_fields.keys():
                 data = validated_data.pop(nested_field_name, None)
                 if data:
                     nested_data_map[nested_field_name] = data
 
+            # Create the instance from the massaged data
             obj = self.Meta.model.objects.create(**validated_data)
 
+            # Create related objects from the data removed earlier
             for nested_key, nested_data in nested_data_map.items():
                 nested_cls = self.nested_serializers[nested_key]
                 nested_field = self.nested_fields[nested_key]
                 for child_obj_data in nested_data:
                     child_obj_data[nested_field.remote_field.name] = obj
-                    _create(nested_cls, child_obj_data)
+                    _create(nested_cls, child_obj_data)  # Recursive
 
             return obj
 

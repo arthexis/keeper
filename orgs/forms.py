@@ -47,8 +47,6 @@ class RegistrationForm(ModelForm):
     )
     initial_org_pk = IntegerField(widget=HiddenInput, required=False)
 
-    # TODO Fix clean for email and username
-
     def clean(self):
         if exists(Profile, self.instance, email=self.cleaned_data['email']):
             self.add_error('email', 'This email address is already in use.')
