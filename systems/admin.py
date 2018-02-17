@@ -23,7 +23,6 @@ class SplatCategoryInline(admin.TabularInline):
     model = SplatCategory
     fields = ('name', 'flavor', 'splats')
     readonly_fields = ('splats', )
-    max_num = 3
     extra = 0
     show_change_link = True
 
@@ -34,8 +33,9 @@ class SplatCategoryInline(admin.TabularInline):
 @admin.register(SplatCategory)
 class SplatCategoryAdmin(admin.ModelAdmin):
     model = SplatCategory
-    list_display = ('name', 'character_template', 'splat_names')
+    list_display = ('name', 'character_template', 'splat_names', )
     readonly_fields = ('splat_names', )
+    inlines = (SplatInline, )
     fieldsets = (
         (None, {
             'fields': (
@@ -57,9 +57,17 @@ class MeritAdmin(admin.ModelAdmin):
     prepopulated_fields = {'reference_code': ('name', )}
 
 
+@admin.register(Power)
+class PowerAdmin(admin.ModelAdmin):
+    model = Power
+    fields = ('name', 'power_category', 'origin_splat',)
+    list_filter = ('power_category', )
+    list_display = ('name', 'power_category', 'origin_splat', )
+
+
 class PowerInline(admin.TabularInline):
     model = Power
-    fields = ('name',)
+    fields = ('name', 'origin_splat')
     extra = 0
     show_change_link = True
 

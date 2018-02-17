@@ -5,6 +5,12 @@ import sys
 # https://docs.python.org/3/library/logging.html
 
 def get_logging_config(debug=False):
+    console_app_logger = {
+        'level': 'DEBUG' if debug else 'INFO',
+        'handlers': ['console'],
+        'propagate': True,
+    }
+
     return {
         'version': 1,
         'disable_existing_loggers': True,
@@ -37,10 +43,9 @@ def get_logging_config(debug=False):
                 'level': 'DEBUG',
                 'handlers': ['console'],
             },
-            'orgs': {
-                'level': 'DEBUG' if debug else 'INFO',
-                'handlers': ['console'],
-                'propagate': True,
-            },
+            'orgs': console_app_logger,
+            'seed_data': console_app_logger,
+            'sheets': console_app_logger,
+            'systems': console_app_logger,
         }
     }

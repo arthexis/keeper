@@ -1,6 +1,7 @@
 import logging
 
 from django.db import models
+from django.db.models import SET_NULL, CASCADE
 from model_utils import Choices
 
 logger = logging.getLogger(__name__)
@@ -46,6 +47,7 @@ class CharacterTemplate(models.Model):
 
     class Meta:
         verbose_name = "Character Template"
+        ordering = ('name', 'game_line')
 
     def __str__(self):
         return str(self.name)
@@ -53,9 +55,9 @@ class CharacterTemplate(models.Model):
 
 class SplatCategory(models.Model):
     FLAVOR = Choices(
-        ('1', 'Primary (Nature)'),
-        ('2', 'Secondary (Faction)'),
-        ('3', 'Tertiary (Attained)'),
+        ('1', 'Primary: Nature'),
+        ('2', 'Secondary: Faction'),
+        ('3', 'Tertiary: Attained'),
     )
     name = models.CharField(max_length=20)
     character_template = models.ForeignKey(
@@ -64,7 +66,6 @@ class SplatCategory(models.Model):
 
     class Meta:
         ordering = ('character_template', 'flavor', )
-        unique_together = ('character_template', 'flavor', )
         verbose_name = ('Splat Category')
         verbose_name_plural = ('Splat Categories')
 
@@ -141,7 +142,9 @@ class PowerCategory(models.Model):
 
 class Power(models.Model):
     name = models.CharField(max_length=40)
-    power_category = models.ForeignKey('PowerCategory', on_delete=models.CASCADE, related_name='powers')
+    power_category = models.ForeignKey('PowerCategory', CASCADE, related_name='powers')
+
+    origin_splat = models.ForeignKey('Splat', SET_NULL, related_name='+', null=True)
 
     class Meta:
         unique_together = ('name', 'power_category', )

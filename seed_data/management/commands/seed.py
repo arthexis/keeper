@@ -21,7 +21,7 @@ class Command(BaseCommand):
         parser.add_argument('--dir', default=None)
         parser.add_argument('--skip', action='store_true')
         parser.add_argument('--update', action='store_true')
-        parser.add_argument('--migrate', type=bool, default=settings.SEED_DATA_MIGRATE)
+        parser.add_argument('--migrate', action='store_true')
 
     def handle(self, *args, **options):
         if options['dir']:

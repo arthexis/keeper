@@ -247,7 +247,8 @@ SEED_DATA_PLAN = {
     'Template': (
         'geist-sin-eater',
         'mage-awakening',
-        'vampire-requiem'
+        'vampire-requiem',
+        'changeling-lost',
     ),
     'Merit': (lambda obj: True),
     'Organization': ('tmnl', ),
@@ -256,11 +257,6 @@ SEED_DATA_PLAN = {
 # Directory that will store the seed data
 
 SEED_DATA_DIRECTORY = os.path.join(BASE_DIR, 'content')
-
-# IF True, always run 'migrate' before executing 'seed install'
-
-SEED_DATA_MIGRATE = True
-
 
 # Some settings to make debugging easier
 
