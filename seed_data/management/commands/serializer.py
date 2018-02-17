@@ -18,16 +18,33 @@ class Command(BaseCommand):
         for nested_cls in serializer_cls.nested_serializers.values():
             self._print(nested_cls, top=False)
         print(f'class {serializer_cls.__name__}(ModelSerializer):')
+        attrs_list = []
+        attrs_cls_list = []
         for nested_field in serializer_cls.nested_fields.values():
             attr_cls = serializer_cls.nested_serializers[nested_field.name]
+            attrs_list.append(nested_field)
+            attrs_cls_list.append(attr_cls)
             print(f'\t{nested_field.name} = {attr_cls.__name__}(many=True, null=True)')
         print('\tclass Meta:')
-        print(f'\t\tmodel = {serializer_cls.Meta.model.__name__}')
+        model_cls = serializer_cls.Meta.model
+        print(f'\t\tmodel = {model_cls.__name__}')
         print(f'\t\tfields = {serializer_cls.Meta.fields}\n')
-        if top:
-            print(f'\tdef create(self, validated_data)')
-            print(f'\t\treturn super().create(validated_data)')
         print()
-
+    #
+    # def _print_create(self):
+    #     if top:
+    #         print(f'\tdef create(self, validated_data)')
+    #     else:
+    #         print('\t@classmethod')
+    #         print('\tdef create_nested(cls, validated_data)')
+    #     for i, field in enumerate(attrs_list):
+    #         print(f'\t\t{field.name} = validated_data.pop("{field.name}", [])')
+    #     obj_cls = model_cls.__name__ if top else 'cls'
+    #     print(f'\t\tobj = {obj_cls}.objects.create(**validated_data)')
+    #     for i, field in enumerate(attrs_list):
+    #         cls = attrs_cls_list.pop()
+    #         print(f'\t\tfor data in {field.name}:')
+    #         print(f'\t\t\t{cls.__name__}.create_nested(data)')
+    #     print(f'\t\treturn obj')
 
 
