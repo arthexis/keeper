@@ -29,22 +29,10 @@ class Command(BaseCommand):
         model_cls = serializer_cls.Meta.model
         print(f'\t\tmodel = {model_cls.__name__}')
         print(f'\t\tfields = {serializer_cls.Meta.fields}\n')
+        if top:
+            print(f'\tdef create(self, validated_data)')
+            print(f'\t\traise NotImplemented')
         print()
-    #
-    # def _print_create(self):
-    #     if top:
-    #         print(f'\tdef create(self, validated_data)')
-    #     else:
-    #         print('\t@classmethod')
-    #         print('\tdef create_nested(cls, validated_data)')
-    #     for i, field in enumerate(attrs_list):
-    #         print(f'\t\t{field.name} = validated_data.pop("{field.name}", [])')
-    #     obj_cls = model_cls.__name__ if top else 'cls'
-    #     print(f'\t\tobj = {obj_cls}.objects.create(**validated_data)')
-    #     for i, field in enumerate(attrs_list):
-    #         cls = attrs_cls_list.pop()
-    #         print(f'\t\tfor data in {field.name}:')
-    #         print(f'\t\t\t{cls.__name__}.create_nested(data)')
-    #     print(f'\t\treturn obj')
+
 
 
