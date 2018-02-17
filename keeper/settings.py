@@ -233,6 +233,7 @@ SEED_DATA_SERIALIZERS = {
     },
     'Organization': {
         'model': 'orgs.models.Organization',
+        'exclude': ('users',)
     },
     'Merit': {
         'model': 'systems.models.Merit',

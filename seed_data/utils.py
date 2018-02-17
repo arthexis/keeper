@@ -28,18 +28,20 @@ def import_object(path) -> (Type[Model], Type[ModelSerializer]):
     return getattr(module, obj_name)
 
 
-def get_model_serializer(entity: str):
+def get_model_serializer(entity: str) -> (Type[Model], Type[ModelSerializer]):
     entry = SERIALIZERS[entity]
     model_cls = import_object(entry.get('model'))
     serializer_path = entry.get('serializer')
     if serializer_path:
         serializer_cls = import_object(serializer_path)
     else:
-        serializer_cls = serializer_factory(model_cls)
+        exclude = entry.get('exclude')
+        serializer_cls = serializer_factory(model_cls, exclude=exclude)
     return (model_cls, serializer_cls)
 
 
-def serializer_factory(model_cls: Type[Model], create=True, nested=True, exclude=None):
+def serializer_factory(
+        model_cls: Type[Model], create=True, nested=True, exclude=None) -> type:
     attrs = {}
     class_name = f"{model_cls.__name__}Serializer"
 

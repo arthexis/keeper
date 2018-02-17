@@ -41,23 +41,22 @@ class Command(BaseCommand):
                 serializer = serializer_cls(data=data)
 
                 # Validate and execute the individual import
+                with transaction.atomic():
 
-                if serializer.is_valid():
-                    print(f'Import {entity} {pk}: serialized data valid')
-                    with transaction.atomic():
+                    if options['update']:
+                        ref = data[REF_FIELD]
+                        instance = model_cls.objects.filter(**{REF_FIELD: ref})
+                        if instance.exists():
+                            instance.delete()
 
-                        if options['update']:
-                            ref = data[REF_FIELD]
-                            instance = model_cls.objects.filter(**{REF_FIELD: ref})
-                            if instance.exists():
-                                instance.delete()
-
+                    if serializer.is_valid():
+                        print(f'Import {entity} {pk}: serialized data valid')
                         serializer.save()
-                else:
-                    print(f"Failed to import {name}:")
-                    for key, val in serializer.errors.items():
-                        has_errors = True
-                        print(f"- {key}: {val}")
+                    else:
+                        print(f"Failed to import {name}:")
+                        for key, val in serializer.errors.items():
+                            has_errors = True
+                            print(f"- {key}: {val}")
 
         print("Import complete.")
         if has_errors and not options['skip']:
