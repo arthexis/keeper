@@ -1,9 +1,12 @@
 import logging
+import uuid
 
-from django.db.models import Model, CharField, ForeignKey, TextField, PositiveIntegerField, DateField, \
-    PROTECT, DO_NOTHING, CASCADE, BooleanField, F, Manager
+from django.db.models import Model, CharField, ForeignKey, TextField, PositiveIntegerField, \
+    PROTECT, DO_NOTHING, CASCADE, F, UUIDField
 from django.contrib.auth.models import User, Group
+from model_utils import Choices
 from model_utils.managers import InheritanceManager, QueryManager
+from model_utils.models import TimeStampedModel, StatusModel
 
 from orgs.models import Organization
 from systems.models import CharacterTemplate, Splat, Power, Merit, SKILLS
@@ -20,14 +23,22 @@ __all__ = (
 )
 
 
-class Character(Model):
+class Character(TimeStampedModel, StatusModel):
+
+    STATUS = Choices(
+        ('in_progress', 'In Progress'),
+        ('submitted', 'Submitted'),
+        ('approved', 'Approved'),
+        ('archived', 'Archived'),
+    )
 
     # Character basic info
-    name = CharField(max_length=40, verbose_name="Character Name")
-    template = ForeignKey(CharacterTemplate, PROTECT)
+    name = CharField("Name or Alias", max_length=40)
+    template = ForeignKey(CharacterTemplate, CASCADE, null=True)
     power_stat = DotsField(default=1, clear=False)
     integrity = DotsField(default=7)
     background = TextField(blank=True)
+    alt_names = CharField("Other Names", max_length=500, blank=True)
     resource = PositiveIntegerField(default=10, blank=True, null=True)
     resource_max = PositiveIntegerField(default=10, blank=True, null=True)
     concept = CharField(max_length=200, blank=True)
@@ -81,25 +92,19 @@ class Character(Model):
 
     # Splat foreign Keys
     primary_splat = ForeignKey(Splat, PROTECT, related_name='+', null=True, blank=True)
+    primary_sub_splat = ForeignKey(Splat, PROTECT, related_name='+', null=True, blank=True)
     secondary_splat = ForeignKey(Splat, PROTECT, related_name='+', null=True, blank=True)
+    secondary_sub_splat = ForeignKey(Splat, PROTECT, related_name='+', null=True, blank=True)
     tertiary_splat = ForeignKey(Splat, PROTECT, related_name='+', null=True, blank=True)
-
-    # Character Advancement related
-    beats = PositiveIntegerField(default=0)
-    experiences = PositiveIntegerField(default=0)
-    template_beats = DotsField()
-    template_experiences = PositiveIntegerField(default=0)
 
     # Organization related fields
     user = ForeignKey(
         User, DO_NOTHING, null=True, blank=True, related_name='characters')
     organization = ForeignKey(Organization, CASCADE, null=True, blank=True)
-    created_on = DateField(auto_now_add=True, editable=False)
-    modified_on = DateField(auto_now=True, editable=False)
 
     # Derived traits, they are not handled automatically because
     # their values can be manually adjusted
-    size = DotsField(default=5, clear=False)
+    size = DotsField(default=5, clear=False, editable=False)
     health_levels = PositiveIntegerField(default=0)
     damage_track = CharField(max_length=100, blank=True, null=True)
     willpower = PositiveIntegerField(blank=True, null=True)
@@ -110,11 +115,12 @@ class Character(Model):
     primary_anchor = CharField(max_length=40, blank=True)
     secondary_anchor = CharField(max_length=40, blank=True)
 
-    version = PositiveIntegerField(default=0)
-    is_active = BooleanField(default=True)
+    # Versioning fields. The highest number is the latest version
 
-    objects = Manager()
-    active = QueryManager(is_active=True)
+    version = PositiveIntegerField(default=0)
+    uuid = UUIDField(unique=True, default=uuid.uuid4, editable=False)
+
+    objects = QueryManager(status__in=('in_progress', 'submitted', 'approved'))
 
     # Derived Traits
 
@@ -160,20 +166,47 @@ class Character(Model):
 
     # Calculate some stuff automatically on save
     def save(self, **kwargs):
+        if self.pk:
+            old = Character.objects.get(pk=self.pk)
+            if old.is_locked():
+                raise ValueError('Cannot modify character, already archived.')
+
         if self.power_stat:
             self.resource_max = int(self.power_stat) + 10
+
         self.willpower_max = int(self.resolve) + int(self.composure) - int(self.perm_willpower_spent or 0)
         self.health_levels = int(self.stamina) + int(self.size)
         if self.willpower is None:
             self.willpower = self.willpower_max
+
         super().save(**kwargs)
 
+    # Methods related to revisions and approvals
+
+    def is_locked(self):
+        return self.status in ('archived', 'approved')
+
+    def is_active(self):
+        return self.status != 'archived'
+
+    def submit(self):
+        self.status = 'submitted'
+        self.save()
+
+    def approve(self):
+        self.status = 'approved'
+        self.save()
+
+    def reject(self):
+        self.rejected = 'in_progress'
+        self.save()
+
     def create_revision(self):
-        self.is_active = False
+        self.status = 'archived'
         self.save()
 
         # By removing the PK a new instance is created on save()
-        old_pk, self.pk, self.is_active = self.pk, None, True
+        old_pk, self.pk, self.status = self.pk, None, 'in_progress'
         self.version = F('version') + 1
         self.save()
         for cls in (CharacterMerit, CharacterPower, SkillSpeciality):

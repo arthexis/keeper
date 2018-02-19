@@ -9,5 +9,10 @@
 {% endblock %}
 
 {% block submit_buttons_bottom %}
-  {{ block.super }}
+  {% if original.is_locked %}
+    <p>You cannot make changes to this character because it's locked.</p>
+    <p>Create a revision for this character and edit the revision.</p>
+  {% else %}
+    {{ block.super }}
+  {% endif %}
 {% endblock %}

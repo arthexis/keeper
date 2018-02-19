@@ -28,14 +28,14 @@ class CharacterAdmin(admin.ModelAdmin):
         (None, {
             'fields': (
                 ('name', 'template', ),
-                ('user', 'organization')
+                ('user', 'organization', 'status')
             ),
         }),
         ('Template', {
             'fields': (
-                ('primary_splat', 'secondary_splat', 'tertiary_splat', ),
+                ('primary_splat', 'secondary_splat',  'tertiary_splat',),
+                ('primary_sub_splat', 'secondary_sub_splat', 'character_group', ),
                 ('primary_anchor', 'secondary_anchor', 'concept', ),
-                ('faction', 'character_group', ),
             ),
         }),
         ('Attributes', {
@@ -59,23 +59,23 @@ class CharacterAdmin(admin.ModelAdmin):
         }),
         ('Advantages', {
             'fields': (
-                ('power_stat', 'integrity', 'resource',),
+                ('integrity', 'power_stat', 'resource',),
                 ('size', 'health_levels', 'defense', ),
                 ('speed', 'initiative', )
             ),
         }),
         ('Information', {
             'fields': (
-                ('background',),
+                'background', 'alt_names',
             ),
         }),
     )
-    list_display = ('name', 'template',)
+    list_display = ('name', 'template', 'user', 'organization', 'status')
     list_filter = ('template', )
     search_fields = ('name', 'user')
     readonly_fields = (
         'template', 'size', 'health_levels', 'speed',
-        'initiative', 'defense', 'created_on', 'modified_on',
+        'initiative', 'defense', 'created', 'modified',
     )
     readonly_fields_new = ('version', )
     formfield_overrides = {
@@ -134,20 +134,24 @@ class CharacterAdmin(admin.ModelAdmin):
         form = super().get_form(request, obj, **kwargs)
         if obj is not None:
             # Rename splats and filter their choices
-            for flavor in ('primary', 'secondary', 'tertiary'):
+            for flavor, flavor_text in SplatCategory.FLAVORS:
                 field = form.base_fields[flavor + '_splat']
                 try:
                     category = SplatCategory.objects.get(flavor=flavor, character_template=obj.template)
                     field.queryset = Splat.objects.filter(splat_category=category)
                     field.label = category.name
-                    if flavor == 'primary' and obj.template:
+                    if category.is_required and obj.template:
                         field.required = True
                 except SplatCategory.DoesNotExist:
                     field.widget = HiddenInput()
             # Modify other template specific labels
             if obj.template:
                 for trait in self.rename_traits:
-                    form.base_fields[trait].label = getattr(obj.template, "{}_name".format(trait))
+                    label = getattr(obj.template, "{}_name".format(trait))
+                    if label:
+                        form.base_fields[trait].label = label
+                    else:
+                        form.base_fields[trait].widget = HiddenInput()
         return form
 
     def get_readonly_fields(self, request, obj=None):

@@ -79,4 +79,16 @@ table .field-status input {
     margin-bottom: 10px!important;
 }
 
+.form-group.field-box{
+    padding-left: 5px!important;
+    padding-right: 5px!important;
+}
+
+textarea#id_background {
+    height: 120px;
+}
+
+#id_alt_names {
+    min-width: 700px;
+}
 

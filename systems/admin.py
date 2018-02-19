@@ -25,6 +25,7 @@ class SplatCategoryInline(admin.TabularInline):
     readonly_fields = ('splats', )
     extra = 0
     show_change_link = True
+    max_num = 5
 
     def splats(self, obj=None):
         return obj.splat_names()
@@ -36,14 +37,7 @@ class SplatCategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'character_template', 'splat_names', )
     readonly_fields = ('splat_names', )
     inlines = (SplatInline, )
-    fieldsets = (
-        (None, {
-            'fields': (
-                ('name',),
-                ('character_template', 'flavor', ),
-            ),
-        }),
-    )
+    fields = ('name', 'character_template', 'flavor', 'is_required', )
 
 
 @admin.register(Merit)

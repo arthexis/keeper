@@ -16,6 +16,7 @@ class Command(BaseCommand):
                 if fn == '__init__.py':
                     continue
                 if fn.endswith('.py'):
+                    print(f'Deleting {app} migration {fn}')
                     os.remove(os.path.join(mig_dir, fn))
         call_command('makemigrations')
 

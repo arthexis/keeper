@@ -256,14 +256,20 @@ SEED_DATA_SERIALIZERS = {
 # what model instances are seeded. The order is preserved when generating and installing.
 # Each entry will generate exactly one zipfile.
 
+# SEED_DATA_PLAN = {
+#     'Template': (
+#         'geist-sin-eater',
+#         'mage-awakening',
+#         'vampire-requiem',
+#         'changeling-lost',
+#     ),
+#     'Merit': (lambda obj: True),
+# }
+
 SEED_DATA_PLAN = {
     'Template': (
-        'geist-sin-eater',
-        'mage-awakening',
-        'vampire-requiem',
-        'changeling-lost',
-    ),
-    'Merit': (lambda obj: True),
+        'mage-mtaw',
+    )
 }
 
 # Directory that will store the seed data
@@ -277,9 +283,7 @@ ORGS_AUTO_VERIFY_USERS = bool(DEBUG)
 
 # Magic admin login password
 
-ADMIN_LOGIN = {
-    'username': 'admin',
-    'password': 'admin'
-}
+ADMIN_LOGIN_USERNAME = getenv('ADMIN_LOGIN_USERNAME', 'admin')
+ADMIN_LOGIN_PASSWORD = getenv('ADMIN_LOGIN_PASSWORD')
 
 

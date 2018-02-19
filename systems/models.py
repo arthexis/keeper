@@ -70,8 +70,17 @@ class ReferenceBook(models.Model):
 
 
 class CharacterTemplate(models.Model):
+    GAME_LINES = Choices(
+        ('gmc', 'God Machine Chronicles'),
+        ('vtr', 'Vampire the Requiem'),
+        ('ctl', 'Changeling the Lost'),
+        ('mtaw', 'Mage the Awakening'),
+        ('wtf', 'Werewolf the Forsaken'),
+        ('gts', 'Geist the Sin-Eaters'),
+    )
+
     name = models.CharField(max_length=20)
-    game_line = models.CharField(max_length=20)
+    game_line = models.CharField(max_length=20, choices=GAME_LINES)
     integrity_name = models.CharField(
         max_length=20, verbose_name="Integrity", default="Integrity", blank=True)
     power_stat_name = models.CharField(max_length=20, verbose_name="Power Stat", blank=True)
@@ -97,17 +106,21 @@ class CharacterTemplate(models.Model):
 
 
 class SplatCategory(models.Model):
-    FLAVOR = Choices(
-        ('1', 'Primary: Nature'),
-        ('2', 'Secondary: Faction'),
-        ('3', 'Tertiary: Attained'),
+    FLAVORS = Choices(
+        ('primary', 'Primary Kind'),
+        ('primary_sub', 'Secondary Kind'),
+        ('secondary', 'Major Faction'),
+        ('secondary_sub', 'Minor Faction'),
+        ('tertiary', 'Tertiary Kind'),
     )
     name = models.CharField(max_length=20)
     character_template = models.ForeignKey(
         CharacterTemplate, on_delete=models.CASCADE, related_name='splat_categories')
-    flavor = models.CharField(max_length=1, choices=FLAVOR, null=True)
+    flavor = models.CharField(max_length=20, choices=FLAVORS)
+    is_required = models.BooleanField(default=False)
 
     class Meta:
+        unique_together = ('character_template', 'flavor')
         ordering = ('character_template', 'flavor', )
         verbose_name = ('Splat Category')
         verbose_name_plural = ('Splat Categories')
@@ -119,12 +132,7 @@ class SplatCategory(models.Model):
         return ', '.join(self.splats.values_list('name', flat=True))
 
     def storage_column(self):
-        if self.flavor == '1':
-            return 'primary_splat'
-        elif self.flavor == '2':
-            return 'secondary_splat'
-        elif self.flavor == '3':
-            return 'tertiary_splat'
+        return SplatCategory.STORAGE_COLUMNS[self.flavor]
 
 
 class Splat(models.Model):
@@ -133,6 +141,7 @@ class Splat(models.Model):
         SplatCategory, on_delete=models.CASCADE, related_name='splats')
 
     class Meta:
+        unique_together = ('name', 'splat_category')
         ordering = ('splat_category', 'name', )
 
     def __str__(self):
@@ -155,7 +164,7 @@ class Merit(models.Model):
     category = CharField(max_length=20, choices=CATEGORIES)
     character_template = ForeignKey(
         'CharacterTemplate', on_delete=models.CASCADE, null=True, blank=True, related_name='+',
-        verbose_name='Template Restriction', help_text='Optional. Restricts Merit to specific a Template.'
+        verbose_name='Template Restriction', help_text='Optional. Restricts Merit to specific Template.'
     )
 
     reference_code = SlugField('Code', unique=True)
