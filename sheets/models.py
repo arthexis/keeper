@@ -277,3 +277,5 @@ class SkillSpeciality(CharacterElement):
         verbose_name = "Skill Speciality"
         verbose_name_plural = "Skill Specialities"
 
+
+

@@ -19,6 +19,7 @@
       <sourceFolder url="file://$MODULE_DIR$/orgs" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/assets/js" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/seed_data" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/downtime" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/.idea" />
       <excludeFolder url="file://$MODULE_DIR$/content" />
       <excludeFolder url="file://$MODULE_DIR$/env" />
