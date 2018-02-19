@@ -35,9 +35,11 @@ class Command(BaseCommand):
             self.generate_data()
         elif options['action'] == 'install':
             if options['migrate']:
-                if call_command('migrate') != 0:
+                try:
+                    call_command('migrate')
+                except RuntimeError:
                     print('Migrate failed, cancelling import.')
-                    sys.exit(1)
+                    raise
             self.install_data(options['update'], options['start'])
 
     def generate_data(self):

@@ -53,7 +53,6 @@ INSTALLED_APPS = [
     'whitenoise',
     'datetimewidget',
     'model_utils',
-    'treebeard',
     'seed_data',
 ] + LOCAL_APPS
 

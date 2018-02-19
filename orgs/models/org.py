@@ -1,8 +1,7 @@
 import logging
 
-from django.db.models import CharField, ForeignKey, TextField, BooleanField, SlugField, CASCADE, Manager, Model
+from django.db.models import CharField, ForeignKey, TextField, SlugField, CASCADE, Manager, Model
 from model_utils import Choices
-from model_utils.managers import QueryManager
 logger = logging.getLogger(__name__)
 
 __all__ = (
@@ -18,6 +17,9 @@ class Region(Model):
     def __str__(self):
         return str(self.name)
 
+    def __repr__(self):
+        return str(self.reference_code)
+
 
 class Organization(Model):
 
@@ -27,21 +29,23 @@ class Organization(Model):
     )
 
     name = CharField(
-        max_length=200, help_text="Required. Two orgs in the same region cannot have the same name.")
+        max_length=200, help_text="Required. Orgs in a region cannot share names.")
     region = ForeignKey(
         Region, CASCADE, related_name='organizations',
         help_text="Required. Region where the organization operates.")
     information = TextField(
         blank=True,
-        help_text="Information about your organization. If you set this Organization to be "
-        "public, everyone will be able to see this information.")
-    reference_code = SlugField('URL Prefix', unique=True)
+        help_text="Information about your organization.")
+    reference_code = SlugField(
+        'URL Prefix', unique=True,
+        help_text='Required. Must be unique across all organizations.')
 
     # Managers
     objects = Manager()
 
     class Meta:
         unique_together = ('name', 'region')
+        verbose_name = 'Organization'
 
     def __str__(self):
         return f'{self.name} ({self.region})'

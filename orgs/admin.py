@@ -53,10 +53,10 @@ class MemberInline(admin.TabularInline):
 @admin.register(Organization)
 class OrganizationAdmin(admin.ModelAdmin):
     model = Organization
-    fields = ('name', 'region', 'information', 'reference_code')
+    fields = (('name', 'region'), 'reference_code', 'information', )
     list_display = ('name', 'region', 'reference_code', )
     inlines = (MemberInline, )
-    prepopulated_fields = {'reference_code': ('name', 'region', )}
+    prepopulated_fields = {'reference_code': ('name', )}
 
 
 class OrganizationInline(admin.TabularInline):
@@ -67,7 +67,7 @@ class OrganizationInline(admin.TabularInline):
 @admin.register(Region)
 class RegionAdmin(admin.ModelAdmin):
     model = Region
-    fields = ('name', 'reference_code')
+    fields = (('name', 'reference_code'), )
     list_display = ('name', 'reference_code')
     prepopulated_fields = {'reference_code': ('name',)}
     inlines = (OrganizationInline, )
