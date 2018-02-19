@@ -29,6 +29,13 @@ INTERNAL_IPS = ['127.0.0.1']
 
 # Application definition
 
+LOCAL_APPS = [
+    'systems',
+    'sheets',
+    'orgs',
+    'downtime',
+]
+
 INSTALLED_APPS = [
     'django_admin_bootstrapped',
     'django.contrib.admin',
@@ -46,11 +53,8 @@ INSTALLED_APPS = [
     'whitenoise',
     'datetimewidget',
     'model_utils',
-    'systems',
-    'sheets',
-    'orgs',
     'seed_data',
-]
+] + LOCAL_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

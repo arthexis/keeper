@@ -7,7 +7,7 @@ from django.core.management.base import BaseCommand
 from zipfile import ZipFile
 from django.db import transaction
 
-from seed_data.utils import *
+from seed_data.utils import get_model_serializer, REF_FIELD
 
 
 class Command(BaseCommand):
@@ -15,7 +15,6 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('filename')
-        parser.add_argument('--skip', action='store_true')
         parser.add_argument('--update', action='store_true')
 
     def handle(self, *args, **options):
@@ -28,36 +27,43 @@ class Command(BaseCommand):
         print("Loading file {}".format(source))
 
         # Open the zipfile for reading
-        has_errors = False
-        with ZipFile(source, 'r') as z:
-            for name in z.namelist():
+        with transaction.atomic():
 
-                # Prepare the serializer from the file name and contents
-                entity, pk = name.replace('.json', '').split('_')
+            errors = 0
+            with ZipFile(source, 'r') as z:
+                for name in z.namelist():
+                    update = False
 
-                model_cls, serializer_cls = get_model_serializer(entity)
+                    # Prepare the serializer from the file name and contents
+                    entity, ref = name.replace('.json', '').split('_')
+                    display = f'<{entity}: {ref}>'
 
-                data = json.loads(z.read(name).decode(settings.DEFAULT_CHARSET))
-                serializer = serializer_cls(data=data)
+                    model_cls, serializer_cls = get_model_serializer(entity)
 
-                # Validate and execute the individual import
-                with transaction.atomic():
+                    data = json.loads(z.read(name).decode(settings.DEFAULT_CHARSET))
+                    serializer = serializer_cls(data=data)
 
                     if options['update']:
                         ref = data[REF_FIELD]
                         instance = model_cls.objects.filter(**{REF_FIELD: ref})
                         if instance.exists():
+                            update = True
                             instance.delete()
 
                     if serializer.is_valid():
-                        print(f'Import {entity} {pk}: serialized data valid')
+                        if update:
+                            print(f'{display} is valid, already exists, updating.')
+                        else:
+                            print(f'{display} is valid, creating.')
                         serializer.save()
                     else:
-                        print(f"Failed to import {name}:")
+                        print(f"{display} failed to import with errors:")
                         for key, val in serializer.errors.items():
-                            has_errors = True
                             print(f"- {key}: {val}")
+                            errors += 1
 
-        print("Import complete.")
-        if has_errors and not options['skip']:
-            sys.exit(1)
+                if errors:
+                    print(f'{errors} errors.')
+                    sys.exit(1)
+
+        print(f"Import of {filename} complete, changes saved.")

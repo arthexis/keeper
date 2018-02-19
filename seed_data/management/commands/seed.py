@@ -1,10 +1,13 @@
 import os.path
 
+import sys
 from django.core.management.base import BaseCommand
 from django.core.management import call_command
 from django.conf import settings
 
 from seed_data.utils import import_object, REF_FIELD
+
+STEPS = settings.SEED_DATA_PLAN.keys()
 
 
 class Command(BaseCommand):
@@ -19,9 +22,9 @@ class Command(BaseCommand):
         parser.add_argument('action', choices=('generate', 'install'))
         parser.add_argument('--plan', default=None)
         parser.add_argument('--dir', default=None)
-        parser.add_argument('--skip', action='store_true')
         parser.add_argument('--update', action='store_true')
         parser.add_argument('--migrate', action='store_true')
+        parser.add_argument('--start', choices=STEPS)
 
     def handle(self, *args, **options):
         if options['dir']:
@@ -32,10 +35,14 @@ class Command(BaseCommand):
             self.generate_data()
         elif options['action'] == 'install':
             if options['migrate']:
-                call_command('migrate')
-            self.install_data(options['skip'], options['update'])
+                if call_command('migrate') != 0:
+                    print('Migrate failed, cancelling import.')
+                    sys.exit(1)
+            self.install_data(options['update'], options['start'])
 
     def generate_data(self):
+        print(f'Source database: {settings.DATABASES["default"]["NAME"]}')
+
         for entity, refs in self.plan.items():
             if callable(refs):
                 model_cls = import_object(settings.SEED_DATA_SERIALIZERS[entity]['model'])
@@ -45,16 +52,27 @@ class Command(BaseCommand):
             call_command('export', entity, '-o', outfile, '--refs', *refs)
         print("All seed data generated.")
 
-    def install_data(self, skip=False, update=False):
+    def install_data(self, update=False, start=None):
+        print(f'Target database: {settings.DATABASES["default"]["NAME"]}')
+
         # Ensure the imports are made in the correct order
+        completed = []
         for entity in self.plan.keys():
+            if start:
+                if entity != start:
+                    print(f'Skipping import of <{entity}>')
+                    continue
+                start = None
             source = os.path.join(self.directory, entity)
-            print("Seeding ", entity)
+            print(f"Seeding file <{entity}>")
             params = []
-            if skip:
-                params.append('--skip')
             if update:
                 params.append('--update')
-            call_command('import', source, *params)
-        print("Missing seed data imported.")
+            try:
+                call_command('import', source, *params)
+            except SystemExit:
+                print(f'Aborting. Steps completed: {", ".join(completed) or None}')
+                sys.exit(1)
+            completed.append(entity)
+        print('Complete. Seed data installed successfully.')
 
