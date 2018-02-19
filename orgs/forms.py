@@ -80,7 +80,7 @@ class PublicOrganizationWidget(ModelSelect2Widget):
     search_fields = ['name__icontains']
 
     def get_queryset(self):
-        return Organization.public.all()
+        return Organization.objects.all()
 
     def label_from_instance(self, obj):
         return obj.name
@@ -91,7 +91,7 @@ class RequestMembershipForm(RequestFormMixin):
 
     def configure(self):
         self.fields['organization'].widget = PublicOrganizationWidget(
-            queryset=Organization.public.exclude(memberships__user=self.request.user))
+            queryset=Organization.objects.exclude(memberships__user=self.request.user))
 
 
 class PasswordRecoveryForm(Form):

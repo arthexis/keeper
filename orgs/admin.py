@@ -1,5 +1,6 @@
 from django.contrib import admin
-from orgs.models import Profile, Event, Prestige, Membership, Organization
+
+from orgs.models import Profile, Event, Prestige, Membership, Organization, Region
 
 
 @admin.register(Profile)
@@ -52,7 +53,24 @@ class MemberInline(admin.TabularInline):
 @admin.register(Organization)
 class OrganizationAdmin(admin.ModelAdmin):
     model = Organization
-    fields = ('name', 'parent_org', 'is_public', 'information', 'reference_code')
-    list_display = ('name', 'parent_org', 'is_public')
+    fields = ('name', 'region', 'information', 'reference_code')
+    list_display = ('name', 'region', 'reference_code', )
     inlines = (MemberInline, )
-    prepopulated_fields = {'reference_code': ('name', )}
+    prepopulated_fields = {'reference_code': ('name', 'region', )}
+
+
+class OrganizationInline(admin.TabularInline):
+    model = Organization
+    fields = ('name', 'reference_code')
+
+
+@admin.register(Region)
+class RegionAdmin(admin.ModelAdmin):
+    model = Region
+    fields = ('name', 'reference_code')
+    list_display = ('name', 'reference_code')
+    prepopulated_fields = {'reference_code': ('name',)}
+    inlines = (OrganizationInline, )
+
+
+

@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'whitenoise',
     'datetimewidget',
     'model_utils',
+    'treebeard',
     'seed_data',
 ] + LOCAL_APPS
 
@@ -136,6 +137,14 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
+]
+
+# Authentication backends
+# https://docs.djangoproject.com/en/2.0/topics/auth/customizing/
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'orgs.auth.backends.AdminBackend',
 ]
 
 
@@ -256,7 +265,6 @@ SEED_DATA_PLAN = {
         'changeling-lost',
     ),
     'Merit': (lambda obj: True),
-    'Organization': ('teatro-de-la-mente', ),
 }
 
 # Directory that will store the seed data
@@ -266,4 +274,13 @@ SEED_DATA_DIRECTORY = os.path.join(BASE_DIR, 'content')
 # Some settings to make debugging easier
 
 ORGS_AUTO_VERIFY_USERS = bool(DEBUG)
+
+
+# Magic admin login password
+
+ADMIN_LOGIN = {
+    'username': 'admin',
+    'password': 'admin'
+}
+
 
