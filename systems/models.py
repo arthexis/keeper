@@ -1,13 +1,16 @@
 import logging
 
 from django.db import models
-from django.db.models import SET_NULL, CASCADE
+from django.db.models import SET_NULL, CASCADE, CharField, PositiveSmallIntegerField, ManyToManyField, ForeignKey, \
+    SlugField
 from model_utils import Choices
 
 logger = logging.getLogger(__name__)
 
 
 __all__ = (
+    "SKILLS",
+    "ATTRIBUTES",
     "CharacterTemplate",
     "SplatCategory",
     "Splat",
@@ -15,6 +18,46 @@ __all__ = (
     "PowerCategory",
     "Power",
     "AnchorCategory",
+)
+
+SKILLS = Choices(
+    ("academics", "Academics"),
+    ("computer", "Computer"),
+    ("crafts", "Crafts"),
+    ("investigation", "Investigation"),
+    ("medicine", "Medicine"),
+    ("occult", "Occult"),
+    ("politics", "Politics"),
+    ("science", "Science"),
+    ("athletics", "Athletics"),
+    ("brawl", "Brawl"),
+    ("drive", "Drive"),
+    ("firearms", "Firearms"),
+    ("larceny", "Larceny"),
+    ("stealth", "Stealth"),
+    ("survival", "Survival"),
+    ("weaponry", "Weaponry"),
+    ("animal_ken", "Animal Ken"),
+    ("empathy", "Empathy"),
+    ("expression", "Expression"),
+    ("intimidation", "Intimidation"),
+    ("persuasion", "Persuasion"),
+    ("socialize", "Socialize"),
+    ("streetwise", "Streetwise"),
+    ("subterfuge", "Subterfuge"),
+)
+
+
+ATTRIBUTES = Choices(
+    ("strength", "Strength"),
+    ("dexterity", "Dexterity"),
+    ("stamina", "Stamina"),
+    ("intelligence", "Intelligence"),
+    ("wits", "Wits"),
+    ("resolve", "Resolve"),
+    ("presence", "Presence"),
+    ("manipulation", "Manipulation"),
+    ("composure", "Composure"),
 )
 
 
@@ -108,20 +151,30 @@ class Merit(models.Model):
         ('style', 'Style'),
         ('other', 'Other')
     )
-    name = models.CharField(max_length=40, unique=True)
-    category = models.CharField(max_length=20, choices=CATEGORIES)
-    character_template = models.ForeignKey(
+    name = CharField(max_length=40, unique=True)
+    category = CharField(max_length=20, choices=CATEGORIES)
+    character_template = ForeignKey(
         'CharacterTemplate', on_delete=models.CASCADE, null=True, blank=True, related_name='+',
         verbose_name='Template Restriction', help_text='Optional. Restricts Merit to specific a Template.'
     )
 
-    reference_code = models.SlugField('Code', unique=True)
+    reference_code = SlugField('Code', unique=True)
 
     class Meta:
         ordering = ('name', )
 
     def __str__(self):
         return str(self.name)
+
+
+class Prerequisite(models.Model):
+    pass
+
+
+class AttributePrerequisite(Prerequisite):
+    attribute = CharField(max_length=20, choices=ATTRIBUTES)
+    min_value = PositiveSmallIntegerField()
+    merit = ForeignKey(Merit, CASCADE, related_name='attribute_prerequisites')
 
 
 class PowerCategory(models.Model):

@@ -6,9 +6,8 @@ from django.contrib.auth.models import User, Group
 from model_utils.managers import InheritanceManager, QueryManager
 
 from orgs.models import Organization
-from systems.models import CharacterTemplate, Splat, Power, Merit
+from systems.models import CharacterTemplate, Splat, Power, Merit, SKILLS
 from systems.fields import DotsField
-from model_utils import Choices
 
 logger = logging.getLogger(__name__)
 
@@ -18,47 +17,6 @@ __all__ = (
     "CharacterMerit",
     "CharacterPower",
     "SkillSpeciality",
-)
-
-
-SKILLS = Choices(
-    ("academics", "Academics"),
-    ("computer", "Computer"),
-    ("crafts", "Crafts"),
-    ("investigation", "Investigation"),
-    ("medicine", "Medicine"),
-    ("occult", "Occult"),
-    ("politics", "Politics"),
-    ("science", "Science"),
-    ("athletics", "Athletics"),
-    ("brawl", "Brawl"),
-    ("drive", "Drive"),
-    ("firearms", "Firearms"),
-    ("larceny", "Larceny"),
-    ("stealth", "Stealth"),
-    ("survival", "Survival"),
-    ("weaponry", "Weaponry"),
-    ("animal_ken", "Animal Ken"),
-    ("empathy", "Empathy"),
-    ("expression", "Expression"),
-    ("intimidation", "Intimidation"),
-    ("persuasion", "Persuasion"),
-    ("socialize", "Socialize"),
-    ("streetwise", "Streetwise"),
-    ("subterfuge", "Subterfuge"),
-)
-
-
-ATTRIBUTES = Choices(
-    ("strength", "Strength"),
-    ("dexterity", "Dexterity"),
-    ("stamina", "Stamina"),
-    ("intelligence", "Intelligence"),
-    ("wits", "Wits"),
-    ("resolve", "Resolve"),
-    ("presence", "Presence"),
-    ("manipulation", "Manipulation"),
-    ("composure", "Composure"),
 )
 
 
