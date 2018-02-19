@@ -1,5 +1,21 @@
 {% extends 'admin/change_form.html' %}{% load admin_static %}
 
+{% block object-tools-items %}
+  {% for tool in objectactions %}
+    <li class="objectaction-item" data-tool-name="{{ tool.name }}">
+      <a href='{% url tools_view_name pk=object_id tool=tool.name %}'
+        title="{{ tool.standard_attrs.title }}"
+      {% for k, v in tool.custom_attrs.items %}
+        {{ k }}="{{ v }}"
+      {% endfor %}
+      class="{{ tool.standard_attrs.class }}">
+      {{ tool.label|capfirst }}
+      </a>
+    </li>
+  {% endfor %}
+{% endblock %}
+
+
 {% block submit_buttons_bottom %}
   <hr>
   {{ block.super }}

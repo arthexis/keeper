@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.urls import reverse
+from django_object_actions import BaseDjangoObjectActions
 
 from systems.models import PowerCategory, Power, SplatCategory, Splat
 from sheets.models import *
@@ -21,14 +23,14 @@ class SkillSpecialityInline(admin.TabularInline):
 
 
 @admin.register(Character)
-class CharacterAdmin(admin.ModelAdmin):
+class CharacterAdmin(BaseDjangoObjectActions, admin.ModelAdmin):
     model = Character
     inlines = (SkillSpecialityInline, MeritInline, )
     fieldsets = (
         (None, {
             'fields': (
-                ('name', 'template', ),
-                ('user', 'organization', 'status')
+                ('name', 'template', 'status'),
+                ('user', 'organization', 'version')
             ),
         }),
         ('Template', {
@@ -75,7 +77,7 @@ class CharacterAdmin(admin.ModelAdmin):
     search_fields = ('name', 'user')
     readonly_fields = (
         'template', 'size', 'health_levels', 'speed',
-        'initiative', 'defense', 'created', 'modified',
+        'initiative', 'defense', 'created', 'modified', 'version',
     )
     readonly_fields_new = ('version', )
     formfield_overrides = {
@@ -86,6 +88,27 @@ class CharacterAdmin(admin.ModelAdmin):
         'secondary_anchor', 'character_group',
     )
     change_form_template = 'sheets/change_form.html'
+    change_actions = ('revision_this', )
+
+    def revision_this(self, request, obj: Character):
+        try:
+            obj = obj.create_revision()
+        except RuntimeError:
+            pass
+        return reverse('admin:sheets_character_change', kwargs={'pk': obj.pk})
+
+    revision_this.label = 'Revision'
+    revision_this.short_description = 'Create a new revision'
+
+    def get_change_actions(self, request, object_id, form_url):
+        if not object_id:
+            return []
+        actions = super().get_change_actions(request, object_id, form_url)
+        actions = list(actions)
+        obj = Character.objects.get(pk=object_id)
+        if obj.status != 'approved':
+            actions.remove('revision_this')
+        return actions
 
     def get_fieldsets(self, request, obj: Character=None):
         if obj is None:
@@ -158,5 +181,11 @@ class CharacterAdmin(admin.ModelAdmin):
         if obj is not None:
             return self.readonly_fields
         return self.readonly_fields_new
+
+    def get_queryset(self, request):
+        uuid = request.GET.get('uuid')
+        if uuid:
+            return Character.objects.filter(uuid=uuid)
+        return Character.active.all()
 
 #

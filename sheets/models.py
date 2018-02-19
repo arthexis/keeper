@@ -1,15 +1,16 @@
 import logging
 import uuid
 
+from django.db import transaction
 from django.db.models import Model, CharField, ForeignKey, TextField, PositiveIntegerField, \
-    PROTECT, DO_NOTHING, CASCADE, F, UUIDField
+    PROTECT, DO_NOTHING, CASCADE, UUIDField, Manager
 from django.contrib.auth.models import User, Group
 from model_utils import Choices
 from model_utils.managers import InheritanceManager, QueryManager
 from model_utils.models import TimeStampedModel, StatusModel
 
 from orgs.models import Organization
-from systems.models import CharacterTemplate, Splat, Power, Merit, SKILLS
+from systems.models import CharacterTemplate, Splat, Power, Merit, SKILLS, SplatCategory
 from systems.fields import DotsField
 
 logger = logging.getLogger(__name__)
@@ -118,9 +119,15 @@ class Character(TimeStampedModel, StatusModel):
     # Versioning fields. The highest number is the latest version
 
     version = PositiveIntegerField(default=0)
-    uuid = UUIDField(unique=True, default=uuid.uuid4, editable=False)
+    uuid = UUIDField(default=uuid.uuid4, editable=False)
 
-    objects = QueryManager(status__in=('in_progress', 'submitted', 'approved'))
+    objects = Manager()
+    active = QueryManager(status__in=('in_progress', 'submitted', 'approved'))
+    submitted = QueryManager(status='submitted')
+    approved = QueryManager(status='approved')
+
+    class Meta:
+        unique_together = (('uuid', 'version'),)
 
     # Derived Traits
 
@@ -139,6 +146,10 @@ class Character(TimeStampedModel, StatusModel):
     def merit_value(self, merit_name):
         qs = self.merits.filter(merit__name=merit_name)
         return qs.first().rating if qs.exists() else 0
+
+    def splats(self):
+        flavors = SplatCategory.FLAVORS
+        return [x for x in (getattr(self, s, None) for k, s in flavors) if x is not None]
 
     def __str__(self):
         return str(self.name)
@@ -166,11 +177,6 @@ class Character(TimeStampedModel, StatusModel):
 
     # Calculate some stuff automatically on save
     def save(self, **kwargs):
-        if self.pk:
-            old = Character.objects.get(pk=self.pk)
-            if old.is_locked():
-                raise ValueError('Cannot modify character, already archived.')
-
         if self.power_stat:
             self.resource_max = int(self.power_stat) + 10
 
@@ -202,17 +208,25 @@ class Character(TimeStampedModel, StatusModel):
         self.save()
 
     def create_revision(self):
-        self.status = 'archived'
-        self.save()
+        with transaction.atomic():
+            self.status = 'archived'
+            self.save()
 
-        # By removing the PK a new instance is created on save()
-        old_pk, self.pk, self.status = self.pk, None, 'in_progress'
-        self.version = F('version') + 1
-        self.save()
-        for cls in (CharacterMerit, CharacterPower, SkillSpeciality):
-            for elem in cls.objects.filter(character_id=old_pk):
-                elem.pk, elem.character_id = None, self.pk
-                elem.save()
+            # By removing the PK a new instance is created on save()
+            old_pk, self.pk, self.status = self.pk, None, 'in_progress'
+            self.version += 1
+            self.save()
+            for cls in (CharacterMerit, CharacterPower, SkillSpeciality):
+                for elem in cls.objects.filter(character_id=old_pk):
+                    elem.pk, elem.character_id = None, self.pk
+                    elem.save()
+        return self
+
+    def revisions(self):
+        return Character.objects.filter(uuid=self.uuid).order_by('version')
+
+    def active_revision(self):
+        return self.revisions().exclude(status='archived').first()
 
 
 class CharacterElement(Model):
