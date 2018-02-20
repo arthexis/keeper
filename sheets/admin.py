@@ -54,10 +54,10 @@ class SimpleActionsModel(BaseDjangoObjectActions, admin.ModelAdmin):
         for action in actions:
             if not hasattr(self, action):
 
-                def inner(self, request, obj):
+                def inner(self, obj):
                     func = getattr(obj, action, None)
                     if callable(func):
-                        return func(self, user=request.user)
+                        return func(user=self.user)
 
                 inner.label = action.replace('_', ' ').upper()
                 setattr(self, action, inner)
@@ -142,7 +142,7 @@ class CharacterAdmin(SimpleActionsModel):
     )
     change_form_template = 'sheets/change_form.html'
     change_actions = (
-        'create_revision',
+        'create_revision', 'randomize',
     )
 
     def get_fieldsets(self, request, obj: Character=None):
@@ -236,4 +236,13 @@ class CharacterAdmin(SimpleActionsModel):
             fields.append('version')
         return fields
 
-#
+
+@admin.register(ApprovalRequest)
+class ApprovalAdmin(admin.ModelAdmin):
+    model = ApprovalRequest
+    fields = ('character', 'request', 'created', )
+    list_display = ('character', 'request', 'created', 'status')
+    list_filter = ('status', )
+    readonly_fields = ('created', )
+    search_fields = ('character', )
+

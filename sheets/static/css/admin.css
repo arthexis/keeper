@@ -117,3 +117,7 @@ textarea#id_background {
 #content-main #fieldset-1 {
     padding-top: 15px;
 }
+
+#id_game_line {
+    width: 240px
+}

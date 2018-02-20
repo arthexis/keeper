@@ -1,7 +1,7 @@
 import logging
 import uuid
+import random
 
-from django.db import transaction
 from django.db.models import Model, CharField, ForeignKey, TextField, PositiveIntegerField, \
     PROTECT, DO_NOTHING, CASCADE, UUIDField, Manager
 from django.contrib.auth.models import User, Group
@@ -11,7 +11,7 @@ from model_utils.managers import InheritanceManager, QueryManager
 from model_utils.models import TimeStampedModel, StatusModel
 
 from orgs.models import Organization
-from systems.models import CharacterTemplate, Splat, Power, Merit, SKILLS, SplatCategory
+from systems.models import CharacterTemplate, Splat, Power, Merit, SKILLS, SplatCategory, ATTRIBUTES, SKILLS
 from systems.fields import DotsField
 
 logger = logging.getLogger(__name__)
@@ -189,13 +189,47 @@ class Character(TimeStampedModel, StatusModel):
 
         super().save(**kwargs)
 
+    # Methods for generating a random character
+    def randomize(self, user=None):
+        self.clear_attributes()
+        self.randomize_stats([k for k, v in ATTRIBUTES], 12)
+        self.randomize_stats([k for k, v in SKILLS], 22)
+        self.save()
+
+    def randomize_stats(self, stats, points):
+        while points:
+            state = random.choice(stats)
+            target = getattr(self, state)
+            if target < 5:
+                setattr(self, state, target + 1)
+                points -= 1
+
+    def get_attribute_total(self):
+        return sum(int(getattr(self, k)) for k, v in ATTRIBUTES)
+
+    def get_skills_total(self):
+        return sum(int(getattr(self, k)) for k, v in SKILLS)
+
+    def clear_attributes(self):
+        for attr, _ in ATTRIBUTES:
+            setattr(self, attr, 1)
+
+    def clear_skills(self):
+        for skill, _ in SKILLS:
+            setattr(self, skill, 1)
+
     # Methods related to revisions and approvals
 
     def can_take_action(self, action, user=None):
-        if action == 'submit_for_approval':
-            return self.status == 'in_progress' and self.version == 0 and self.user == user
-        elif action == 'create_revision':
+        if action in 'submit_for_approval':
+            return self.is_new() and self.user == user
+        if action in 'randomize':
+            return self.is_new()
+        if action == 'create_revision':
             return self.status == 'approved'
+
+    def is_new(self):
+        return self.status == 'in_progress' and self.version == 0
 
     def is_locked(self):
         return self.status in ('archived', 'approved')
@@ -299,7 +333,13 @@ class ApprovalRequest(TimeStampedModel, StatusModel):
     response = TextField('Response Details',  blank=True, default='Granted.')
 
     pending = QueryManager(status='pending')
+    completed = QueryManager(status='completed')
+
+    class Meta:
+        verbose_name = "Approval Request"
 
     def __str__(self):
         return f'{self.character.name} #{self.pk}'
+
+
 
