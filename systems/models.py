@@ -205,8 +205,7 @@ class PowerCategory(models.Model):
 class Power(models.Model):
     name = models.CharField(max_length=40)
     power_category = models.ForeignKey('PowerCategory', CASCADE, related_name='powers')
-
-    origin_splat = models.ForeignKey('Splat', SET_NULL, related_name='+', null=True)
+    origin_splat = models.ForeignKey('Splat', SET_NULL, related_name='+', null=True, blank=True)
 
     class Meta:
         unique_together = ('name', 'power_category', )

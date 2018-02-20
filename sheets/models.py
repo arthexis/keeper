@@ -283,4 +283,9 @@ class SkillSpeciality(CharacterElement):
         verbose_name_plural = "Skill Specialities"
 
 
+class ApprovalRequest(TimeStampedModel):
+    character = ForeignKey(Character, CASCADE, related_name='approval_requests')
+    request = TextField()
+
+
 
