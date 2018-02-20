@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django_object_actions import BaseDjangoObjectActions
+from admin_tech.admin import SimpleActionsModel
 
 from systems.models import PowerCategory, Power, SplatCategory, Splat
 from sheets.models import ApprovalRequest, Character, CharacterMerit, SkillSpeciality, CharacterPower
@@ -45,34 +45,6 @@ class ApprovalLogInline(admin.StackedInline):
 
     def get_queryset(self, request):
         return super().get_queryset(request).filter(status='complete')
-
-
-class SimpleActionsModel(BaseDjangoObjectActions, admin.ModelAdmin):
-
-    def __init__(self, model, admin_site):
-        actions = list(self.change_actions)
-        for action in actions:
-            if not hasattr(self, action):
-
-                def inner(self, obj):
-                    func = getattr(obj, action, None)
-                    if callable(func):
-                        return func(user=self.user)
-
-                inner.label = action.replace('_', ' ').upper()
-                setattr(self, action, inner)
-
-        super().__init__(model, admin_site)
-
-    def get_change_actions(self, request, object_id, form_url):
-        if not object_id:
-            return []
-        actions = list(super().get_change_actions(request, object_id, form_url))
-        obj = Character.objects.get(pk=object_id)
-        if not hasattr(obj, 'can_take_action'):
-            return actions
-        user = request.user
-        return [a for a in actions if obj.can_take_action(a, user=user)]
 
 
 @admin.register(Character)

@@ -1,5 +1,8 @@
 from django.contrib import admin
+from django.urls import reverse
+
 from systems.models import Splat, SplatCategory, Merit, Power, PowerCategory, CharacterTemplate
+from admin_tech.admin import SaveRedirectAdmin
 
 
 class ParentInlineMixin(admin.TabularInline):
@@ -32,12 +35,15 @@ class SplatCategoryInline(admin.TabularInline):
 
 
 @admin.register(SplatCategory)
-class SplatCategoryAdmin(admin.ModelAdmin):
+class SplatCategoryAdmin(SaveRedirectAdmin):
     model = SplatCategory
     list_display = ('name', 'character_template', 'splat_names', )
     readonly_fields = ('splat_names', )
     inlines = (SplatInline, )
     fields = ('name', 'character_template', 'flavor', 'is_required', )
+
+    def get_save_redirect_url(self, request, obj):
+        return reverse('admin:systems_charactertemplate_change', args=[obj.character_template.pk])
 
 
 @admin.register(Merit)

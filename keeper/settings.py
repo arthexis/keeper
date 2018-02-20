@@ -269,6 +269,8 @@ SEED_DATA_SERIALIZERS = {
 SEED_DATA_PLAN = {
     'Template': (
         'mage-mtaw',
+        'vampire-vtr',
+        'changeling-ctl',
     )
 }
 
