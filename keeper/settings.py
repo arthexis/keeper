@@ -256,16 +256,6 @@ SEED_DATA_SERIALIZERS = {
 # what model instances are seeded. The order is preserved when generating and installing.
 # Each entry will generate exactly one zipfile.
 
-# SEED_DATA_PLAN = {
-#     'Template': (
-#         'geist-sin-eater',
-#         'mage-awakening',
-#         'vampire-requiem',
-#         'changeling-lost',
-#     ),
-#     'Merit': (lambda obj: True),
-# }
-
 SEED_DATA_PLAN = {
     'Template': (
         'mage-mtaw',

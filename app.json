@@ -27,6 +27,9 @@
     },
     "SECRET_KEY": {
       "generator": "secret"
+    },
+    "ADMIN_LOGIN_PASSWORD": {
+      "required": true
     }
   }
 }
