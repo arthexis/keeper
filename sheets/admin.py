@@ -1,10 +1,8 @@
 from django.contrib import admin
-from django.shortcuts import redirect
-from django.urls import reverse
 from django_object_actions import BaseDjangoObjectActions
 
 from systems.models import PowerCategory, Power, SplatCategory, Splat
-from sheets.models import *
+from sheets.models import ApprovalRequest, Character, CharacterMerit, SkillSpeciality, CharacterPower
 from django.forms.widgets import HiddenInput
 from systems.admin import ParentInlineMixin
 from systems.fields import DotsField, DotsInput
@@ -24,15 +22,68 @@ class SkillSpecialityInline(admin.TabularInline):
     extra = 0
 
 
+class PendingApprovalInline(admin.TabularInline):
+    model = ApprovalRequest
+    fields = ('request', 'status', 'created')
+    readonly_fields = ('created', )
+    extra = 0
+    verbose_name = 'Approval'
+    verbose_name_plural = 'Pending Approvals'
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(status='pending')
+
+
+class ApprovalLogInline(admin.StackedInline):
+    model = ApprovalRequest
+    fields = ('request', 'created', 'modified')
+    readonly_fields = ('created', 'modified', 'request')
+    verbose_name_plural = 'Approval History'
+
+    def has_add_permission(self, request):
+        return False
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(status='complete')
+
+
+class SimpleActionsModel(BaseDjangoObjectActions, admin.ModelAdmin):
+
+    def __init__(self, model, admin_site):
+        actions = list(self.change_actions)
+        for action in actions:
+            if not hasattr(self, action):
+
+                def inner(self, request, obj):
+                    func = getattr(obj, action, None)
+                    if callable(func):
+                        return func(self, user=request.user)
+
+                inner.label = action.replace('_', ' ').upper()
+                setattr(self, action, inner)
+
+        super().__init__(model, admin_site)
+
+    def get_change_actions(self, request, object_id, form_url):
+        if not object_id:
+            return []
+        actions = list(super().get_change_actions(request, object_id, form_url))
+        obj = Character.objects.get(pk=object_id)
+        if not hasattr(obj, 'can_take_action'):
+            return actions
+        user = request.user
+        return [a for a in actions if obj.can_take_action(a, user=user)]
+
+
 @admin.register(Character)
-class CharacterAdmin(BaseDjangoObjectActions, admin.ModelAdmin):
+class CharacterAdmin(SimpleActionsModel):
     model = Character
-    inlines = (SkillSpecialityInline, MeritInline, )
+    inlines = (SkillSpecialityInline, MeritInline, PendingApprovalInline, )
     fieldsets = (
         (None, {
             'fields': (
                 ('name', 'template', 'status'),
-                ('user', 'organization', 'version')
+                ('user', 'organization', 'version'),
             ),
         }),
         ('Template', {
@@ -81,7 +132,7 @@ class CharacterAdmin(BaseDjangoObjectActions, admin.ModelAdmin):
         'template', 'size', 'health_levels', 'speed',
         'initiative', 'defense', 'created', 'modified', 'version',
     )
-    readonly_fields_new = ('version', )
+    readonly_fields_new = ('version', 'status',)
     formfield_overrides = {
         DotsField: {'widget': DotsInput}
     }
@@ -90,28 +141,9 @@ class CharacterAdmin(BaseDjangoObjectActions, admin.ModelAdmin):
         'secondary_anchor', 'character_group',
     )
     change_form_template = 'sheets/change_form.html'
-    change_actions = ('revision_this', )
-
-    def revision_this(self, request, obj: Character):
-        try:
-            obj.create_revision()
-            new_obj = obj.active_revision()
-            return redirect('admin:sheets_character_change', object_id=new_obj.pk)
-        except RuntimeError:
-            pass
-
-    revision_this.label = 'Create Revision'
-    revision_this.short_description = 'Create a new revision'
-
-    def get_change_actions(self, request, object_id, form_url):
-        if not object_id:
-            return []
-        actions = super().get_change_actions(request, object_id, form_url)
-        actions = list(actions)
-        obj = Character.objects.get(pk=object_id)
-        if obj.status != 'approved':
-            actions.remove('revision_this')
-        return actions
+    change_actions = (
+        'create_revision',
+    )
 
     def get_fieldsets(self, request, obj: Character=None):
         if obj is None:
@@ -123,12 +155,15 @@ class CharacterAdmin(BaseDjangoObjectActions, admin.ModelAdmin):
 
     def get_extra_inlines(self, request, obj: Character):
         extra_inlines = []
+        if obj and obj.approval_requests.filter(status='complete').exists():
+            extra_inlines.append(ApprovalLogInline)
+
         for category in PowerCategory.objects.filter(character_template=obj.template):
 
             class PowerInline(ParentInlineMixin):
                 model = CharacterPower
-                fields = ('power', 'rating', )
-                readonly_fields = ('category', )
+                fields = ('power', 'rating', 'origin')
+                readonly_fields = ('category', 'origin')
                 power_category = category
                 verbose_name = category.name
                 verbose_name_plural = category.name
@@ -143,6 +178,9 @@ class CharacterAdmin(BaseDjangoObjectActions, admin.ModelAdmin):
                     if db_field.name == 'power' and self.parent_obj:
                         return Power.objects.filter(power_category=self.power_category)
                     return queryset
+
+                def origin(self, power: CharacterPower):
+                    return f'{power.power.origin_splat}'
 
             extra_inlines.append(PowerInline)
 

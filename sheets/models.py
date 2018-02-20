@@ -5,6 +5,7 @@ from django.db import transaction
 from django.db.models import Model, CharField, ForeignKey, TextField, PositiveIntegerField, \
     PROTECT, DO_NOTHING, CASCADE, UUIDField, Manager
 from django.contrib.auth.models import User, Group
+from django.shortcuts import redirect
 from model_utils import Choices
 from model_utils.managers import InheritanceManager, QueryManager
 from model_utils.models import TimeStampedModel, StatusModel
@@ -17,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 __all__ = (
+    'ApprovalRequest',
     "Character",
     "CharacterMerit",
     "CharacterPower",
@@ -189,38 +191,41 @@ class Character(TimeStampedModel, StatusModel):
 
     # Methods related to revisions and approvals
 
+    def can_take_action(self, action, user=None):
+        if action == 'submit_for_approval':
+            return self.status == 'in_progress' and self.version == 0 and self.user == user
+        elif action == 'create_revision':
+            return self.status == 'approved'
+
     def is_locked(self):
         return self.status in ('archived', 'approved')
 
     def is_active(self):
         return self.status != 'archived'
 
-    def submit(self):
+    def submit_for_approval(self, user=None):
         self.status = 'submitted'
+        ApprovalRequest.objects.create(character=self, request="New character request.")
         self.save()
 
-    def approve(self):
-        self.status = 'approved'
+    def create_revision(self, user=None):
+        self.status = 'archived'
         self.save()
 
-    def reject(self):
-        self.rejected = 'in_progress'
+        # By removing the PK a new instance is created on save()
+        old_pk, self.pk, self.status = self.pk, None, 'in_progress'
+        self.version += 1
         self.save()
 
-    def create_revision(self):
-        with transaction.atomic():
-            self.status = 'archived'
-            self.save()
+        # Copy character elements
+        for cls in (CharacterMerit, CharacterPower, SkillSpeciality):
+            cls.objects.filter(character_id=old_pk).update(pk=None, character_id=self.pk)
 
-            # By removing the PK a new instance is created on save()
-            old_pk, self.pk, self.status = self.pk, None, 'in_progress'
-            self.version += 1
-            self.save()
-            for cls in (CharacterMerit, CharacterPower, SkillSpeciality):
-                for elem in cls.objects.filter(character_id=old_pk):
-                    elem.pk, elem.character_id = None, self.pk
-                    elem.save()
-        return self
+        # Migrate approvals
+        ApprovalRequest.objects.filter(character_id=old_pk).update(character=self)
+
+        # Return a redirect to new revision
+        return redirect('admin:sheets_character_change', object_id=self.pk)
 
     def revisions(self):
         return Character.objects.filter(uuid=self.uuid).order_by('version')
@@ -283,4 +288,18 @@ class SkillSpeciality(CharacterElement):
         verbose_name_plural = "Skill Specialities"
 
 
+class ApprovalRequest(TimeStampedModel, StatusModel):
+    STATUS = Choices(
+        ('pending', 'Pending'),
+        ('complete', 'Complete'),
+    )
+
+    character = ForeignKey(Character, CASCADE, related_name='approval_requests')
+    request = TextField('Request Information')
+    response = TextField('Response Details',  blank=True, default='Granted.')
+
+    pending = QueryManager(status='pending')
+
+    def __str__(self):
+        return f'{self.character.name} #{self.pk}'
 

@@ -99,15 +99,21 @@ textarea#id_background {
     padding-top: 10px!important;
     padding-bottom: 10px!important;
     border-radius: 5px;
+    color: darkblue;
 }
 
 .objectaction-item a:hover {
     background-color: deepskyblue!important;
 }
-.objectaction-item a:active {
-    background-color: mediumpurple;
-}
 
 .hidden {
     display: none;
+}
+
+#content-main div.items .well legend {
+    padding-top: 0;
+}
+
+#content-main #fieldset-1 {
+    padding-top: 15px;
 }
