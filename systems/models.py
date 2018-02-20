@@ -152,21 +152,7 @@ class Splat(models.Model):
 
 
 class Merit(models.Model):
-    CATEGORIES = Choices(
-        ('mental', 'Mental'),
-        ('physical', 'Physical'),
-        ('social', 'Social'),
-        ('supernatural', 'Supernatural'),
-        ('style', 'Style'),
-        ('other', 'Other')
-    )
     name = CharField(max_length=40, unique=True)
-    category = CharField(max_length=20, choices=CATEGORIES)
-    character_template = ForeignKey(
-        'CharacterTemplate', on_delete=models.CASCADE, null=True, blank=True, related_name='+',
-        verbose_name='Template Restriction', help_text='Optional. Restricts Merit to specific Template.'
-    )
-
     reference_code = SlugField('Code', unique=True)
 
     class Meta:
@@ -205,7 +191,6 @@ class PowerCategory(models.Model):
 class Power(models.Model):
     name = models.CharField(max_length=40)
     power_category = models.ForeignKey('PowerCategory', CASCADE, related_name='powers')
-    origin_splat = models.ForeignKey('Splat', SET_NULL, related_name='+', null=True, blank=True)
 
     class Meta:
         unique_together = ('name', 'power_category', )

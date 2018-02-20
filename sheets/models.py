@@ -3,7 +3,7 @@ import uuid
 import random
 
 from django.db.models import Model, CharField, ForeignKey, TextField, PositiveIntegerField, \
-    PROTECT, DO_NOTHING, CASCADE, UUIDField, Manager
+    PROTECT, DO_NOTHING, CASCADE, UUIDField, Manager, BooleanField
 from django.contrib.auth.models import User, Group
 from django.shortcuts import redirect
 from model_utils import Choices
@@ -287,9 +287,6 @@ class CharacterMerit(CharacterElement):
     class Meta:
         verbose_name = "Merit"
 
-    def origin(self):
-        return self.merit.character_template.name if self.merit.character_template else 'Any'
-
     def __str__(self):
         return '{} ({})'.format(self.merit.name, self.rating)
 
@@ -298,6 +295,7 @@ class CharacterPower(CharacterElement):
     character = ForeignKey(Character, CASCADE, related_name='powers')
     power = ForeignKey(Power, PROTECT, related_name='+')
     rating = DotsField(default=1, clear=False)
+    details = CharField(max_length=200, blank=True)
 
     class Meta:
         verbose_name = "Power"

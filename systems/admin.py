@@ -49,36 +49,38 @@ class SplatCategoryAdmin(SaveRedirectAdmin):
 @admin.register(Merit)
 class MeritAdmin(admin.ModelAdmin):
     model = Merit
-    list_filter = ('category', 'character_template', )
-    fields = (('name', 'reference_code'), 'character_template', 'category')
-    list_display = ('name', 'category', 'character_template', )
+    fields = (('name', 'reference_code'), )
+    list_display = ('name', )
     # list_editable = ('category', 'character_template', )
     # list_display_links = ('name', )
     prepopulated_fields = {'reference_code': ('name', )}
 
 
-@admin.register(Power)
-class PowerAdmin(admin.ModelAdmin):
-    model = Power
-    fields = ('name', 'power_category', 'origin_splat',)
-    list_filter = ('power_category', )
-    list_display = ('name', 'power_category', 'origin_splat', )
+# @admin.register(Power)
+# class PowerAdmin(admin.ModelAdmin):
+#     model = Power
+#     fields = ('name', 'power_category',)
+#     list_filter = ('power_category', )
+#     list_display = ('name', 'power_category', )
 
 
 class PowerInline(admin.TabularInline):
     model = Power
-    fields = ('name', 'origin_splat')
+    fields = ('name', )
     extra = 0
     show_change_link = True
 
 
 @admin.register(PowerCategory)
-class PowerCategoryAdmin(admin.ModelAdmin):
+class PowerCategoryAdmin(SaveRedirectAdmin):
     model = PowerCategory
     fields = ('name', 'character_template')
     list_display = ('name', 'character_template', 'power_names', )
     readonly_fields = ('power_names', )
     inlines = (PowerInline, )
+
+    def get_save_redirect_url(self, request, obj):
+        return reverse('admin:systems_charactertemplate_change', args=[obj.character_template.pk])
 
 
 class PowerCategoryInline(admin.TabularInline):

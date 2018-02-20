@@ -10,8 +10,7 @@ from systems.fields import DotsField, DotsInput
 
 class MeritInline(admin.TabularInline):
     model = CharacterMerit
-    fields = ('merit', 'rating', 'details', 'origin', )
-    readonly_fields = ('origin', )
+    fields = ('merit', 'rating', 'details', )
     extra = 0
 
 

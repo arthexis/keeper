@@ -271,7 +271,9 @@ SEED_DATA_PLAN = {
         'mage-mtaw',
         'vampire-vtr',
         'changeling-ctl',
-    )
+        'werewolf-wtf',
+    ),
+    'Merit': (lambda obj: True),
 }
 
 # Directory that will store the seed data
