@@ -92,3 +92,22 @@ textarea#id_background {
     min-width: 700px;
 }
 
+.objectaction-item a:link,
+.objectaction-item a:visited {
+    background-color: skyblue;
+    margin-top: 5px!important;
+    padding-top: 10px!important;
+    padding-bottom: 10px!important;
+    border-radius: 5px;
+}
+
+.objectaction-item a:hover {
+    background-color: deepskyblue!important;
+}
+.objectaction-item a:active {
+    background-color: mediumpurple;
+}
+
+.hidden {
+    display: none;
+}

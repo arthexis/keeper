@@ -10,9 +10,27 @@
 
 {% block submit_buttons_bottom %}
   {% if original.is_locked %}
-    <p>You cannot make changes to this character because it's locked.</p>
-    <p>Create a revision for this character and edit the revision.</p>
-  {% else %}
-    {{ block.super }}
+    <div id="lock-warning">
+      <p>You cannot make changes to this character because it's locked.</p>
+      <p>Create a revision for this character and edit the revision
+        or <a id="unlock-link" target="">click here to unlock it.</a>
+      </p>
+    </div>
+    <script>
+        (function ($) {
+          $(function () {
+              var $buttons = $('#submit-buttons-sheet')
+              $buttons.addClass('hidden')
+              $('#unlock-link').on('click', function ( event ) {
+                  event.preventDefault()
+                  $('#lock-warning').addClass('hidden')
+                  $buttons.removeClass('hidden')
+              })
+          })
+        }(django.jQuery))
+    </script>
   {% endif %}
+  <div id="submit-buttons-sheet">
+    {{ block.super }}
+  </div>
 {% endblock %}

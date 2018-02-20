@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.shortcuts import redirect
 from django.urls import reverse
 from django_object_actions import BaseDjangoObjectActions
 
@@ -19,6 +20,7 @@ class MeritInline(admin.TabularInline):
 class SkillSpecialityInline(admin.TabularInline):
     model = SkillSpeciality
     fields = ('speciality', 'skill')
+    min_num = 3
     extra = 0
 
 
@@ -92,12 +94,13 @@ class CharacterAdmin(BaseDjangoObjectActions, admin.ModelAdmin):
 
     def revision_this(self, request, obj: Character):
         try:
-            obj = obj.create_revision()
+            obj.create_revision()
+            new_obj = obj.active_revision()
+            return redirect('admin:sheets_character_change', object_id=new_obj.pk)
         except RuntimeError:
             pass
-        return reverse('admin:sheets_character_change', kwargs={'pk': obj.pk})
 
-    revision_this.label = 'Revision'
+    revision_this.label = 'Create Revision'
     revision_this.short_description = 'Create a new revision'
 
     def get_change_actions(self, request, object_id, form_url):
@@ -187,5 +190,12 @@ class CharacterAdmin(BaseDjangoObjectActions, admin.ModelAdmin):
         if uuid:
             return Character.objects.filter(uuid=uuid)
         return Character.active.all()
+
+    def get_list_display(self, request):
+        uuid = request.GET.get('uuid')
+        fields = list(super().get_list_display(request))
+        if uuid:
+            fields.append('version')
+        return fields
 
 #

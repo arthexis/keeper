@@ -264,7 +264,7 @@ class CharacterPower(CharacterElement):
         verbose_name = "Power"
 
     def __str__(self):
-        return '{} {}'.format(self.power.name, self.rating)
+        return f'{self.power.name} {self.rating}'
 
     def category(self):
         return self.power.power_category.name
@@ -272,8 +272,8 @@ class CharacterPower(CharacterElement):
 
 class SkillSpeciality(CharacterElement):
     character = ForeignKey(Character, CASCADE, related_name='specialities')
-    skill = CharField(max_length=20, choices=SKILLS)
-    speciality = CharField(max_length=200)
+    skill = CharField(max_length=20, choices=SKILLS, blank=True)
+    speciality = CharField(max_length=200, blank=True)
 
     def __str__(self):
         return "{} ({})".format(self.speciality, self.get_skill_display())
