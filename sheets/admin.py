@@ -127,8 +127,8 @@ class CharacterAdmin(BaseDjangoObjectActions, admin.ModelAdmin):
 
             class PowerInline(ParentInlineMixin):
                 model = CharacterPower
-                fields = ('power', 'rating', )
-                readonly_fields = ('category', )
+                fields = ('power', 'rating', 'origin')
+                readonly_fields = ('category', 'origin')
                 power_category = category
                 verbose_name = category.name
                 verbose_name_plural = category.name
@@ -143,6 +143,9 @@ class CharacterAdmin(BaseDjangoObjectActions, admin.ModelAdmin):
                     if db_field.name == 'power' and self.parent_obj:
                         return Power.objects.filter(power_category=self.power_category)
                     return queryset
+
+                def origin(self, power: CharacterPower):
+                    return f'{power.power.origin_splat}'
 
             extra_inlines.append(PowerInline)
 
