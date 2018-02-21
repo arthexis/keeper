@@ -46,6 +46,26 @@ class ApprovalLogInline(admin.StackedInline):
         return super().get_queryset(request).filter(status='complete')
 
 
+class BasePowerInline(ParentInlineMixin):
+    model = CharacterPower
+    fields = ('power', 'rating', 'details' )
+    readonly_fields = ('category',)
+    power_category = None
+    verbose_name = None
+    verbose_name_plural = None
+    extra = 0
+
+    def get_queryset(self, request):
+        return CharacterPower.objects.filter(power__power_category=self.power_category)
+
+    def get_field_queryset(self, db, db_field, request):
+        self.formset.power_category = self.power_category
+        queryset = super().get_field_queryset(db, db_field, request)
+        if db_field.name == 'power' and self.parent_obj:
+            return Power.objects.filter(power_category=self.power_category)
+        return queryset
+
+
 @admin.register(Character)
 class CharacterAdmin(SimpleActionsModel):
     model = Character
@@ -86,8 +106,6 @@ class CharacterAdmin(SimpleActionsModel):
         ('Advantages', {
             'fields': (
                 ('integrity', 'power_stat', 'resource',),
-                ('size', 'health_levels', 'defense', ),
-                ('speed', 'initiative', )
             ),
         }),
         ('Information', {
@@ -100,8 +118,7 @@ class CharacterAdmin(SimpleActionsModel):
     list_filter = ('template', )
     search_fields = ('name', 'user')
     readonly_fields = (
-        'template', 'size', 'health_levels', 'speed',
-        'initiative', 'defense', 'created', 'modified', 'version',
+        'template', 'health_levels', 'created', 'modified', 'version',
     )
     readonly_fields_new = ('version', 'status',)
     formfield_overrides = {
@@ -113,7 +130,7 @@ class CharacterAdmin(SimpleActionsModel):
     )
     change_form_template = 'sheets/change_form.html'
     change_actions = (
-        'create_revision', 'randomize',
+        'create_revision',
     )
 
     def get_fieldsets(self, request, obj: Character=None):
@@ -131,27 +148,10 @@ class CharacterAdmin(SimpleActionsModel):
 
         for category in PowerCategory.objects.filter(character_template=obj.template):
 
-            class PowerInline(ParentInlineMixin):
-                model = CharacterPower
-                fields = ('power', 'rating', 'origin')
-                readonly_fields = ('category', 'origin')
+            class PowerInline(BasePowerInline):
                 power_category = category
                 verbose_name = category.name
                 verbose_name_plural = category.name
-                extra = 0
-
-                def get_queryset(self, request):
-                    return CharacterPower.objects.filter(power__power_category=self.power_category)
-
-                def get_field_queryset(self, db, db_field, request):
-                    self.formset.power_category = self.power_category
-                    queryset = super().get_field_queryset(db, db_field, request)
-                    if db_field.name == 'power' and self.parent_obj:
-                        return Power.objects.filter(power_category=self.power_category)
-                    return queryset
-
-                def origin(self, power: CharacterPower):
-                    return f'{power.power.origin_splat}'
 
             extra_inlines.append(PowerInline)
 

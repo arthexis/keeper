@@ -10,15 +10,31 @@ logger = logging.getLogger(__name__)
 
 __all__ = (
     "SKILLS",
+    "SKILL_KEYS",
     "ATTRIBUTES",
+    "ATTRIBUTE_KEYS",
     "CharacterTemplate",
     "SplatCategory",
     "Splat",
-    "Merit",
     "PowerCategory",
+    "Merit",
     "Power",
     "AnchorCategory",
 )
+
+ATTRIBUTES = Choices(
+    ("strength", "Strength"),
+    ("dexterity", "Dexterity"),
+    ("stamina", "Stamina"),
+    ("intelligence", "Intelligence"),
+    ("wits", "Wits"),
+    ("resolve", "Resolve"),
+    ("presence", "Presence"),
+    ("manipulation", "Manipulation"),
+    ("composure", "Composure"),
+)
+
+ATTRIBUTE_KEYS = [k for k, v in ATTRIBUTES]
 
 SKILLS = Choices(
     ("academics", "Academics"),
@@ -47,18 +63,7 @@ SKILLS = Choices(
     ("subterfuge", "Subterfuge"),
 )
 
-
-ATTRIBUTES = Choices(
-    ("strength", "Strength"),
-    ("dexterity", "Dexterity"),
-    ("stamina", "Stamina"),
-    ("intelligence", "Intelligence"),
-    ("wits", "Wits"),
-    ("resolve", "Resolve"),
-    ("presence", "Presence"),
-    ("manipulation", "Manipulation"),
-    ("composure", "Composure"),
-)
+SKILL_KEYS = [k for k, v in SKILLS]
 
 
 class ReferenceBook(models.Model):
@@ -132,7 +137,7 @@ class SplatCategory(models.Model):
         return ', '.join(self.splats.values_list('name', flat=True))
 
     def storage_column(self):
-        return SplatCategory.STORAGE_COLUMNS[self.flavor]
+        return f'{self.flavor}_splat'
 
 
 class Splat(models.Model):

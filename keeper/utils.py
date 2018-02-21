@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 __all__ = (
     'exists',
     'getenv',
-    'otherwise',
+    'missing',
     'path',
     'rand_string'
 )
@@ -44,23 +44,21 @@ def getenv(var, default=None):
     return r
 
 
-def otherwise(f, default=None, exceptions=None):
+def missing(val):
     """ Decorator that makes a function catch ValueError and return a value instead.
 
-    :param f: The function being decorated.
-    :param default: Value to return when the exceptions are caught, defaults to None
-    :param exceptions: A sequence of exceptions to catch, defaults to (AttributeError, )
+    :param val: Value to return when the exceptions are caught, defaults to None
     :return: A decorated function.
     """
-    exceptions = exceptions or (AttributeError,)
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except (IndexError, AttributeError):
+                return val
+        return wrapper
 
-    def inner(*args, **kwargs):
-        try:
-            return f(*args, **kwargs)
-        except exceptions:
-            return default
-
-    return inner
+    return decorator
 
 
 def path(pattern, view, name=None, **kwargs):

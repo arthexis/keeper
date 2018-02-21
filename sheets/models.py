@@ -1,9 +1,8 @@
 import logging
 import uuid
-import random
 
 from django.db.models import Model, CharField, ForeignKey, TextField, PositiveIntegerField, \
-    PROTECT, DO_NOTHING, CASCADE, UUIDField, Manager, BooleanField
+    PROTECT, DO_NOTHING, CASCADE, UUIDField, SET_NULL, Manager
 from django.contrib.auth.models import User, Group
 from django.shortcuts import redirect
 from model_utils import Choices
@@ -11,8 +10,9 @@ from model_utils.managers import InheritanceManager, QueryManager
 from model_utils.models import TimeStampedModel, StatusModel
 
 from orgs.models import Organization
-from systems.models import CharacterTemplate, Splat, Power, Merit, SKILLS, SplatCategory, ATTRIBUTES, SKILLS
+from systems.models import CharacterTemplate, Splat, Power, Merit, SplatCategory, ATTRIBUTE_KEYS, SKILLS, SKILL_KEYS
 from systems.fields import DotsField
+from keeper.utils import missing
 
 logger = logging.getLogger(__name__)
 
@@ -27,16 +27,16 @@ __all__ = (
 
 
 class Character(TimeStampedModel, StatusModel):
+    objects = Manager()
 
     STATUS = Choices(
         ('in_progress', 'In Progress'),
-        ('submitted', 'Submitted'),
         ('approved', 'Approved'),
         ('archived', 'Archived'),
     )
 
     # Character basic info
-    name = CharField("Name or Alias", max_length=40)
+    name = CharField("Name or Alias", max_length=40, db_index=True)
     template = ForeignKey(CharacterTemplate, CASCADE, null=True)
     power_stat = DotsField(default=1, clear=False)
     integrity = DotsField(default=7)
@@ -101,35 +101,36 @@ class Character(TimeStampedModel, StatusModel):
     tertiary_splat = ForeignKey(Splat, PROTECT, related_name='+', null=True, blank=True)
 
     # Organization related fields
-    user = ForeignKey(
-        User, DO_NOTHING, null=True, blank=True, related_name='characters')
-    organization = ForeignKey(Organization, CASCADE, null=True, blank=True)
+    user = ForeignKey(User, SET_NULL, null=True, blank=True, related_name='characters')
+    organization = ForeignKey(Organization, SET_NULL, null=True, blank=True)
 
-    # Derived traits, they are not handled automatically because
-    # their values can be manually adjusted
-    size = DotsField(default=5, clear=False, editable=False)
-    health_levels = PositiveIntegerField(default=0)
-    damage_track = CharField(max_length=100, blank=True, null=True)
-    willpower = PositiveIntegerField(blank=True, null=True)
-    willpower_max = PositiveIntegerField(blank=True, null=True, editable=False)
-    perm_willpower_spent = PositiveIntegerField(blank=True, null=True)
+    # Tracking of spent resources
+    bashing_damage = PositiveIntegerField(default=0)
+    lethal_damage = PositiveIntegerField(default=0)
+    aggravated_damage = PositiveIntegerField(default=0)
+    willpower_points_spent = PositiveIntegerField(default=0)
+    willpower_dots_spent = PositiveIntegerField(default=0)
+    supernatural_energy = PositiveIntegerField(default=0)
+    extra_health_levels = PositiveIntegerField(default=0)
 
     # Character Anchors (ie. Virtue / Vice)
     primary_anchor = CharField(max_length=40, blank=True)
     secondary_anchor = CharField(max_length=40, blank=True)
 
     # Versioning fields. The highest number is the latest version
-
     version = PositiveIntegerField(default=0)
-    uuid = UUIDField(default=uuid.uuid4, editable=False)
+    created_by = ForeignKey(User, DO_NOTHING, related_name='+', null=True, blank=True)
 
-    objects = Manager()
-    active = QueryManager(status__in=('in_progress', 'submitted', 'approved'))
-    submitted = QueryManager(status='submitted')
-    approved = QueryManager(status='approved')
+    active = QueryManager(status__in=('in_progress', 'approved'))
+
+    # This UUID is shared by all versions of the same character
+    uuid = UUIDField(default=uuid.uuid4, editable=False, db_index=True)
 
     class Meta:
         unique_together = (('uuid', 'version'),)
+
+    def __str__(self):
+        return f'[{self.template.game_line.upper()}] {self.name}'
 
     # Derived Traits
 
@@ -145,109 +146,51 @@ class Character(TimeStampedModel, StatusModel):
     def defense_skill(self):
         return self.athletics
 
+    def willpower_dots(self):
+        return (self.resolve + self.composure) - self.willpower_dots_spent
+
+    def health_levels(self):
+        return 5 + self.stamina + self.extra_health_levels
+
+    # Retrieve related or summarized values
+
     def merit_value(self, merit_name):
         qs = self.merits.filter(merit__name=merit_name)
-        return qs.first().rating if qs.exists() else 0
+        return qs.first().rating
 
     def splats(self):
         flavors = SplatCategory.FLAVORS
         return [x for x in (getattr(self, s, None) for k, s in flavors) if x is not None]
 
-    def __str__(self):
-        return str(self.name)
+    def attributes_total(self):
+        return sum(int(getattr(self, k)) for k in ATTRIBUTE_KEYS)
+
+    def skills_total(self):
+        return sum(int(getattr(self, k)) for k in SKILL_KEYS)
 
     # The following methods are useful to have around for template rendering
 
-    def splat_1_pk(self):
-        return self.primary_splat.pk if self.primary_splat else ""
-
-    def splat_2_pk(self):
-        return self.secondary_splat.pk if self.secondary_splat else ""
-
-    def splat_3_pk(self):
-        return self.tertiary_splat.pk if self.tertiary_splat else ""
-
+    @missing("Virtue")
     def primary_anchor_name(self):
-        return self.template.primary_anchor_name if self.template else "Virtue"
+        return self.template.primary_anchor_name
 
+    @missing("Vice")
     def secondary_anchor_name(self):
-        return self.template.secondary_anchor_name if self.template else "Vice"
-
-    def available_health_track(self):
-        return str(self.damage_track)[:int(self.health_levels)] + \
-               ('_' * (self.health_levels - len(self.damage_track or '')))
-
-    # Calculate some stuff automatically on save
-    def save(self, **kwargs):
-        if self.power_stat:
-            self.resource_max = int(self.power_stat) + 10
-
-        self.willpower_max = int(self.resolve) + int(self.composure) - int(self.perm_willpower_spent or 0)
-        self.health_levels = int(self.stamina) + int(self.size)
-        if self.willpower is None:
-            self.willpower = self.willpower_max
-
-        super().save(**kwargs)
-
-    # Methods for generating a random character
-    def randomize(self, user=None):
-        self.clear_attributes()
-        self.randomize_stats([k for k, v in ATTRIBUTES], 12)
-        self.randomize_stats([k for k, v in SKILLS], 22)
-        self.save()
-
-    def randomize_stats(self, stats, points):
-        while points:
-            state = random.choice(stats)
-            target = getattr(self, state)
-            if target < 5:
-                setattr(self, state, target + 1)
-                points -= 1
-
-    def get_attribute_total(self):
-        return sum(int(getattr(self, k)) for k, v in ATTRIBUTES)
-
-    def get_skills_total(self):
-        return sum(int(getattr(self, k)) for k, v in SKILLS)
-
-    def clear_attributes(self):
-        for attr, _ in ATTRIBUTES:
-            setattr(self, attr, 1)
-
-    def clear_skills(self):
-        for skill, _ in SKILLS:
-            setattr(self, skill, 1)
+        return self.template.secondary_anchor_name
 
     # Methods related to revisions and approvals
 
-    def can_take_action(self, action, user=None):
-        if action in 'submit_for_approval':
-            return self.is_new() and self.user == user
-        if action in 'randomize':
-            return self.is_new()
-        if action == 'create_revision':
-            return self.status == 'approved'
-
-    def is_new(self):
-        return self.status == 'in_progress' and self.version == 0
-
     def is_locked(self):
-        return self.status in ('archived', 'approved')
+        return self.status != 'in_progress'
 
-    def is_active(self):
-        return self.status != 'archived'
-
-    def submit_for_approval(self, user=None):
-        self.status = 'submitted'
-        ApprovalRequest.objects.create(character=self, request="New character request.")
-        self.save()
+    def can_create_revision(self, user=None):
+        return self.is_locked() and user.is_staff
 
     def create_revision(self, user=None):
-        self.status = 'archived'
-        self.save()
-
         # By removing the PK a new instance is created on save()
-        old_pk, self.pk, self.status = self.pk, None, 'in_progress'
+        old_pk, self.pk = self.pk, None
+        self.status = 'in_progress'
+        self.created_by = user
         self.version += 1
         self.save()
 
@@ -255,24 +198,27 @@ class Character(TimeStampedModel, StatusModel):
         for cls in (CharacterMerit, CharacterPower, SkillSpeciality):
             cls.objects.filter(character_id=old_pk).update(pk=None, character_id=self.pk)
 
-        # Migrate approvals
-        ApprovalRequest.objects.filter(character_id=old_pk).update(character=self)
+        # Move pending approval requests to new revision
+        ApprovalRequest.objects.filter(uuid=self.uuid, status='pending').update(character=self)
 
         # Return a redirect to new revision
         return redirect('admin:sheets_character_change', object_id=self.pk)
 
+    def save(self, **kwargs):
+        # When a sheet becomes approved, all other approved sheets for the same character are archived
+        if self.status == 'approved':
+            self.revisions().filter(status='approved').update(status='archived')
+        super().save(**kwargs)
+
     def revisions(self):
         return Character.objects.filter(uuid=self.uuid).order_by('version')
 
-    def active_revision(self):
-        return self.revisions().exclude(status='archived').first()
+    def approval_history(self):
+        return ApprovalRequest.objects.filter(uuid=self.uuid).order_by('character__version')
 
 
 class CharacterElement(Model):
     objects = InheritanceManager()
-
-    def save(self, **kwargs):
-        super().save(**kwargs)
 
     class Meta:
         abstract = True
@@ -288,7 +234,7 @@ class CharacterMerit(CharacterElement):
         verbose_name = "Merit"
 
     def __str__(self):
-        return '{} ({})'.format(self.merit.name, self.rating)
+        return f'{self.merit.name} self.rating'
 
 
 class CharacterPower(CharacterElement):
@@ -326,18 +272,23 @@ class ApprovalRequest(TimeStampedModel, StatusModel):
         ('complete', 'Complete'),
     )
 
-    character = ForeignKey(Character, CASCADE, related_name='approval_requests')
+    character = ForeignKey(Character, DO_NOTHING, related_name='approval_requests')
     request = TextField('Request Information')
-    response = TextField('Response Details',  blank=True, default='Granted.')
 
-    pending = QueryManager(status='pending')
-    completed = QueryManager(status='completed')
+    # Keep track of the character UUID
+    uuid = UUIDField(editable=False, db_index=True, null=True)
 
     class Meta:
         verbose_name = "Approval Request"
 
     def __str__(self):
         return f'{self.character.name} #{self.pk}'
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        self.uuid = self.character.uuid
+        super().save(force_insert, force_update, using, update_fields)
+
+
 
 
 

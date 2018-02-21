@@ -31,10 +31,12 @@ class SimpleActionsModel(BaseDjangoObjectActions, admin.ModelAdmin):
             return []
         actions = list(super().get_change_actions(request, object_id, form_url))
         obj = self.model.objects.get(pk=object_id)
-        if not hasattr(obj, 'can_take_action'):
-            return actions
         user = request.user
-        return [a for a in actions if obj.can_take_action(a, user=user)]
+        for action in actions:
+            func = getattr(obj, f'can_{action}', None)
+            if not func or not func(user=user):
+                actions.remove(action)
+        return actions
 
 
 class SaveRedirectAdmin(admin.ModelAdmin):
