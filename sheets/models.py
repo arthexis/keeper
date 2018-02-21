@@ -127,7 +127,8 @@ class Character(TimeStampedModel, StatusModel):
     uuid = UUIDField(default=uuid.uuid4, editable=False, db_index=True)
 
     class Meta:
-        unique_together = (('uuid', 'version'),)
+        pass
+        # unique_together = (('uuid', 'version'),)
 
     def __str__(self):
         return f'[{self.template.game_line.upper()}] {self.name}'
@@ -196,7 +197,7 @@ class Character(TimeStampedModel, StatusModel):
 
         # Copy character elements
         for cls in (CharacterMerit, CharacterPower, SkillSpeciality):
-            cls.objects.filter(character_id=old_pk).update(pk=None, character_id=self.pk)
+            cls.objects.filter(character_id=old_pk).update(id=None, character_id=self.pk)
 
         # Move pending approval requests to new revision
         ApprovalRequest.objects.filter(uuid=self.uuid, status='pending').update(character=self)

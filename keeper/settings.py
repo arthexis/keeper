@@ -13,7 +13,7 @@ SITE_ID = getenv('SITE_ID', 1)
 
 if SITE_ID == 1:
     SITE_NAME = 'localhost'
-    SITE_DOMAIN = getenv('LOCAL_DOMAIN')
+    SITE_DOMAIN = getenv('LOCAL_DOMAIN', '127.0.0.1:8100')
 
 elif SITE_ID == 2:
     SITE_NAME = 'heroku-review-app'
@@ -117,6 +117,7 @@ if DATABASE_URL:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'ATOMIC_REQUESTS': True
         }
     }
     DATABASES['default'].update(DATABASE_URL)
@@ -129,7 +130,8 @@ else:
             'NAME': os.path.join(BASE_DIR, 'database.sqlite3'),
             'OPTIONS': {
                 'timeout': 20,
-            }
+            },
+            'ATOMIC_REQUESTS': True
         }
     }
 
@@ -254,9 +256,6 @@ REST_FRAMEWORK = {
 # This sets which Models can be seeded and which Serializer is used
 
 SEED_DATA_SERIALIZERS = {
-    'Site': {
-        'model': 'django.contrib.sites.models.Site',
-    },
     'Template': {
         'model': 'systems.models.CharacterTemplate',
     },
