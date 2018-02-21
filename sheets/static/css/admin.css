@@ -94,16 +94,16 @@ textarea#id_background {
 
 .objectaction-item a:link,
 .objectaction-item a:visited {
-    background-color: skyblue;
-    margin-top: 5px!important;
-    padding-top: 10px!important;
-    padding-bottom: 10px!important;
+    /*background-color: skyblue;*/
+    margin-top: 10px!important;
+    padding-top: 5px!important;
+    padding-bottom: 5px!important;
     border-radius: 5px;
-    color: darkblue;
+    border: deepskyblue 1px solid;
 }
 
 .objectaction-item a:hover {
-    background-color: deepskyblue!important;
+    background-color: lightsteelblue!important;
 }
 
 .hidden {
