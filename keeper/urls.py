@@ -35,7 +35,7 @@ urlpatterns = [
     # REST Framework
     # http://www.django-rest-framework.org/
 
-    path('rest/', include(router.urls)),
+    path('api/', include(router.urls)),
     path('api-auth/', include('rest_framework.urls')),
 
     # Django-Select2
