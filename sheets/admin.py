@@ -19,15 +19,18 @@ class SkillSpecialityInline(admin.TabularInline):
     fields = ('speciality', 'skill')
     min_num = 3
     extra = 0
+    verbose_name_plural = 'Specialities'
+    verbose_name = 'Speciality'
 
 
 class PendingApprovalInline(admin.TabularInline):
     model = ApprovalRequest
     fields = ('request', 'status', 'created')
     readonly_fields = ('created', )
-    extra = 0
-    verbose_name = 'Approval'
     verbose_name_plural = 'Pending Approvals'
+
+    def has_add_permission(self, request):
+        return False
 
     def get_queryset(self, request):
         return super().get_queryset(request).filter(status='pending')
@@ -69,7 +72,7 @@ class BasePowerInline(ParentInlineMixin):
 @admin.register(Character)
 class CharacterAdmin(SimpleActionsModel):
     model = Character
-    inlines = (SkillSpecialityInline, MeritInline, PendingApprovalInline, )
+    inlines = (SkillSpecialityInline, MeritInline, )
     fieldsets = (
         (None, {
             'fields': (
@@ -143,8 +146,6 @@ class CharacterAdmin(SimpleActionsModel):
 
     def get_extra_inlines(self, request, obj: Character):
         extra_inlines = []
-        if obj and obj.approval_requests.filter(status='complete').exists():
-            extra_inlines.append(ApprovalLogInline)
 
         for category in PowerCategory.objects.filter(character_template=obj.template):
 
@@ -154,6 +155,13 @@ class CharacterAdmin(SimpleActionsModel):
                 verbose_name_plural = category.name
 
             extra_inlines.append(PowerInline)
+
+        if obj:
+            approvals = obj.approval_requests
+            if approvals.filter(status='pending').exists():
+                extra_inlines.append(PendingApprovalInline)
+            if approvals.filter(status='complete').exists():
+                extra_inlines.append(ApprovalLogInline)
 
         return tuple(extra_inlines)
 

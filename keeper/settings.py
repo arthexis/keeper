@@ -211,11 +211,10 @@ if DEBUG:
 # Django-Select2 Configuration
 # http://django-select2.readthedocs.io/en/latest/django_select2.html
 
-SELECT2_JS = \
-    'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.full.min.js'
-
+SELECT2_JS = 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.full.min.js'
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+
 
 # Redirect back to index after login if no next URL parameter
 
@@ -261,7 +260,7 @@ SEED_DATA_SERIALIZERS = {
     },
     'Organization': {
         'model': 'orgs.models.Organization',
-        'exclude': ('memberships', 'events')
+        'exclude': ('memberships', 'events'),
     },
     'Merit': {
         'model': 'systems.models.Merit',
