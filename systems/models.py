@@ -1,8 +1,7 @@
 import logging
 
 from django.db import models
-from django.db.models import SET_NULL, CASCADE, CharField, PositiveSmallIntegerField, ManyToManyField, ForeignKey, \
-    SlugField
+from django.db.models import CASCADE, CharField, PositiveSmallIntegerField, ForeignKey, SlugField
 from model_utils import Choices
 
 logger = logging.getLogger(__name__)
@@ -34,7 +33,7 @@ ATTRIBUTES = Choices(
     ("composure", "Composure"),
 )
 
-ATTRIBUTE_KEYS = [k for k, v in ATTRIBUTES]
+ATTRIBUTE_KEYS = [k for k, _ in ATTRIBUTES]
 
 SKILLS = Choices(
     ("academics", "Academics"),
@@ -63,7 +62,7 @@ SKILLS = Choices(
     ("subterfuge", "Subterfuge"),
 )
 
-SKILL_KEYS = [k for k, v in SKILLS]
+SKILL_KEYS = [k for k, _ in SKILLS]
 
 
 class ReferenceBook(models.Model):

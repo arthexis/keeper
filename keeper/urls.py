@@ -52,3 +52,7 @@ if settings.DEBUG:
         path('__debug__/', include(debug_toolbar.urls)),
     ]
 
+if settings.SITE_ID < 3:
+    from django.contrib.sites.models import Site
+    Site.objects.filter(pk=settings.SITE_ID).update(domain=settings.SITE_DOMAIN, name=settings.SITE_NAME)
+

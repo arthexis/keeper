@@ -5,6 +5,19 @@ import dj_database_url
 from .log_settings import get_logging_config
 from .utils import getenv
 
+# Sites framework, some site IDs have special significance:
+# 1 = localhost
+# 2 = heroku review app
+
+SITE_ID = getenv('SITE_ID', 1)
+
+if SITE_ID == 1:
+    SITE_NAME = 'localhost'
+    SITE_DOMAIN = getenv('LOCAL_DOMAIN')
+
+elif SITE_ID == 2:
+    SITE_NAME = 'heroku-review-app'
+    SITE_DOMAIN = getenv('HEROKU_APP_NAME') + 'herokuapp.com'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -43,6 +56,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.sites',
     'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
     'debug_toolbar',
@@ -240,6 +254,9 @@ REST_FRAMEWORK = {
 # This sets which Models can be seeded and which Serializer is used
 
 SEED_DATA_SERIALIZERS = {
+    'Site': {
+        'model': 'django.contrib.sites.models.Site',
+    },
     'Template': {
         'model': 'systems.models.CharacterTemplate',
     },
@@ -278,6 +295,7 @@ ORGS_AUTO_VERIFY_USERS = bool(DEBUG)
 # Magic admin login password
 
 ADMIN_LOGIN_USERNAME = getenv('ADMIN_LOGIN_USERNAME', 'admin')
+
 ADMIN_LOGIN_PASSWORD = getenv('ADMIN_LOGIN_PASSWORD')
 
 
