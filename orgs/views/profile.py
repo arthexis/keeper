@@ -10,24 +10,20 @@ logger = logging.getLogger(__name__)
 
 __all__ = (
     'EditProfile',
-    'RedirectMyProfile',
 )
 
 
 class EditProfile(UpdateView):
-    template_name = 'orgs/profile.html'
+    template_name = 'profile.html'
     model = Profile
     fields = (
-        "username", "email", "first_name", "last_name", "phone", "information"
+        "username", "email",
+        "first_name", "last_name", "phone", "information"
     )
     model_name = "Profile"
 
-
-class RedirectMyProfile(RedirectView):
-    def get_redirect_url(self, *args, **kwargs):
-        profile = Profile.objects.get(user=self.request.user)
-        return reverse('orgs:edit-profile', kwargs={'pk': profile.pk})
-
-
+    def get_object(self, queryset=None):
+        profile, created = Profile.objects.get_or_create(user=self.request.user)
+        return profile
 
 

@@ -1,0 +1,47 @@
+{% extends 'base.html' %}{% load bootstrap3 %}
+
+{% block extrahead %}
+  {{ block.super }}
+  {{ form.media.css }}
+  {{ form.media.js }}
+{% endblock %}
+
+{% block content %}
+
+  {% block tools %}
+  {% endblock %}
+
+  {% block actiontitle %}
+    {% if object %}
+      <h1>Edit {{ view.model_name }}</h1>
+    {% else %}
+      <h1>Create {{ view.model_name }}</h1>
+    {% endif %}
+  {% endblock %}
+  {% block helptext %}
+    {% if view.help_text %}
+      <p id="model-help-text">{{ view.help_text }}</p>
+    {% endif %}
+  {% endblock %}
+  <hr>
+
+  {% block mainform %}
+    <form method="post">
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md-6">
+          {% bootstrap_form form %}
+          {% block submitrow %}
+            <input class="btn btn-lg btn-primary" type="submit"
+              value="{% if object %}Update{% else %}Create{% endif %}">
+          {% endblock %}
+        </div>
+        <div class="col-md-6">
+          {% block sidecontent %}{% endblock %}
+        </div>
+      </div>
+    </form>
+  {% endblock %}
+  {% block extracontent %}{% endblock %}
+
+{% endblock %}
