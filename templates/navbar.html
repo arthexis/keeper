@@ -12,10 +12,9 @@
 
     <div class="collapse navbar-collapse">
         <ul class="nav navbar-nav navbar-right">
-            Logged in as {{ user.username }}
-{#            <li><a href="{% url 'orgs:profile' %}">#}
-{#              Profile ({{ user.username }})#}
-{#            </a></li>#}
+            <li><a href="{% url 'orgs:profile' %}">
+              Profile ({{ user.username }})
+            </a></li>
             {% if user.is_staff %}
                 <li><a target="_blank" href="{% url 'admin:index' %}">
                   Admin
@@ -23,7 +22,7 @@
                 <li><a target="_blank" href="{% url 'api-root' %}">
                   API</a></li>
             {% endif %}
-            <li><a href="{% url 'logout' %}">Logout</a></li>
+            <li><a href="{% url 'account_logout' %}">Logout</a></li>
         </ul>
     </div>
 

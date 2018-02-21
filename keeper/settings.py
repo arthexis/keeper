@@ -67,6 +67,10 @@ INSTALLED_APPS = [
     'whitenoise',
     'datetimewidget',
     'model_utils',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.facebook',
     'seed_data',
 ] + LOCAL_APPS
 
@@ -160,6 +164,7 @@ AUTH_PASSWORD_VALIDATORS = [
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'orgs.auth.backends.AdminBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
 

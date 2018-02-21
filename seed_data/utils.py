@@ -11,7 +11,8 @@ __all__ = (
     'SERIALIZERS',
     'REF_FIELD',
     'import_object',
-    'get_model_serializer'
+    'get_model_serializer',
+    'serializer_factory',
 )
 
 logger = logging.getLogger(__name__)

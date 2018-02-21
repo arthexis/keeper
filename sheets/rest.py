@@ -1,7 +1,9 @@
 from rest_framework import routers, serializers, viewsets
+from rest_framework.relations import StringRelatedField
 
 from sheets.models import Character
 from systems.models import Merit
+
 
 __all__ = (
     'router',
@@ -9,10 +11,12 @@ __all__ = (
 
 
 class CharacterSerializer(serializers.HyperlinkedModelSerializer):
+    template = StringRelatedField()
+
     class Meta:
         model = Character
         fields = (
-            'name', 'uuid', 'status', 'version'
+            'name', 'template', 'uuid', 'status', 'version'
         )
 
 

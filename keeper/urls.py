@@ -26,8 +26,8 @@ urlpatterns = [
     path('systems/', include('systems.urls')),
 
     # Authentication views (default with custom templates)
-    path('accounts/login/', auth_views.LoginView.as_view(template_name="index.html"), name="login"),
-    path('accounts/logout/', auth_views.LogoutView.as_view(), name="logout"),
+    # path('accounts/login/', auth_views.LoginView.as_view(template_name="index.html"), name="login"),
+    # path('accounts/logout/', auth_views.LogoutView.as_view(), name="logout"),
 
     # Admin
     path('admin/', admin.site.urls),
@@ -40,6 +40,9 @@ urlpatterns = [
 
     # Django-Select2
     path('select2/', include('django_select2.urls')),
+
+    # All Auth urls
+    path('accounts/', include('allauth.urls')),
 
     # Main IndexView (homepage)
     path('', Index.as_view(), name='index'),

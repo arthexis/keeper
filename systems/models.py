@@ -106,7 +106,7 @@ class CharacterTemplate(models.Model):
         ordering = ('name', 'game_line')
 
     def __str__(self):
-        return str(self.name)
+        return f'{self.name} [{self.game_line.upper()}]'
 
 
 class SplatCategory(models.Model):
