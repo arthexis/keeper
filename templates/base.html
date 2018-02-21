@@ -1,4 +1,4 @@
-{% load bootstrap3 static %}
+{% load bootstrap3 static socialaccount %}
 
 <html lang="en">
 <head>
@@ -11,7 +11,11 @@
         integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
         crossorigin="anonymous"></script>
     {% bootstrap_javascript %}
-    {% block extrahead %}{% endblock %}
+    {% block extrahead %}
+      {% if not user.is_authenticated %}
+        {% providers_media_js %}
+      {% endif %}
+    {% endblock %}
 </head>
 <body>
     <div id="content" class="container">{% block body %}

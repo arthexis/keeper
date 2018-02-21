@@ -4,8 +4,6 @@ from django.conf import settings
 from django.urls import include, path
 from django.contrib import admin
 
-import django.contrib.auth.views as auth_views
-
 from sheets.rest import router
 from orgs.views import Index
 
@@ -55,7 +53,17 @@ if settings.DEBUG:
         path('__debug__/', include(debug_toolbar.urls)),
     ]
 
-if settings.SITE_ID < 3:
+if settings.SITE_ID == 1:
     from django.contrib.sites.models import Site
     Site.objects.filter(pk=settings.SITE_ID).update(domain=settings.SITE_DOMAIN, name=settings.SITE_NAME)
+
+    if settings.FACEBOOK_LOGIN_ENABLED:
+        from allauth.socialaccount.models import SocialApp
+        app, created = SocialApp.objects.get_or_create(name='Facebook')
+        app.client_id = settings.FACEBOOK_APP_ID
+        app.secret = settings.FACEBOOK_APP_SECRET
+        if created:
+            app.sites.add(Site.objects.filter(pk=1))
+        app.save()
+
 

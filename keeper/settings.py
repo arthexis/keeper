@@ -5,19 +5,17 @@ import dj_database_url
 from .log_settings import get_logging_config
 from .utils import getenv
 
-# Sites framework, some site IDs have special significance:
-# 1 = localhost
-# 2 = heroku review app
+# Sites Framework configuration
+# This will be automatically updated
 
 SITE_ID = getenv('SITE_ID', 1)
 
-if SITE_ID == 1:
-    SITE_NAME = 'localhost'
-    SITE_DOMAIN = getenv('LOCAL_DOMAIN', '127.0.0.1:8100')
+HEROKU_APP_NAME = getenv('HEROKU_APP_NAME')
 
-elif SITE_ID == 2:
-    SITE_NAME = 'heroku-review-app'
-    SITE_DOMAIN = getenv('HEROKU_APP_NAME') + 'herokuapp.com'
+SITE_NAME = 'keeper'
+
+SITE_DOMAIN = f'{HEROKU_APP_NAME}.herokuapp.com' if HEROKU_APP_NAME else 'localhost:8100'
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -293,6 +291,44 @@ SEED_DATA_DIRECTORY = os.path.join(BASE_DIR, 'content')
 # Some settings to make debugging easier
 
 ORGS_AUTO_VERIFY_USERS = bool(DEBUG)
+
+
+# Setting up login providers with django-allauth
+# https://django-allauth.readthedocs.io/en/latest/providers.html#facebook
+# https://stackoverflow.com/questions/4532721/facebook-development-in-localhost
+
+SOCIALACCOUNT_PROVIDERS = {}
+
+FACEBOOK_APP_ID = getenv('FACEBOOK_APP_ID')
+
+FACEBOOK_APP_SECRET = getenv('FACEBOOK_APP_SECRET')
+
+if FACEBOOK_APP_ID and FACEBOOK_APP_SECRET:
+
+    FACEBOOK_LOGIN_ENABLED = True
+
+    SOCIALACCOUNT_PROVIDERS['facebook'] = {
+        'METHOD': 'js_sdk',
+        'SCOPE': ['email', ],
+        'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
+        'INIT_PARAMS': {'cookie': True},
+        'FIELDS': [
+            'id',
+            'email',
+            'name',
+            'first_name',
+            'last_name',
+            'verified',
+            'locale',
+            'timezone',
+            'link',
+            'gender',
+            'updated_time',
+        ],
+        'EXCHANGE_TOKEN': True,
+        'VERIFIED_EMAIL': False,
+        'VERSION': 'v2.5',
+    }
 
 
 # Magic admin login password

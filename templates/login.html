@@ -1,4 +1,5 @@
-{% load bootstrap3 %}
+{% load bootstrap3 socialaccount %}
+
 
 <div class="header">
   <h1>Keeper
@@ -26,6 +27,12 @@
       <br><br>
       <input class="btn btn-lg btn-primary" type="submit"
         value="Login with username and password" style="width: 100%">
+      <br><br>
+
+      <a class="btn btn-lg btn-primary"
+        href="{% provider_login_url "facebook" method="js_sdk" %}"
+        style="width: 100%">
+          Login with Facebook Connect</a>
     </form>
 
   </div>
