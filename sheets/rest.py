@@ -1,5 +1,7 @@
-from sheets.models import Character
 from rest_framework import routers, serializers, viewsets
+
+from sheets.models import Character
+from systems.models import Merit
 
 __all__ = (
     'router',
@@ -10,8 +12,7 @@ class CharacterSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Character
         fields = (
-            'name', 'power_stat',
-            'strength', 'dexterity', 'stamina',
+            'name', 'uuid', 'status', 'version'
         )
 
 
@@ -20,6 +21,18 @@ class CharacterViewSet(viewsets.ModelViewSet):
     serializer_class = CharacterSerializer
 
 
+class MeritSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Merit
+        fields = ('name',)
+
+
+class MeritViewSet(viewsets.ModelViewSet):
+    queryset = Merit.objects.all()
+    serializer_class = MeritSerializer
+
+
 router = routers.DefaultRouter()
-router.register(r'characters', CharacterViewSet)
+router.register(r'character', CharacterViewSet)
+router.register(r'merit', MeritViewSet)
 
