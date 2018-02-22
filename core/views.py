@@ -1,12 +1,15 @@
 import logging
 
 from django.shortcuts import redirect
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, UpdateView
+
+from .models import UserProfile
 
 logger = logging.getLogger(__name__)
 
 __all__ = (
     'Index',
+    'EditMyProfile',
 )
 
 
@@ -16,6 +19,17 @@ class Index(TemplateView):
     template_name = 'index.html'
 
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
+        user = request.user
+        if not user.is_authenticated:
             return redirect('account_login')
         return super().dispatch(request, *args, **kwargs)
+
+
+class EditMyProfile(UpdateView):
+    template_name = 'change_form.html'
+    model = UserProfile
+    fields = (
+        "username", "email",
+        "first_name", "last_name", "phone", "information"
+    )
+    model_name = "Profile"

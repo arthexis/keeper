@@ -5,8 +5,8 @@ from django.db import OperationalError
 from django.urls import include, path
 from django.contrib import admin
 
-from sheets.rest import router
-from core.views import Index
+from core.rest import router
+from core.views import Index, EditMyProfile
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +33,9 @@ urlpatterns = [
 
     # All Auth urls
     path('accounts/', include('allauth.urls')),
+
+    # Edit Profile
+    path('profile/', EditMyProfile.as_view(), name="profile"),
 
     # Main IndexView (homepage)
     path('', Index.as_view(), name='index'),
