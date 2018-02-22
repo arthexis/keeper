@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import reverse
 
 from systems.models import Splat, SplatCategory, Merit, Power, PowerCategory, CharacterTemplate
-from admin_tech.admin import SaveRedirectAdmin
+from core.admin import SaveRedirectAdmin
 
 
 class ParentInlineMixin(admin.TabularInline):

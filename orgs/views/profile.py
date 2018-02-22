@@ -1,7 +1,7 @@
 import logging
 
-from django.views.generic import UpdateView, RedirectView
-from django.urls import reverse
+from django.db import IntegrityError
+from django.views.generic import UpdateView
 
 from orgs.models import Profile
 
@@ -14,7 +14,7 @@ __all__ = (
 
 
 class EditProfile(UpdateView):
-    template_name = 'profile.html'
+    template_name = 'change_form.html'
     model = Profile
     fields = (
         "username", "email",
@@ -23,7 +23,10 @@ class EditProfile(UpdateView):
     model_name = "Profile"
 
     def get_object(self, queryset=None):
-        profile, created = Profile.objects.get_or_create(user=self.request.user)
+        try:
+            profile, created = Profile.objects.get_or_create(user=self.request.user)
+        except IntegrityError:
+            profile = None
         return profile
 
 

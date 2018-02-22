@@ -4,7 +4,6 @@ from django.shortcuts import redirect
 from django.views.generic import TemplateView
 
 from orgs.models import Profile
-from orgs.forms import RequestMembershipForm
 
 logger = logging.getLogger(__name__)
 
@@ -34,5 +33,4 @@ class Index(TemplateView):
         except Profile.DoesNotExist:
             logger.error(f"User <{user}> has no profile.")
             context['profile'] = None
-        context['req_member_form'] = RequestMembershipForm(request=self.request)
         return context

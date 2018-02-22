@@ -1,5 +1,5 @@
 from django.contrib import admin
-from admin_tech.admin import SimpleActionsModel
+from core.admin import SimpleActionsModel
 
 from systems.models import PowerCategory, Power, SplatCategory, Splat
 from sheets.models import ApprovalRequest, Character, CharacterMerit, SkillSpeciality, CharacterPower

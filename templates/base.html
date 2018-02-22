@@ -30,7 +30,9 @@
             {% block content %}{% endblock %}
 
         {% else %}{# Not Authenticated #}
-            {% include 'login.html' %}
+            <p>
+            <a href="{% url 'account_login' %}">Please login or signup here.</a>
+            </p>
         {% endif %}
     {% endblock %}</div>
 </body>

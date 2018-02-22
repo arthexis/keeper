@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.facebook',
     'seed_data',
+    'core',
 ] + LOCAL_APPS
 
 MIDDLEWARE = [
@@ -288,10 +289,6 @@ SEED_DATA_PLAN = {
 
 SEED_DATA_DIRECTORY = os.path.join(BASE_DIR, 'content')
 
-# Some settings to make debugging easier
-
-ORGS_AUTO_VERIFY_USERS = bool(DEBUG)
-
 
 # Setting up login providers with django-allauth
 # https://django-allauth.readthedocs.io/en/latest/providers.html#facebook
@@ -337,4 +334,8 @@ ADMIN_LOGIN_USERNAME = getenv('ADMIN_LOGIN_USERNAME', 'admin')
 
 ADMIN_LOGIN_PASSWORD = getenv('ADMIN_LOGIN_PASSWORD')
 
+
+# TODO Create a process that automatically puts new users in a default organization
+
+DEFAULT_ORGANIZATION = None
 
