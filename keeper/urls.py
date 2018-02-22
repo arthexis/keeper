@@ -60,6 +60,7 @@ if settings.SITE_ID == 1:
             app, created = SocialApp.objects.get_or_create(name='Facebook')
             app.client_id = settings.FACEBOOK_APP_ID
             app.secret = settings.FACEBOOK_APP_SECRET
+            app.provider = 'facebook'
             app.save()
             if created:
                 logger.info(f'New social app created: {app.name}')

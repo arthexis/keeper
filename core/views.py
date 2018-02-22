@@ -17,5 +17,5 @@ class Index(TemplateView):
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return redirect('login')
+            return redirect('account_login')
         return super().dispatch(request, *args, **kwargs)
