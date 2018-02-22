@@ -2,7 +2,6 @@ import os
 import sys
 import dj_database_url
 
-from .log_settings import get_logging_config
 from .utils import getenv
 
 # Sites Framework configuration
@@ -12,7 +11,7 @@ SITE_ID = getenv('SITE_ID', 1)
 
 HEROKU_APP_NAME = getenv('HEROKU_APP_NAME')
 
-SITE_NAME = 'keeper'
+SITE_NAME = HEROKU_APP_NAME or 'keeper'
 
 SITE_DOMAIN = f'{HEROKU_APP_NAME}.herokuapp.com' if HEROKU_APP_NAME else 'localhost:8100'
 
@@ -23,7 +22,40 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = getenv('DEBUG', True)
 
-LOGGING = get_logging_config(DEBUG)
+# Python Logging documentation
+# https://docs.python.org/3/library/logging.html
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'verbose': {
+            'format': (
+                    'at=%(levelname)s logger="%(name)s" lineno=%(lineno)s ' +
+                    'funcname="%(funcName)s" msg="%(message)s"'),
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+            'stream': sys.stdout,
+        },
+    },
+    'loggers': {
+        'keeper': {
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'handlers': ['console'],
+            'propagate': True,
+        },
+        'django.server': {
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'handlers': ['console'],
+        },
+    }
+}
 
 
 # Quick-start development settings - unsuitable for production
@@ -41,6 +73,7 @@ INTERNAL_IPS = ['127.0.0.1']
 # Application definition
 
 LOCAL_APPS = [
+    'core',
     'systems',
     'sheets',
     'orgs',
@@ -70,7 +103,6 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.facebook',
     'seed_data',
-    'core',
 ] + LOCAL_APPS
 
 MIDDLEWARE = [
@@ -139,6 +171,11 @@ else:
     }
 
 
+# Override default User model
+
+AUTH_USER_MODEL = 'orgs.UserProfile'
+
+
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
 
@@ -162,8 +199,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'orgs.auth.backends.AdminBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
+    'orgs.auth.backends.AdminBackend',
 ]
 
 
@@ -195,9 +232,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Django Admin Bootstrapped
 
-DAB_FIELD_RENDERER = \
-    'django_admin_bootstrapped.renderers.BootstrapFieldRenderer'
+DAB_FIELD_RENDERER = 'django_admin_bootstrapped.renderers.BootstrapFieldRenderer'
 
+
+# Product header used at the top of the site
 
 SITE_HEADER = getenv('SITE_HEADER', "Keeper")
 
@@ -225,6 +263,10 @@ SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 LOGIN_REDIRECT_URL = 'index'
 
 LOGOUT_REDIRECT_URL = 'index'
+
+
+# Django caching, current: local memory cache
+# https://docs.djangoproject.com/en/2.0/topics/cache/
 
 CACHES = {
     'default': {

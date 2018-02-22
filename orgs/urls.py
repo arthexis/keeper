@@ -1,10 +1,6 @@
 from orgs.views import *
 from keeper.utils import path
 
-# noinspection PyUnresolvedReferences
-import orgs.signals
-
-
 app_name = 'orgs'
 urlpatterns = [
 

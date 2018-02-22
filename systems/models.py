@@ -166,16 +166,6 @@ class Merit(models.Model):
         return str(self.name)
 
 
-class Prerequisite(models.Model):
-    pass
-
-
-class AttributePrerequisite(Prerequisite):
-    attribute = CharField(max_length=20, choices=ATTRIBUTES)
-    min_value = PositiveSmallIntegerField()
-    merit = ForeignKey(Merit, CASCADE, related_name='attribute_prerequisites')
-
-
 class PowerCategory(models.Model):
     name = models.CharField(max_length=20)
     character_template = models.ForeignKey(

@@ -1,11 +1,11 @@
 from django.contrib import admin
 
-from orgs.models import Profile, Event, Prestige, Membership, Organization, Region
+from orgs.models import UserProfile, Event, Prestige, Membership, Organization, Region
 
 
-@admin.register(Profile)
+@admin.register(UserProfile)
 class ProfileAdmin(admin.ModelAdmin):
-    model = Profile
+    model = UserProfile
     fields = (
         ('username', 'email'),
         ('first_name', 'last_name'),

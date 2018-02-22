@@ -1,7 +1,7 @@
 import logging
 
 from django.db.models import ForeignKey, CharField, BooleanField, IntegerField, CASCADE, SET_NULL
-from django.contrib.auth.models import User
+from django.conf import settings
 from model_utils.models import TimeStampedModel
 
 from .org import Organization
@@ -16,7 +16,7 @@ __all__ = (
 
 # Membership is a relation between Users and Organizations
 class Membership(TimeStampedModel):
-    user = ForeignKey(User, CASCADE, related_name="memberships")
+    user = ForeignKey(settings.AUTH_USER_MODEL, CASCADE, related_name="memberships")
     organization = ForeignKey(Organization, CASCADE, related_name="memberships")
     title = CharField(max_length=200, blank=True)
 
@@ -46,7 +46,7 @@ class Prestige(TimeStampedModel):
     membership = ForeignKey('Membership', CASCADE, related_name='prestige')
     amount = IntegerField()
     notes = CharField(max_length=2000)
-    witness = ForeignKey(User, SET_NULL, null=True, related_name='+')
+    witness = ForeignKey(settings.AUTH_USER_MODEL, SET_NULL, null=True, related_name='+')
 
     class Meta:
         verbose_name = 'Prestige Record'

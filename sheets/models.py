@@ -5,6 +5,7 @@ from django.db.models import Model, CharField, ForeignKey, TextField, PositiveIn
     PROTECT, DO_NOTHING, CASCADE, UUIDField, SET_NULL, Manager
 from django.contrib.auth.models import User, Group
 from django.shortcuts import redirect
+from django.conf import settings
 from model_utils import Choices
 from model_utils.managers import InheritanceManager, QueryManager
 from model_utils.models import TimeStampedModel, StatusModel
@@ -101,7 +102,7 @@ class Character(TimeStampedModel, StatusModel):
     tertiary_splat = ForeignKey(Splat, PROTECT, related_name='+', null=True, blank=True)
 
     # Organization related fields
-    user = ForeignKey(User, SET_NULL, null=True, blank=True, related_name='characters')
+    user = ForeignKey(settings.AUTH_USER_MODEL, SET_NULL, null=True, blank=True, related_name='characters')
     organization = ForeignKey(Organization, SET_NULL, null=True, blank=True)
 
     # Tracking of spent resources
@@ -119,7 +120,7 @@ class Character(TimeStampedModel, StatusModel):
 
     # Versioning fields. The highest number is the latest version
     version = PositiveIntegerField(default=0)
-    created_by = ForeignKey(User, DO_NOTHING, related_name='+', null=True, blank=True)
+    created_by = ForeignKey(settings.AUTH_USER_MODEL, DO_NOTHING, related_name='+', null=True, blank=True)
 
     active = QueryManager(status__in=('in_progress', 'approved'))
 
