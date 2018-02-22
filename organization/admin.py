@@ -55,5 +55,3 @@ class ChapterAdmin(admin.ModelAdmin):
             return ','.join(obj.domains.values_list('name', flat=True))
 
 
-
-

@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import reverse
 
 from game_rules.models import Splat, SplatCategory, Merit, Power, PowerCategory, CharacterTemplate
-from core.admin import SaveRedirectAdmin
+from core.admin import SaveRedirectAdmin, HiddenAdmin
 
 
 class ParentInlineMixin(admin.TabularInline):
@@ -35,7 +35,7 @@ class SplatCategoryInline(admin.TabularInline):
 
 
 @admin.register(SplatCategory)
-class SplatCategoryAdmin(SaveRedirectAdmin):
+class SplatCategoryAdmin(SaveRedirectAdmin, HiddenAdmin):
     model = SplatCategory
     list_display = ('name', 'character_template', 'splat_names', )
     readonly_fields = ('splat_names', )
@@ -51,17 +51,7 @@ class MeritAdmin(admin.ModelAdmin):
     model = Merit
     fields = (('name', 'reference_code'), )
     list_display = ('name', )
-    # list_editable = ('category', 'character_template', )
-    # list_display_links = ('name', )
     prepopulated_fields = {'reference_code': ('name', )}
-
-
-# @admin.register(Power)
-# class PowerAdmin(admin.ModelAdmin):
-#     model = Power
-#     fields = ('name', 'power_category',)
-#     list_filter = ('power_category', )
-#     list_display = ('name', 'power_category', )
 
 
 class PowerInline(admin.TabularInline):
@@ -72,7 +62,7 @@ class PowerInline(admin.TabularInline):
 
 
 @admin.register(PowerCategory)
-class PowerCategoryAdmin(SaveRedirectAdmin):
+class PowerCategoryAdmin(SaveRedirectAdmin, HiddenAdmin):
     model = PowerCategory
     fields = ('name', 'character_template')
     list_display = ('name', 'character_template', 'power_names', )
@@ -80,7 +70,7 @@ class PowerCategoryAdmin(SaveRedirectAdmin):
     inlines = (PowerInline, )
 
     def get_save_redirect_url(self, request, obj):
-        return reverse('admin:systems_charactertemplate_change', args=[obj.character_template.pk])
+        return reverse('admin:game_rules_charactertemplate_change', args=[obj.character_template.pk])
 
 
 class PowerCategoryInline(admin.TabularInline):
