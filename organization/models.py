@@ -1,8 +1,7 @@
 import logging
 
 from django.conf import settings
-from django.db.models import CASCADE, CharField, ForeignKey, IntegerField, Manager, Model, SET_NULL, SlugField, \
-    TextField
+from django.db.models import CASCADE, CharField, ForeignKey, IntegerField, Manager, Model, SET_NULL, URLField
 from model_utils import Choices
 from model_utils.managers import QueryManager
 from model_utils.models import StatusModel, TimeStampedModel
@@ -20,8 +19,6 @@ __all__ = (
 class Organization(Model):
     name = CharField(
         max_length=200, help_text="Required. Must be unique.", unique=True)
-    information = TextField(blank=True)
-    reference_code = SlugField('URL Prefix', unique=True, help_text='Required. Must be unique.')
 
     class Meta:
         abstract = True
@@ -31,6 +28,7 @@ class Organization(Model):
 
 
 class Chapter(Organization):
+    rules_url = URLField('Rules URL', blank=True, help_text='URL pointing to the Chapter rules document.')
 
     # Chapters represent regional play organizations with multiple domains
     # Prestige is granted at Chapter level
@@ -43,6 +41,7 @@ class Chapter(Organization):
 
 
 class Domain(Organization):
+    rules_url = URLField('Rules URL', blank=True, help_text='URL pointing to the Domain game and approval rules.')
 
     # Domains represent one or more venues sharing the same fictional universe
     # Characters are approved at Domain level
@@ -84,7 +83,7 @@ class Prestige(TimeStampedModel):
     membership = ForeignKey('Membership', CASCADE, related_name='prestige')
     amount = IntegerField()
     notes = CharField(max_length=2000)
-    witness = ForeignKey(settings.AUTH_USER_MODEL, SET_NULL, null=True, related_name='+')
+    coordinator = ForeignKey(settings.AUTH_USER_MODEL, SET_NULL, null=True, related_name='+')
 
     class Meta:
         verbose_name = 'Prestige Record'

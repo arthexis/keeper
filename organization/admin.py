@@ -5,66 +5,54 @@ from core.models import UserProfile
 from organization.models import Prestige, Membership, Domain, Chapter
 
 
+class ProfileMemberInline(admin.TabularInline):
+    model = Membership
+    fields = ('chapter', 'title', 'status', 'external_id',)
+    extra = 0
+
+
 @admin.register(UserProfile)
 class ProfileAdmin(SimpleActionsModel):
     model = UserProfile
+    inlines = (ProfileMemberInline,)
     fields = (
         'username', 'email',
         'first_name', 'last_name',
         'phone', 'is_staff'
     )
-    list_display = ('username', 'email', 'last_name', 'phone')
-    list_editable = ('email', 'last_name', 'phone')
-    list_display_links = ('username',)
+    list_display = ('username', 'email', 'last_name', 'first_name', 'phone', 'is_staff')
     change_actions = ('change_password',)
 
 
 class PrestigeInline(admin.TabularInline):
     model = Prestige
-    fields = ('notes', 'amount', 'witness')
+    fields = ('notes', 'amount', 'coordinator')
     extra = 0
 
 
-@admin.register(Membership)
-class MembershipAdmin(admin.ModelAdmin):
-    model = Membership
-    inlines = (PrestigeInline, )
-    fields = ('user', 'chapter', 'title', 'external_id', 'status')
-    list_display = ('user', 'chapter', 'title', 'status', 'external_id', )
-    list_editable = ('title', 'status', 'external_id', )
-    list_display_links = ('user', 'chapter')
-    list_filter = ('status', 'title')
-
-
-class MemberInline(admin.TabularInline):
+class ChapterMemberInline(admin.TabularInline):
     model = Membership
     fields = ('user', 'title', 'status', 'external_id',)
     extra = 1
-    show_change_link = True
 
 
 class DomainInline(admin.StackedInline):
     model = Domain
-    fields = ('name', 'reference_code', 'information',)
+    fields = ('name', 'rules_url',)
     extra = 0
     min_num = 1
-
-
-@admin.register(Domain)
-class DomainAdmin(admin.ModelAdmin):
-    model = Domain
-    fields = ('name', 'reference_code', 'information', )
-    list_display = ('name', 'reference_code', )
-    prepopulated_fields = {'reference_code': ('name', )}
 
 
 @admin.register(Chapter)
 class ChapterAdmin(admin.ModelAdmin):
     model = Domain
-    inlines = (DomainInline, MemberInline, )
-    fields = ('name', 'reference_code', 'information',)
-    list_display = ('name', 'reference_code',)
-    prepopulated_fields = {'reference_code': ('name',)}
+    inlines = (DomainInline, ChapterMemberInline,)
+    fields = ('name', 'rules_url',)
+    list_display = ('name', 'rules_url', 'domains')
+
+    def domains(self, obj: Chapter =None):
+        if obj:
+            return ','.join(obj.domains.values_list('name', flat=True))
 
 
 

@@ -126,3 +126,7 @@ textarea#id_background {
     height: 100px;
 }
 
+#membership_form .fields select {
+    width: 300px;
+}
+

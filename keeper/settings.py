@@ -105,6 +105,7 @@ INSTALLED_APPS = [
 ] + LOCAL_APPS
 
 MIDDLEWARE = [
+    'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -114,6 +115,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'django.middleware.cache.FetchFromCacheMiddleware',
 ]
 
 ROOT_URLCONF = 'keeper.urls'
@@ -171,6 +173,8 @@ else:
 
 
 # Override default User model
+# https://docs.djangoproject.com/en/2.0/topics/auth/customizing/#extending-user
+# https://simpleisbetterthancomplex.com/tutorial/2016/07/22/how-to-extend-django-user-model.html#abstractuser
 
 AUTH_USER_MODEL = 'core.UserProfile'
 
@@ -300,14 +304,10 @@ REST_FRAMEWORK = {
 # This sets which Models can be seeded and which Serializer is used
 
 SEED_DATA_SERIALIZERS = {
-    'Template': {
+    'CharacterTemplates': {
         'model': 'game_rules.models.CharacterTemplate',
     },
-    'Organization': {
-        'model': 'orgs.models.Organization',
-        'exclude': ('memberships', 'events'),
-    },
-    'Merit': {
+    'Merits': {
         'model': 'game_rules.models.Merit',
     }
 }
@@ -317,13 +317,13 @@ SEED_DATA_SERIALIZERS = {
 # Each entry will generate exactly one zipfile.
 
 SEED_DATA_PLAN = {
-    'Template': (
+    'CharacterTemplates': (
         'mage-mtaw',
         'vampire-vtr',
         'changeling-ctl',
         'werewolf-wtf',
     ),
-    'Merit': (lambda obj: True),
+    'Merits': (lambda obj: True),
 }
 
 # Directory that will store the seed data
@@ -360,7 +360,6 @@ if FACEBOOK_APP_ID and FACEBOOK_APP_SECRET:
             'locale',
             'timezone',
             'link',
-            'gender',
             'updated_time',
         ],
         'EXCHANGE_TOKEN': True,
@@ -378,9 +377,4 @@ else:
 ADMIN_LOGIN_USERNAME = getenv('ADMIN_LOGIN_USERNAME', 'admin')
 
 ADMIN_LOGIN_PASSWORD = getenv('ADMIN_LOGIN_PASSWORD')
-
-
-# TODO Create a process that automatically puts new users in a default organization
-
-DEFAULT_ORGANIZATION = 'teatro-de-la-mente'
 
