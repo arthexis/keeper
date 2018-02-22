@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from django.db.models import CASCADE, CharField, ForeignKey, IntegerField, Manager, Model, SET_NULL, URLField, \
     DO_NOTHING
+from django_extensions.db.fields import AutoSlugField
 from model_utils import Choices
 from model_utils.managers import QueryManager
 from model_utils.models import StatusModel, TimeStampedModel
@@ -36,6 +37,7 @@ class Chapter(Organization):
 
     site = ForeignKey(Site, DO_NOTHING, related_name='chapters', null=True)  # Django Site
     rules_url = URLField('Rules URL', blank=True, help_text='URL pointing to the Chapter rules document.')
+    reference_code = AutoSlugField(populate_from='name')
 
     class Meta:
         verbose_name = 'Chapter'
@@ -51,6 +53,7 @@ class Domain(Organization):
 
     rules_url = URLField('Rules URL', blank=True, help_text='URL pointing to the Domain game and approval rules.')
     chapter = ForeignKey('Chapter', CASCADE, related_name='domains')
+    reference_code = AutoSlugField(populate_from=('name', 'chapter__name'))
 
     class Meta:
         verbose_name = 'Domain'

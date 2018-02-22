@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Keeper</title>
     {% bootstrap_css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/site.css' %}">
+    {% block extrastyle %}{% endblock %}
     <script
         src="https://code.jquery.com/jquery-3.2.1.min.js"
         integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
@@ -27,6 +29,25 @@
             {% block messages %}
                 {% bootstrap_messages %}
             {% endblock %}
+            {% block contentheader %}
+            <div class="row">
+              <div class="col-lg-6 col-sm12">
+                <h1 class="content-title">
+                  {% block contenttitle %}Title{% endblock %}
+                </h1>
+              </div>
+              <div class="col-lg-6 col-sm12 chapter-header">
+                {% block memberhead %}
+                  {% if membership %}
+                    {{ membership.chapter.name }}
+                  {% else %}
+
+                  {% endif %}
+                {% endblock %}
+              </div>
+            </div>
+            {% endblock %}
+            <hr>
             {% block content %}{% endblock %}
 
         {% else %}{# Not Authenticated #}

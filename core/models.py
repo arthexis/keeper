@@ -25,7 +25,9 @@ class UserProfile(AbstractUser):
         verbose_name = 'User Profile'
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        if self.first_name or self.last_name:
+            return f"{self.first_name} {self.last_name}"
+        return f'{self.username}'
 
     def can_change_password(self, user=None):
         if user and user.username == settings.ADMIN_LOGIN_USERNAME:
@@ -38,10 +40,14 @@ class UserProfile(AbstractUser):
     def save(self, *args, **kwargs):
         created = not self.pk
         super().save(*args, **kwargs)
-        if created:
+        if created and not self.is_superuser:
             membership_cls = apps.get_model('organization', 'Membership')
             chapter_cls = apps.get_model('organization', 'Chapter')
-            chapter = chapter_cls.objects.get(site_id=settings.SITE_ID)
+            try:
+                chapter = chapter_cls.objects.get(site_id=settings.SITE_ID)
+            except chapter_cls.DoesNotExist:
+                logger.warning(f'No site has been associated with SIDE_ID = 1')
+                return
             membership_cls.objects.create(user=self, chapter=chapter)
 
     def send_mail(self, subject, message=None, template=None, context=None):

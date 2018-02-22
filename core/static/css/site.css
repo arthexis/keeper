@@ -1,0 +1,10 @@
+h1.content-title {
+    margin-top: 5px;
+}
+
+.chapter-header {
+    text-align: right;
+    padding-top: 10px;
+    font-size: 1.5em;
+    color: darkgrey;
+}
