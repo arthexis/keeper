@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import reverse
 
-from systems.models import Splat, SplatCategory, Merit, Power, PowerCategory, CharacterTemplate
+from game_rules.models import Splat, SplatCategory, Merit, Power, PowerCategory, CharacterTemplate
 from core.admin import SaveRedirectAdmin
 
 

@@ -4,7 +4,7 @@ from django.views.generic import CreateView, UpdateView, DetailView
 from django.urls import reverse
 from django.contrib import messages
 
-from orgs.models import Organization, Membership
+from organization.models import Domain, Membership
 from .perms import OrgMemberPermission
 
 logger = logging.getLogger(__name__)
@@ -19,7 +19,7 @@ __all__ = (
 # Base settings shared by CreateOrganizationView and EditOrganizationView
 class _OrganizationMixin:
     template_name = 'orgs/organization/change_form.html'
-    model = Organization
+    model = Domain
     model_name = "Organization"
     fields = ("name", "parent_org", "information", "is_public")
     context_object_name = 'organization'

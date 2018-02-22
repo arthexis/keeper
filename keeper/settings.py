@@ -74,10 +74,9 @@ INTERNAL_IPS = ['127.0.0.1']
 
 LOCAL_APPS = [
     'core',
-    'systems',
+    'game_rules',
+    'organization',
     'sheets',
-    'orgs',
-    'downtime',
 ]
 
 INSTALLED_APPS = [
@@ -173,7 +172,7 @@ else:
 
 # Override default User model
 
-AUTH_USER_MODEL = 'orgs.UserProfile'
+AUTH_USER_MODEL = 'core.UserProfile'
 
 
 # Password validation
@@ -200,7 +199,7 @@ AUTH_PASSWORD_VALIDATORS = [
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
-    'orgs.auth.backends.AdminBackend',
+    'core.auth.backends.AdminBackend',
 ]
 
 
@@ -302,14 +301,14 @@ REST_FRAMEWORK = {
 
 SEED_DATA_SERIALIZERS = {
     'Template': {
-        'model': 'systems.models.CharacterTemplate',
+        'model': 'game_rules.models.CharacterTemplate',
     },
     'Organization': {
         'model': 'orgs.models.Organization',
         'exclude': ('memberships', 'events'),
     },
     'Merit': {
-        'model': 'systems.models.Merit',
+        'model': 'game_rules.models.Merit',
     }
 }
 
@@ -383,5 +382,5 @@ ADMIN_LOGIN_PASSWORD = getenv('ADMIN_LOGIN_PASSWORD')
 
 # TODO Create a process that automatically puts new users in a default organization
 
-DEFAULT_ORGANIZATION = None
+DEFAULT_ORGANIZATION = 'teatro-de-la-mente'
 

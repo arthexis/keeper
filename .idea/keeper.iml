@@ -15,11 +15,12 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/keeper" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/sheets" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/systems" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/orgs" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/game_rules" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/organization" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/assets/js" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/seed_data" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/downtime" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/events" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/core" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/.idea" />
       <excludeFolder url="file://$MODULE_DIR$/content" />
       <excludeFolder url="file://$MODULE_DIR$/env" />

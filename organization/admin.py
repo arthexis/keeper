@@ -1,7 +1,8 @@
 from django.contrib import admin
 
 from core.admin import SimpleActionsModel
-from orgs.models import UserProfile, Event, Prestige, Membership, Organization
+from core.models import UserProfile
+from organization.models import Prestige, Membership, Domain, Chapter
 
 
 @admin.register(UserProfile)
@@ -14,14 +15,8 @@ class ProfileAdmin(SimpleActionsModel):
     )
     list_display = ('username', 'email', 'last_name', 'phone')
     list_editable = ('email', 'last_name', 'phone')
-    list_display_links = ('username', )
-    change_actions = ('change_password', )
-
-
-@admin.register(Event)
-class EventAdmin(admin.ModelAdmin):
-    model = Event
-    list_display = ('name', 'event_date')
+    list_display_links = ('username',)
+    change_actions = ('change_password',)
 
 
 class PrestigeInline(admin.TabularInline):
@@ -34,10 +29,10 @@ class PrestigeInline(admin.TabularInline):
 class MembershipAdmin(admin.ModelAdmin):
     model = Membership
     inlines = (PrestigeInline, )
-    fields = ('user', 'organization', 'title', 'external_id', 'status')
-    list_display = ('user', 'organization', 'title', 'status', 'external_id', )
+    fields = ('user', 'chapter', 'title', 'external_id', 'status')
+    list_display = ('user', 'chapter', 'title', 'status', 'external_id', )
     list_editable = ('title', 'status', 'external_id', )
-    list_display_links = ('user', 'organization')
+    list_display_links = ('user', 'chapter')
     list_filter = ('status', 'title')
 
 
@@ -48,18 +43,28 @@ class MemberInline(admin.TabularInline):
     show_change_link = True
 
 
-@admin.register(Organization)
-class OrganizationAdmin(admin.ModelAdmin):
-    model = Organization
+class DomainInline(admin.StackedInline):
+    model = Domain
+    fields = ('name', 'reference_code', 'information',)
+    extra = 0
+    min_num = 1
+
+
+@admin.register(Domain)
+class DomainAdmin(admin.ModelAdmin):
+    model = Domain
     fields = ('name', 'reference_code', 'information', )
     list_display = ('name', 'reference_code', )
-    inlines = (MemberInline, )
     prepopulated_fields = {'reference_code': ('name', )}
 
 
-class OrganizationInline(admin.TabularInline):
-    model = Organization
-    fields = ('name', 'reference_code')
+@admin.register(Chapter)
+class ChapterAdmin(admin.ModelAdmin):
+    model = Domain
+    inlines = (DomainInline, MemberInline, )
+    fields = ('name', 'reference_code', 'information',)
+    list_display = ('name', 'reference_code',)
+    prepopulated_fields = {'reference_code': ('name',)}
 
 
 

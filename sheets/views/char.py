@@ -5,7 +5,7 @@ from django.views.generic import CreateView, TemplateView, UpdateView
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
 
-from systems.models import Merit, Power
+from game_rules.models import Merit, Power
 from sheets.models import Character, CharacterMerit, SkillSpeciality, CharacterPower
 from sheets.forms import CreateCharacterForm, EditCharacterForm
 

@@ -1,11 +1,11 @@
 from django.contrib import admin
 from core.admin import SimpleActionsModel
 
-from systems.models import PowerCategory, Power, SplatCategory, Splat
+from game_rules.models import PowerCategory, Power, SplatCategory, Splat
 from sheets.models import ApprovalRequest, Character, CharacterMerit, SkillSpeciality, CharacterPower
 from django.forms.widgets import HiddenInput
-from systems.admin import ParentInlineMixin
-from systems.fields import DotsField, DotsInput
+from game_rules.admin import ParentInlineMixin
+from game_rules.fields import DotsField, DotsInput
 
 
 class MeritInline(admin.TabularInline):
@@ -117,7 +117,7 @@ class CharacterAdmin(SimpleActionsModel):
             ),
         }),
     )
-    list_display = ('name', 'template', 'user', 'organization', 'status')
+    list_display = ('name', 'template', 'user', 'domain', 'status')
     list_filter = ('template', )
     search_fields = ('name', 'user')
     readonly_fields = (

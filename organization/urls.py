@@ -1,4 +1,4 @@
-from orgs.views import *
+from organization.views import *
 from keeper.utils import path
 
 app_name = 'orgs'

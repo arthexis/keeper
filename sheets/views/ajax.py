@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 
-from systems.models import Merit
+from game_rules.models import Merit
 from sheets.models import CharacterMerit, SkillSpeciality, CharacterPower
 
 __all__ = (

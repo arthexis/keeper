@@ -4,7 +4,7 @@ from django.views import View
 from django.http.response import Http404
 from django.views.generic.detail import SingleObjectMixin
 
-from orgs.models import Event, Organization
+from organization.models import Event, Domain
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +54,6 @@ class EventMemberPermission(MemberPermission):
 
 
 class OrgMemberPermission(MemberPermission):
-    def get_membership(self, obj: Organization):
+    def get_membership(self, obj: Domain):
         return obj.get_membership(self.request.user)
 

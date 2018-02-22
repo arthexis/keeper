@@ -121,3 +121,8 @@ textarea#id_background {
 #id_game_line {
     width: 240px
 }
+
+.field-information textarea.form-control {
+    height: 100px;
+}
+

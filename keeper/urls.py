@@ -6,7 +6,7 @@ from django.urls import include, path
 from django.contrib import admin
 
 from sheets.rest import router
-from orgs.views import Index
+from core.views import Index
 
 logger = logging.getLogger(__name__)
 
@@ -16,14 +16,8 @@ logger = logging.getLogger(__name__)
 
 urlpatterns = [
 
-    # Organization and Membership namespace
-    path('orgs/', include('orgs.urls')),
-
     # Character sheet stuff namespace
     path('sheets/', include('sheets.urls')),
-
-    # Character sheet stuff namespace
-    path('systems/', include('systems.urls')),
 
     # Admin site
     # https://docs.djangoproject.com/en/2.0/ref/contrib/admin/
@@ -74,5 +68,7 @@ if settings.SITE_ID == 1:
                 app.sites.add(settings.SITE_ID)
     except OperationalError:
         pass
+
+
 
 

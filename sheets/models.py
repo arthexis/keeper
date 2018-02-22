@@ -10,9 +10,9 @@ from model_utils import Choices
 from model_utils.managers import InheritanceManager, QueryManager
 from model_utils.models import TimeStampedModel, StatusModel
 
-from orgs.models import Organization
-from systems.models import CharacterTemplate, Splat, Power, Merit, SplatCategory, ATTRIBUTE_KEYS, SKILLS, SKILL_KEYS
-from systems.fields import DotsField
+from organization.models import Domain
+from game_rules.models import CharacterTemplate, Splat, Power, Merit, SplatCategory, ATTRIBUTE_KEYS, SKILLS, SKILL_KEYS
+from game_rules.fields import DotsField
 from keeper.utils import missing
 
 logger = logging.getLogger(__name__)
@@ -103,7 +103,7 @@ class Character(TimeStampedModel, StatusModel):
 
     # Organization related fields
     user = ForeignKey(settings.AUTH_USER_MODEL, SET_NULL, null=True, blank=True, related_name='characters')
-    organization = ForeignKey(Organization, SET_NULL, null=True, blank=True)
+    domain = ForeignKey(Domain, SET_NULL, null=True, blank=True, related_name='characters')
 
     # Tracking of spent resources
     bashing_damage = PositiveIntegerField(default=0)

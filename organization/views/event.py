@@ -7,8 +7,8 @@ from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from django.utils.http import urlencode
 
-from orgs.models import Event, Organization
-from orgs.forms import EventForm
+from organization.models import Event, Domain
+from organization.forms import EventForm
 from .perms import MemberPermission, EventMemberPermission
 
 logger = logging.getLogger(__name__)
@@ -41,7 +41,7 @@ class _EventMixin(object):
 class CreateEvent(_EventMixin, MemberPermission, CreateView):
 
     def dispatch(self, request, *args, org_pk=None, **kwargs):
-        self.organization = get_object_or_404(Organization, pk=org_pk)
+        self.organization = get_object_or_404(Domain, pk=org_pk)
         self.user_membership = \
             self.organization.get_membership(self.request.user)
         return super().dispatch(request, *args, **kwargs)

@@ -2,7 +2,7 @@ from rest_framework import routers, serializers, viewsets
 from rest_framework.relations import StringRelatedField
 
 from sheets.models import Character
-from systems.models import Merit
+from game_rules.models import Merit
 
 
 __all__ = (

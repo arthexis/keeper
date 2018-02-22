@@ -1,5 +1,5 @@
 from django.db import models
-from systems.widgets import DotsInput
+from game_rules.widgets import DotsInput
 
 
 class DotsField(models.PositiveSmallIntegerField):

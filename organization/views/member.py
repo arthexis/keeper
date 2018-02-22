@@ -6,8 +6,8 @@ from django.http.response import HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
 
-from orgs.models import Organization, Membership
-from orgs.forms import RequestMembershipForm
+from organization.models import Domain, Membership
+from organization.forms import RequestMembershipForm
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class ViewMembership(FormView):
     def form_valid(self, form):
         response = super().form_valid(form)
         org_pk = form.cleaned_data['organization']
-        organization = get_object_or_404(Organization, pk=org_pk)
+        organization = get_object_or_404(Domain, pk=org_pk)
         membership, created = Membership.objects.get_or_create(
             user=self.request.user, organization=organization)
         name = organization.name

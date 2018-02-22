@@ -1,7 +1,11 @@
 from django.contrib import admin
+from django.contrib.auth.models import Group
+from django.contrib.sites.models import Site
 from django.http import HttpResponseRedirect
 from django_object_actions import BaseDjangoObjectActions
+from allauth.socialaccount.models import EmailAddress, SocialApp, SocialAccount, SocialToken
 
+from core.models import UserProfile
 
 __all__ = (
     'SimpleActionsModel',
@@ -57,4 +61,15 @@ class SaveRedirectAdmin(admin.ModelAdmin):
             if url:
                 return HttpResponseRedirect(url)
         return super().response_change(request, obj)
+
+
+# Unregistered unnecessary admin modules
+
+admin.site.unregister(EmailAddress)
+admin.site.unregister(Group)
+admin.site.unregister(SocialApp)
+admin.site.unregister(SocialAccount)
+admin.site.unregister(SocialToken)
+admin.site.unregister(Site)
+
 
