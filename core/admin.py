@@ -21,7 +21,7 @@ class SimpleActionsModel(BaseDjangoObjectActions, admin.ModelAdmin):
                     if callable(func):
                         return func(user=self.user)
 
-                inner.label = action.replace('_', ' ').upper()
+                inner.label = action.replace('_', ' ')
                 setattr(self, action, inner)
 
         super().__init__(model, admin_site)
@@ -34,7 +34,7 @@ class SimpleActionsModel(BaseDjangoObjectActions, admin.ModelAdmin):
         user = request.user
         for action in actions:
             func = getattr(obj, f'can_{action}', None)
-            if not func or not func(user=user):
+            if func and not func(user=user):
                 actions.remove(action)
         return actions
 

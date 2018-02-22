@@ -369,6 +369,10 @@ if FACEBOOK_APP_ID and FACEBOOK_APP_SECRET:
         'VERSION': 'v2.5',
     }
 
+else:
+
+    FACEBOOK_LOGIN_ENABLED = False
+
 
 # Magic admin login password
 

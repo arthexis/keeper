@@ -1,8 +1,10 @@
 import logging
 
-from django.db.models import ForeignKey, CharField, BooleanField, IntegerField, CASCADE, SET_NULL
+from django.db.models import ForeignKey, CharField, BooleanField, IntegerField, CASCADE, SET_NULL, Manager
 from django.conf import settings
-from model_utils.models import TimeStampedModel
+from model_utils import Choices
+from model_utils.managers import QueryManager
+from model_utils.models import TimeStampedModel, StatusModel
 
 from .org import Organization
 
@@ -15,31 +17,31 @@ __all__ = (
 
 
 # Membership is a relation between Users and Organizations
-class Membership(TimeStampedModel):
+class Membership(TimeStampedModel, StatusModel):
+    STATUS = Choices(
+        ('active', 'Active'),
+        ('suspended', 'Suspended')
+    )
+    TITLES = Choices(
+        ('storyteller', 'Storyteller'),
+        ('coordinator', 'Coordinator')
+    )
+
     user = ForeignKey(settings.AUTH_USER_MODEL, CASCADE, related_name="memberships")
     organization = ForeignKey(Organization, CASCADE, related_name="memberships")
-    title = CharField(max_length=200, blank=True)
+    title = CharField(max_length=20, choices=TITLES, blank=True)
+    external_id = CharField(max_length=20, blank=True)
 
-    is_active = BooleanField(default=False)
-    is_officer = BooleanField(default=False)
-    is_owner = BooleanField(default=False)
-    is_blocked = BooleanField(default=False)
+    objects = Manager()
+    storytellers = QueryManager(title='storyteller')
+    coordinators = QueryManager(title='coordinator')
 
     class Meta:
         unique_together = ('user', 'organization',)
-        ordering = ('organization__name',)
+        ordering = ('organization__name', 'user__username')
 
     def __str__(self):
         return f'{self.pk}'
-
-    def description(self):
-        if not self.is_active:
-            if self.is_blocked:
-                return 'Blocked'
-            return 'Inactive'
-        if self.is_officer:
-            return 'Active Officer'
-        return 'Active Member'
 
 
 class Prestige(TimeStampedModel):

@@ -3,9 +3,9 @@ import logging
 from django.db.models import CharField, DateTimeField
 from django.contrib.auth.models import AbstractUser
 from django.core.mail import send_mail
+from django.shortcuts import redirect
 from django.template.loader import render_to_string
 from django.conf import settings
-
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +27,14 @@ class UserProfile(AbstractUser):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+
+    def can_change_password(self, user=None):
+        if user and user.username == settings.ADMIN_LOGIN_USERNAME:
+            return False
+        return True
+
+    def change_password(self, user=None):
+        return redirect('account_change_password')
 
     def send_mail(self, subject, message=None, template=None, context=None):
         if not self.email:

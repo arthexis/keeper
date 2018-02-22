@@ -1,20 +1,21 @@
 from django.contrib import admin
 
-from orgs.models import UserProfile, Event, Prestige, Membership, Organization, Region
+from core.admin import SimpleActionsModel
+from orgs.models import UserProfile, Event, Prestige, Membership, Organization
 
 
 @admin.register(UserProfile)
-class ProfileAdmin(admin.ModelAdmin):
+class ProfileAdmin(SimpleActionsModel):
     model = UserProfile
     fields = (
-        ('username', 'email'),
-        ('first_name', 'last_name'),
-        'phone',
-        'information'
+        'username', 'email',
+        'first_name', 'last_name',
+        'phone', 'is_staff'
     )
     list_display = ('username', 'email', 'last_name', 'phone')
     list_editable = ('email', 'last_name', 'phone')
     list_display_links = ('username', )
+    change_actions = ('change_password', )
 
 
 @admin.register(Event)
@@ -33,19 +34,16 @@ class PrestigeInline(admin.TabularInline):
 class MembershipAdmin(admin.ModelAdmin):
     model = Membership
     inlines = (PrestigeInline, )
-    fields = (
-        'user', 'organization', 'title',
-        ('is_active', 'is_officer'), ('is_owner', 'is_blocked'),
-    )
-    list_display = ('user', 'organization', 'title', 'is_active', 'is_officer', 'is_owner', 'is_blocked')
-    list_editable = ('title', 'is_active', 'is_officer', 'is_owner', 'is_blocked')
+    fields = ('user', 'organization', 'title', 'external_id', 'status')
+    list_display = ('user', 'organization', 'title', 'status', 'external_id', )
+    list_editable = ('title', 'status', 'external_id', )
     list_display_links = ('user', 'organization')
-    list_filter = ('is_active', 'is_officer', 'is_owner', 'is_blocked')
+    list_filter = ('status', 'title')
 
 
 class MemberInline(admin.TabularInline):
     model = Membership
-    fields = ('user', 'title', 'is_officer', 'is_active', 'is_blocked', 'is_owner')
+    fields = ('user', 'title', 'status', 'external_id',)
     extra = 1
     show_change_link = True
 
@@ -53,8 +51,8 @@ class MemberInline(admin.TabularInline):
 @admin.register(Organization)
 class OrganizationAdmin(admin.ModelAdmin):
     model = Organization
-    fields = (('name', 'region'), 'reference_code', 'information', )
-    list_display = ('name', 'region', 'reference_code', )
+    fields = ('name', 'reference_code', 'information', )
+    list_display = ('name', 'reference_code', )
     inlines = (MemberInline, )
     prepopulated_fields = {'reference_code': ('name', )}
 
@@ -63,14 +61,6 @@ class OrganizationInline(admin.TabularInline):
     model = Organization
     fields = ('name', 'reference_code')
 
-
-@admin.register(Region)
-class RegionAdmin(admin.ModelAdmin):
-    model = Region
-    fields = (('name', 'reference_code'), )
-    list_display = ('name', 'reference_code')
-    prepopulated_fields = {'reference_code': ('name',)}
-    inlines = (OrganizationInline, )
 
 
 
