@@ -40,15 +40,10 @@ class UserProfile(AbstractUser):
     def save(self, *args, **kwargs):
         created = not self.pk
         super().save(*args, **kwargs)
+
+        # Create memberships on save when invited
         if created and not self.is_superuser:
-            membership_cls = apps.get_model('organization', 'Membership')
-            chapter_cls = apps.get_model('organization', 'Chapter')
-            try:
-                chapter = chapter_cls.objects.get(site_id=settings.SITE_ID)
-            except chapter_cls.DoesNotExist:
-                logger.warning(f'No site has been associated with SIDE_ID = 1')
-                return
-            membership_cls.objects.create(user=self, chapter=chapter)
+            apps.get_model('organization', 'Invitation').redeem(self)
 
     def send_mail(self, subject, message=None, template=None, context=None):
         if self.email_opt_out:

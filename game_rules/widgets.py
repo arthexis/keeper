@@ -4,14 +4,18 @@ from django.utils.safestring import mark_safe
 
 
 class DotsInput(Widget):
-    input_type = None
+    """ Represents a field with dots useful for skills and attributes.
+
+    Expected attrs:
+
+    """
 
     def __init__(self, clear=True, circles=5):
         super().__init__()
         self.clear = clear
         self.circles = circles
 
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         dots = ""
         for i in range(1, self.circles + 1):
             dots += format_html('<input type="radio" value="{}"></input>', i)

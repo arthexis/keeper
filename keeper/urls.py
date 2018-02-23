@@ -7,6 +7,7 @@ from django.contrib import admin
 
 from core.rest import router
 from core.views import Index, EditMyProfile
+from organization.views import AcceptInvite
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +37,9 @@ urlpatterns = [
 
     # Edit Profile
     path('profile/', EditMyProfile.as_view(), name="profile"),
+
+    # Accept invitations
+    path('join/<str:code>/', AcceptInvite.as_view(), name='accept_invite'),
 
     # Main IndexView (homepage)
     path('', Index.as_view(), name='index'),

@@ -17,6 +17,7 @@ __all__ = (
 # This is because it doesn't belong to any specific application
 class Index(TemplateView):
     template_name = 'index.html'
+    title = "Dashboard"
 
     def dispatch(self, request, *args, **kwargs):
         user = request.user

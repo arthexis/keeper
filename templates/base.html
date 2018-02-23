@@ -29,24 +29,42 @@
             {% block messages %}
                 {% bootstrap_messages %}
             {% endblock %}
-            {% block contentheader %}
-            <div class="row">
-              <div class="col-lg-6 col-sm12">
-                <h1 class="content-title">
-                  {% block contenttitle %}Title{% endblock %}
-                </h1>
-              </div>
-              <div class="col-lg-6 col-sm12 chapter-header">
-                {% block memberhead %}
-                  {% if membership %}
-                    {{ membership.chapter.name }}
-                  {% else %}
 
-                  {% endif %}
-                {% endblock %}
+            {% block header %}
+              <div class="row">
+                <div class="col-lg-6 col-sm12">
+                  <h1 class="content-title">
+                    {% block actiontitle %}
+                      {% if view.title %}
+                        {{ view.title }}
+                      {% elif view.model_name %}
+                        {% if object %}
+                          <h1>Edit {{ view.model_name }}</h1>
+                        {% else %}
+                          <h1>Create {{ view.model_name }}</h1>
+                        {% endif %}
+                      {% endif %}
+                    {% endblock %}
+                  </h1>
+                </div>
+                <div class="col-lg-6 col-sm12 chapter-header">
+                  {% block memberhead %}
+                    {% if membership %}
+                      {{ membership.chapter.name }}
+                    {% else %}
+
+                    {% endif %}
+                  {% endblock %}
+                </div>
               </div>
-            </div>
             {% endblock %}
+
+            {% block helptext %}
+              {% if view.help_text %}
+                <p id="model-help-text">{{ view.help_text }}</p>
+              {% endif %}
+            {% endblock %}
+
             <hr>
             {% block content %}{% endblock %}
 

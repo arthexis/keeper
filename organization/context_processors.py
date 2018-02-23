@@ -12,4 +12,3 @@ def membership(request):
             if obj:
                 request.session['membership'] = obj.pk
     return context
-

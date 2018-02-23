@@ -1,8 +1,25 @@
 {% extends 'account/welcome.html' %}{% load bootstrap3 socialaccount %}
 
-{% block formtitle %}<h2>Login</h2>{% endblock %}
+{% block formtitle %}<h2>Signup</h2>{% endblock %}
+
+{% block extrahead %}
+  {% if request.session.invite_email %}
+  <script>
+    $(function () {
+      $('#id_email').val('{{ request.session.invite_email }}')
+      $('#id_username').val('{{ request.session.invite_email }}'.split('@', 1))
+    })
+  </script>
+  {% endif %}
+{% endblock %}
 
 {% block formactions %}
+  {% if request.session.chapter %}
+    <br>
+    <h4 style="text-align: center;">
+      <strong>Chapter: </strong> {{ request.session.chapter }}
+    </h4>
+  {% endif %}
 
   <br><br>
   <input class="btn btn-lg btn-primary" type="submit"

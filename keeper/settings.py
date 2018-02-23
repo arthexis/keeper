@@ -13,7 +13,7 @@ HEROKU_APP_NAME = getenv('HEROKU_APP_NAME')
 
 SITE_NAME = HEROKU_APP_NAME or 'keeper'
 
-SITE_DOMAIN = f'{HEROKU_APP_NAME}.herokuapp.com' if HEROKU_APP_NAME else 'localhost:8100'
+SITE_DOMAIN = f'http://{HEROKU_APP_NAME}.herokuapp.com' if HEROKU_APP_NAME else 'http://localhost:8100'
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -386,5 +386,8 @@ ADMIN_LOGIN_USERNAME = getenv('ADMIN_LOGIN_USERNAME', 'admin')
 ADMIN_LOGIN_PASSWORD = getenv('ADMIN_LOGIN_PASSWORD')
 
 
+# Site functionality switches
+
 SHOW_HIDDEN_ADMIN_MODULES = False
+
 

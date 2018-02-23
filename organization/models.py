@@ -2,12 +2,14 @@ import logging
 
 from django.conf import settings
 from django.contrib.sites.models import Site
-from django.db.models import CASCADE, CharField, ForeignKey, IntegerField, Manager, Model, SET_NULL, URLField, \
-    DO_NOTHING, TextField
-from django_extensions.db.fields import AutoSlugField
+from django.db.models import CASCADE, CharField, ForeignKey, Manager, Model, URLField, \
+    DO_NOTHING, DateField, PositiveSmallIntegerField, PositiveIntegerField, SET_NULL, Sum, EmailField, BooleanField
+from django.urls import reverse
+from django.utils.html import format_html
+from django_extensions.db.fields import AutoSlugField, RandomCharField
 from model_utils import Choices
 from model_utils.managers import QueryManager
-from model_utils.models import StatusModel, TimeStampedModel
+from model_utils.models import StatusModel, TimeStampedModel, TimeFramedModel
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +18,9 @@ __all__ = (
     'Domain',
     'Membership',
     'Prestige',
+    'PrestigeReport',
+    'PrestigeLevel',
+    'Invitation',
 )
 
 
@@ -38,9 +43,11 @@ class Chapter(Organization):
     site = ForeignKey(Site, DO_NOTHING, related_name='chapters', null=True)  # Django Site
     rules_url = URLField('Rules URL', blank=True, help_text='URL pointing to the Chapter rules document.')
     reference_code = AutoSlugField(populate_from='name')
+    prestige_cutoff = DateField(blank=True, null=True)
 
     class Meta:
         verbose_name = 'Chapter'
+        verbose_name_plural = 'Chapters and Domains'
 
     def get_membership(self, user):
         return self.memberships.get(user=user)
@@ -75,7 +82,10 @@ class Membership(TimeStampedModel, StatusModel):
     user = ForeignKey(settings.AUTH_USER_MODEL, CASCADE, related_name="memberships")
     chapter = ForeignKey(Chapter, CASCADE, related_name="memberships")
     title = CharField(max_length=20, choices=TITLES, blank=True)
-    external_id = CharField(max_length=20, blank=True)
+    external_id = CharField(max_length=20, blank=True, verbose_name='External ID')
+
+    prestige_total = PositiveIntegerField(default=0, editable=False)
+    prestige_level = ForeignKey('PrestigeLevel', SET_NULL, null=True, editable=False, related_name='memberships')
 
     objects = Manager()
     storytellers = QueryManager(title='storyteller')
@@ -88,21 +98,86 @@ class Membership(TimeStampedModel, StatusModel):
     def __str__(self):
         return f'#{self.external_id or self.pk} {self.user}'
 
+    def recalculate_prestige(self):
+        total = self.prestige.filter(amount__gt=0).all().aggregate(Sum('amount'))['amount__sum']
+        self.prestige_total = total
+        try:
+            self.prestige_level = PrestigeLevel.objects.filter(
+                chapter=self.chapter, prestige_required__lte=total).order_by('-prestige_required').first()
+        except PrestigeLevel.DoesNotExist:
+            logger.error(f'Missing prestige level for total >= {total}')
+        self.save()
 
-class PrestigeReport(TimeStampedModel):
+
+class PrestigeReport(TimeFramedModel):
     chapter = ForeignKey('Chapter', CASCADE, related_name='prestige')
-    description = TextField()
 
     class Meta:
         verbose_name = 'Prestige Report'
 
+    def __str__(self):
+        return f'Prestige {self.chapter} {self.start}'
 
-class Prestige(Model):
+
+class Prestige(TimeStampedModel):
     membership = ForeignKey('Membership', CASCADE, related_name='prestige')
     report = ForeignKey('PrestigeReport', CASCADE, related_name='lines')
-    amount = IntegerField()
+    amount = PositiveSmallIntegerField()
     notes = CharField(max_length=400, blank=True)
 
     class Meta:
         verbose_name = 'Prestige Line'
 
+    def __str__(self):
+        return f'{self.membership} +{self.amount}'
+
+    def save(self, **kwargs):
+        super().save(**kwargs)
+        self.membership.recalculate_prestige()
+
+
+class PrestigeLevel(Model):
+    level = CharField(max_length=40)
+    prestige_required = PositiveSmallIntegerField()
+    chapter = ForeignKey(Chapter, CASCADE, related_name='prestige_levels')
+
+    class Meta:
+        verbose_name = 'Prestige Level'
+        ordering = ('prestige_required', )
+        unique_together = ('chapter', 'level')
+
+    def __str__(self):
+        return str(self.level)
+
+    def save(self, **kwargs):
+        super().save(**kwargs)
+        for membership in self.memberships:
+            membership.recalculate_prestige()
+
+
+class Invitation(TimeStampedModel):
+    chapter = ForeignKey(Chapter, CASCADE, related_name='invitations')
+    code = RandomCharField(length=8, unique=True)
+    is_accepted = BooleanField(default=False)
+    external_id = CharField(max_length=20, blank=True, verbose_name='External ID')
+    email_address = EmailField()
+
+    def __str__(self):
+        return f'{self.email_address}'
+
+    def save(self, **kwargs):
+        # TODO Actually send notification email
+        super().save(**kwargs)
+
+    @classmethod
+    def redeem(cls, user):
+        invitations = cls.objects.filter(email_address=user.email, is_accepted=True)
+        for inv in invitations:
+            Membership.objects.create(user=user, chapter=inv.chapter, external_id=inv.external_id, status='active')
+        invitations.delete()
+
+    def invite_link(self):
+        if self.code and self.chapter.site:
+            path = reverse('accept_invite', args=[self.code])
+            url = f'{self.chapter.site.domain}{path}'
+            return format_html(f'<a href="{url}">{url}</a>')
