@@ -3,7 +3,7 @@ import logging
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.db.models import CASCADE, CharField, ForeignKey, IntegerField, Manager, Model, SET_NULL, URLField, \
-    DO_NOTHING
+    DO_NOTHING, TextField
 from django_extensions.db.fields import AutoSlugField
 from model_utils import Choices
 from model_utils.managers import QueryManager
@@ -58,6 +58,9 @@ class Domain(Organization):
     class Meta:
         verbose_name = 'Domain'
 
+    def __str__(self):
+        return f'{self.name} ({self.chapter})'
+
 
 class Membership(TimeStampedModel, StatusModel):
     STATUS = Choices(
@@ -83,16 +86,23 @@ class Membership(TimeStampedModel, StatusModel):
         ordering = ('chapter__name', 'user__username')
 
     def __str__(self):
-        return f'#{self.external_id or self.pk}'
+        return f'#{self.external_id or self.pk} {self.user}'
 
 
-class Prestige(TimeStampedModel):
-    membership = ForeignKey('Membership', CASCADE, related_name='prestige')
-    amount = IntegerField()
-    notes = CharField(max_length=2000)
-    coordinator = ForeignKey(settings.AUTH_USER_MODEL, SET_NULL, null=True, related_name='+')
+class PrestigeReport(TimeStampedModel):
+    chapter = ForeignKey('Chapter', CASCADE, related_name='prestige')
+    description = TextField()
 
     class Meta:
-        verbose_name = 'Prestige Record'
+        verbose_name = 'Prestige Report'
 
+
+class Prestige(Model):
+    membership = ForeignKey('Membership', CASCADE, related_name='prestige')
+    report = ForeignKey('PrestigeReport', CASCADE, related_name='lines')
+    amount = IntegerField()
+    notes = CharField(max_length=400, blank=True)
+
+    class Meta:
+        verbose_name = 'Prestige Line'
 

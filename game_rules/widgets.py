@@ -23,4 +23,5 @@ class DotsInput(Widget):
 
     class Media:
         css = {'all': ('css/dots.css', )}
+        js = ('js/dots.js', )
 

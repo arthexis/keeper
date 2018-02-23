@@ -2,14 +2,13 @@ from django.contrib import admin
 
 from core.admin import SimpleActionsModel
 from core.models import UserProfile
-from organization.models import Prestige, Membership, Domain, Chapter
+from organization.models import Prestige, Membership, Domain, Chapter, PrestigeReport
 
 
 class ProfileMemberInline(admin.TabularInline):
     model = Membership
     fields = ('chapter', 'title', 'status', 'external_id',)
     extra = 0
-
 
 @admin.register(UserProfile)
 class ProfileAdmin(SimpleActionsModel):
@@ -22,12 +21,6 @@ class ProfileAdmin(SimpleActionsModel):
     )
     list_display = ('username', 'email', 'last_name', 'first_name', 'phone', 'is_staff')
     change_actions = ('change_password',)
-
-
-class PrestigeInline(admin.TabularInline):
-    model = Prestige
-    fields = ('notes', 'amount', 'coordinator')
-    extra = 0
 
 
 class ChapterMemberInline(admin.TabularInline):
@@ -53,5 +46,20 @@ class ChapterAdmin(admin.ModelAdmin):
     def domains(self, obj: Chapter =None):
         if obj:
             return ','.join(obj.domains.values_list('name', flat=True))
+
+
+class ReportPrestigeInline(admin.TabularInline):
+    model = Prestige
+    fields = ('membership', 'amount', 'notes')
+    extra = 3
+    min_num = 1
+
+
+@admin.register(PrestigeReport)
+class PrestigeReport(admin.ModelAdmin):
+    model = PrestigeReport
+    inlines = (ReportPrestigeInline,)
+    fields = ('chapter', 'description', )
+
 
 

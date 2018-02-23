@@ -77,7 +77,7 @@ class CharacterAdmin(SimpleActionsModel):
         (None, {
             'fields': (
                 ('name', 'template', 'status'),
-                ('user', 'organization', 'version'),
+                ('user', 'domain', 'version'),
             ),
         }),
         ('Template', {

@@ -3,7 +3,7 @@ from .models import Membership
 
 def membership(request):
     context = {}
-    if request.user:
+    if request.user and not request.user.is_anonymous:
         try:
             member_pk = request.session['membership']
             context['membership'] = Membership.objects.get(pk=member_pk, user=request.user)

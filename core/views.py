@@ -30,6 +30,11 @@ class EditMyProfile(UpdateView):
     model = UserProfile
     fields = (
         "username", "email",
-        "first_name", "last_name", "phone", "information"
+        "first_name", "last_name", "phone",
     )
     model_name = "Profile"
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
+
