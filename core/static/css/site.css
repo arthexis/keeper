@@ -8,3 +8,8 @@ h1.content-title {
     font-size: 1.5em;
     color: darkgrey;
 }
+
+
+.new-guide li {
+    padding: 5px;
+}

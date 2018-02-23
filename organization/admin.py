@@ -31,7 +31,7 @@ class ChapterMemberInline(admin.TabularInline):
 
 class DomainInline(admin.StackedInline):
     model = Domain
-    fields = ('name', 'rules_url',)
+    fields = ('name', 'rules_url', 'chronicle_name', 'short_description')
     extra = 0
     min_num = 1
 

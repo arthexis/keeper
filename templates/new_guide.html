@@ -1,0 +1,59 @@
+<div class="container new-guide">
+
+  <div class="row">
+    <div class="col-lg-6">
+      <h3>Welcome to {{ membership.chapter.name }}</h3>
+      <p>
+        Looks like you just joined and don't have any characters yet,
+        please follow the instructions to get started. </p>
+      <ol>
+        <li>
+          Check the rules for your <strong>Chapter</strong> by
+          <a href="{{ membership.chapter.rules_url }}">clicking here.</a>
+        </li>
+        <li>
+          Check the rules for creating a new character in the
+          <strong>Domain</strong> of your
+          choice. The list of available Domains appears to the right. The rules may
+          determine what kinds of characters can be played.
+        </li>
+        <li>
+          Fill out your character sheet, either in a paper copy or a PDF. If you
+          use a paper sheet, take a clear photo of it or scan it.
+        </li>
+        <li>
+          Click the "Request Character" link for your domain. You will be asked
+          to upload your character sheet.
+        </li>
+        <li>
+          Wait until the appropriate Storyteller approves your character. They
+          may contact you over email if they have any questions. Once approved
+          your will receive an email notification with further instructions.
+        </li>
+      </ol>
+    </div>
+    <div class="col-lg-6" style="text-align: center">
+      {% for domain in membership.chapter.domains.all %}
+        <br>
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4>{{ domain.name_and_chronicle }}</h4>
+          </div>
+          <div class="panel-body">
+            <em>{{ domain.short_description }}</em>
+          </div>
+          <div class="panel-footer">
+            <a href="{{ domain.rules_url }}">
+              Domain Rules and Chronicle Info</a> |
+            <a href="{% url 'request' domain.pk %}">
+              Request Character
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+
+</div>
+

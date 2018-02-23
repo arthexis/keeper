@@ -275,6 +275,7 @@ class ApprovalRequest(TimeStampedModel, StatusModel):
     )
 
     character = ForeignKey(Character, DO_NOTHING, related_name='approval_requests')
+    user = ForeignKey(settings.AUTH_USER_MODEL, DO_NOTHING, null=True, related_name='approval_requests')
     request = TextField('Request Information')
 
     # Keep track of the character UUID
@@ -288,6 +289,8 @@ class ApprovalRequest(TimeStampedModel, StatusModel):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.uuid = self.character.uuid
+        if not self.user and self.character.user:
+            self.user = self.character.user
         super().save(force_insert, force_update, using, update_fields)
 
 

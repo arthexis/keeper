@@ -3,7 +3,8 @@ import logging
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.db.models import CASCADE, CharField, ForeignKey, Manager, Model, URLField, \
-    DO_NOTHING, DateField, PositiveSmallIntegerField, PositiveIntegerField, SET_NULL, Sum, EmailField, BooleanField
+    DO_NOTHING, DateField, PositiveSmallIntegerField, PositiveIntegerField, SET_NULL, Sum, EmailField, BooleanField, \
+    TextField
 from django.urls import reverse
 from django.utils.html import format_html
 from django_extensions.db.fields import AutoSlugField, RandomCharField
@@ -59,7 +60,9 @@ class Domain(Organization):
     # Characters are approved at Domain level
 
     rules_url = URLField('Rules URL', blank=True, help_text='URL pointing to the Domain game and approval rules.')
+    chronicle_name = CharField(max_length=100, blank=True)
     chapter = ForeignKey('Chapter', CASCADE, related_name='domains')
+    short_description = TextField(blank=True)
     reference_code = AutoSlugField(populate_from=('name', 'chapter__name'))
 
     class Meta:
@@ -67,6 +70,11 @@ class Domain(Organization):
 
     def __str__(self):
         return f'{self.name} ({self.chapter})'
+
+    def name_and_chronicle(self):
+        if self.chronicle_name:
+            return f'{self.name}: {self.chronicle_name}'
+        return str(self.name)
 
 
 class Membership(TimeStampedModel, StatusModel):

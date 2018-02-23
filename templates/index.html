@@ -4,6 +4,15 @@
 {% block contenttitle %}Dashboard{% endblock %}
 
 {% block content %}
-
-
+  {% if membership %}
+    {% if new_guide %}
+      {% include 'new_guide.html' %}
+    {% else %}
+    {% endif %}
+  {% else %}
+    <h3>No membership is associated with this account</h3>
+    <p>
+      Please ask your <strong>Coordinator</strong> for an invitation link.
+    </p>
+  {% endif %}
 {% endblock %}

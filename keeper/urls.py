@@ -8,6 +8,7 @@ from django.contrib import admin
 from core.rest import router
 from core.views import Index, EditMyProfile
 from organization.views import AcceptInvite
+from sheets.views import RequestCharacter
 
 logger = logging.getLogger(__name__)
 
@@ -16,9 +17,6 @@ logger = logging.getLogger(__name__)
 # https://docs.djangoproject.com/en/2.0/ref/urls/
 
 urlpatterns = [
-
-    # Character sheet stuff namespace
-    path('sheets/', include('sheets.urls')),
 
     # Admin site
     # https://docs.djangoproject.com/en/2.0/ref/contrib/admin/
@@ -40,6 +38,9 @@ urlpatterns = [
 
     # Accept invitations
     path('join/<str:code>/', AcceptInvite.as_view(), name='accept_invite'),
+
+    # Request a new character
+    path('request/<int:domain>/', RequestCharacter.as_view(), name='request'),
 
     # Main IndexView (homepage)
     path('', Index.as_view(), name='index'),

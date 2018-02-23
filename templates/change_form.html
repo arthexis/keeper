@@ -18,8 +18,9 @@
           {% endblock %}
 
           {% block submitrow %}
+            <br>
             <input class="btn btn-lg btn-primary" type="submit"
-              value="{% if object %}Update{% else %}Create{% endif %}">
+              value="{% if view.submit_label %}{{ view.submit_label }}{% else %}{% if object %}Update{% else %}Create{% endif %}{% endif %}">
           {% endblock %}
 
         </div>
