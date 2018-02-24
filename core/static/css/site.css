@@ -12,3 +12,10 @@ h1.content-title {
 .new-guide li {
     padding: 5px;
 }
+
+
+.facebook-login-btn {
+    width: 100%;
+    background-color: #4267b2;
+
+}

@@ -342,7 +342,14 @@ SEED_DATA_DIRECTORY = os.path.join(BASE_DIR, 'content')
 
 # Setting up login providers with django-allauth
 # https://django-allauth.readthedocs.io/en/latest/providers.html#facebook
+# https://django-allauth.readthedocs.io/en/latest/configuration.html
 # https://stackoverflow.com/questions/4532721/facebook-development-in-localhost
+
+ACCOUNT_EMAIL_REQUIRED = True
+
+ACCOUNT_EMAIL_VERIFICATION = "none"
+
+SOCIALACCOUNT_EMAIL_VERIFICATION = "none"
 
 SOCIALACCOUNT_PROVIDERS = {}
 
