@@ -30,9 +30,6 @@ urlpatterns = [
     # Django-Select2
     path('select2/', include('django_select2.urls')),
 
-    # s3direct urls
-    path('s3direct/', include('s3direct.urls')),
-
     # All Auth urls
     path('accounts/', include('allauth.urls')),
 
