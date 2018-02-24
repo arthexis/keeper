@@ -2,7 +2,7 @@ import logging
 import uuid
 
 from django.db.models import Model, CharField, ForeignKey, TextField, PositiveIntegerField, \
-    PROTECT, DO_NOTHING, CASCADE, UUIDField, SET_NULL, Manager
+    PROTECT, DO_NOTHING, CASCADE, UUIDField, SET_NULL, Manager, BinaryField
 from django.contrib.auth.models import User, Group
 from django.shortcuts import redirect
 from django.conf import settings
@@ -218,6 +218,9 @@ class Character(TimeStampedModel, StatusModel):
     def approval_history(self):
         return ApprovalRequest.objects.filter(uuid=self.uuid).order_by('character__version')
 
+    def request_approval(self):
+        return ApprovalRequest.objects.create()
+
 
 class CharacterElement(Model):
     objects = InheritanceManager()
@@ -277,6 +280,7 @@ class ApprovalRequest(TimeStampedModel, StatusModel):
     character = ForeignKey(Character, DO_NOTHING, related_name='approval_requests')
     user = ForeignKey(settings.AUTH_USER_MODEL, DO_NOTHING, null=True, related_name='approval_requests')
     request = TextField('Request Information')
+    attachment = BinaryField(blank=True)
 
     # Keep track of the character UUID
     uuid = UUIDField(editable=False, db_index=True, null=True)
@@ -287,13 +291,8 @@ class ApprovalRequest(TimeStampedModel, StatusModel):
     def __str__(self):
         return f'{self.character.name} #{self.pk}'
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+    def save(self, **kwargs):
         self.uuid = self.character.uuid
         if not self.user and self.character.user:
             self.user = self.character.user
-        super().save(force_insert, force_update, using, update_fields)
-
-
-
-
-
+        super().save(**kwargs)

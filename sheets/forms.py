@@ -1,6 +1,5 @@
 
-from django.forms import Form, CharField, URLField, Textarea, ModelChoiceField
-from s3direct.widgets import S3DirectWidget
+from django.forms import Form, CharField, Textarea, ModelChoiceField, FileField
 from game_rules.models import CharacterTemplate
 
 
@@ -10,8 +9,7 @@ class RequestCharacterForm(Form):
     character_template = ModelChoiceField(
         queryset=CharacterTemplate.objects.all(),
         help_text='This will determine which Storyteller team will approve your request.')
-    character_sheet_image = URLField(
-        widget=S3DirectWidget(dest='sheet-uploads'),
+    character_sheet_image = FileField(
         help_text='Upload your character in PDF or image format.')
     description = CharField(
         widget=Textarea(),

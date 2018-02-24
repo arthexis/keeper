@@ -109,4 +109,3 @@ class TemplateAdmin(admin.ModelAdmin):
     )
     inlines = (SplatCategoryInline, PowerCategoryInline)
     prepopulated_fields = {'reference_code': ('name', 'game_line')}
-

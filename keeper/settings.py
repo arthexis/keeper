@@ -104,8 +104,6 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.facebook',
-    'boto3',
-    's3direct',
 ] + LOCAL_APPS
 
 MIDDLEWARE = [
@@ -381,32 +379,6 @@ if FACEBOOK_APP_ID and FACEBOOK_APP_SECRET:
 else:
 
     FACEBOOK_LOGIN_ENABLED = False
-
-
-# AWS Configuration (boto3), required for s3direct
-
-AWS_ACCESS_KEY_ID = getenv('AWS_ACCESS_KEY_ID')
-
-AWS_SECRET_ACCESS_KEY = getenv('AWS_SECRET_ACCESS_KEY')
-
-AWS_STORAGE_BUCKET_NAME = getenv('AWS_STORAGE_BUCKET_NAME')
-
-
-# S3 DIRECT Configuration
-# https://github.com/bradleyg/django-s3direct
-
-S3DIRECT_REGION = 'us-east-1'
-
-S3DIRECT_DESTINATIONS = {
-    'sheet-uploads': {
-        # 'key': lambda filename, args: args + '/' + uuid.uuid4(),
-        # 'key_args': 'sheet-uploads',
-        'key': 'sheet-uploads',
-        'allowed': ['image/jpeg', 'image/png', 'application/pdf'],
-        'acl': 'private',
-        'content_disposition': 'attachment',
-    },
-}
 
 
 # Magic admin login password
