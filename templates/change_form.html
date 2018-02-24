@@ -2,7 +2,8 @@
 
 {% block extrahead %}
   {{ block.super }}
-  {{ form.media }}
+  {{ form.media.css }}
+  {{ form.media.js }}
 {% endblock %}
 
 {% block content %}

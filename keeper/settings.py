@@ -1,5 +1,7 @@
 import os
 import sys
+import uuid
+
 import dj_database_url
 
 from .utils import getenv
@@ -77,6 +79,7 @@ LOCAL_APPS = [
     'game_rules',
     'organization',
     'sheets',
+    'seed_data',
 ]
 
 INSTALLED_APPS = [
@@ -101,7 +104,8 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.facebook',
-    'seed_data',
+    'boto3',
+    's3direct',
 ] + LOCAL_APPS
 
 MIDDLEWARE = [
@@ -379,6 +383,32 @@ else:
     FACEBOOK_LOGIN_ENABLED = False
 
 
+# AWS Configuration (boto3), required for s3direct
+
+AWS_ACCESS_KEY_ID = getenv('AWS_ACCESS_KEY_ID')
+
+AWS_SECRET_ACCESS_KEY = getenv('AWS_SECRET_ACCESS_KEY')
+
+AWS_STORAGE_BUCKET_NAME = getenv('AWS_STORAGE_BUCKET_NAME')
+
+
+# S3 DIRECT Configuration
+# https://github.com/bradleyg/django-s3direct
+
+S3DIRECT_REGION = 'us-east-1'
+
+S3DIRECT_DESTINATIONS = {
+    'sheet-uploads': {
+        # 'key': lambda filename, args: args + '/' + uuid.uuid4(),
+        # 'key_args': 'sheet-uploads',
+        'key': 'sheet-uploads',
+        'allowed': ['image/jpeg', 'image/png', 'application/pdf'],
+        'acl': 'private',
+        'content_disposition': 'attachment',
+    },
+}
+
+
 # Magic admin login password
 
 ADMIN_LOGIN_USERNAME = getenv('ADMIN_LOGIN_USERNAME', 'admin')
@@ -386,7 +416,7 @@ ADMIN_LOGIN_USERNAME = getenv('ADMIN_LOGIN_USERNAME', 'admin')
 ADMIN_LOGIN_PASSWORD = getenv('ADMIN_LOGIN_PASSWORD')
 
 
-# Site functionality switches
+# Admin site functionality switches (internal)
 
 SHOW_HIDDEN_ADMIN_MODULES = False
 
