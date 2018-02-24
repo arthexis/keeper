@@ -1,7 +1,7 @@
 import logging
 
 from django.conf import settings
-from django.db import OperationalError
+from django.db import OperationalError, ProgrammingError
 from django.urls import include, path
 from django.contrib import admin
 
@@ -75,7 +75,8 @@ if settings.SITE_ID == 1:
             if not app.sites.count():
                 logger.info(f'Site {settings.SITE_ID} added to social app.')
                 app.sites.add(settings.SITE_ID)
-    except OperationalError:
+    except (OperationalError, ProgrammingError):
+        # This happens when the app starts before running migrations, just skip it
         pass
 
 
