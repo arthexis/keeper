@@ -120,8 +120,6 @@ class Character(TimeStampedModel, StatusModel):
 
     # Versioning fields. The highest number is the latest version
     version = PositiveIntegerField(default=0)
-    created_by = ForeignKey(settings.AUTH_USER_MODEL, DO_NOTHING, related_name='+', null=True, blank=True)
-
     active = QueryManager(status__in=('in_progress', 'approved'))
 
     # This UUID is shared by all versions of the same character
@@ -218,8 +216,13 @@ class Character(TimeStampedModel, StatusModel):
     def approval_history(self):
         return ApprovalRequest.objects.filter(uuid=self.uuid).order_by('character__version')
 
-    def request_approval(self):
-        return ApprovalRequest.objects.create()
+    @classmethod
+    def request_initial_approval(cls, user, domain, template, request=None, attachment=None):
+        obj = cls.objects.create(user=user, template=template, domain=domain)
+        obj.request_approval(request, attachment)
+
+    def request_approval(self, request=None, attachment=None):
+        return ApprovalRequest.objects.create(character=self, request=request, attachment=attachment)
 
 
 class CharacterElement(Model):

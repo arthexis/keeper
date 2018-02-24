@@ -76,6 +76,9 @@ class Domain(Organization):
             return f'{self.name}: {self.chronicle_name}'
         return str(self.name)
 
+    def is_member(self, user):
+        return Membership.objects.filter(chapter=self.chapter, user=user).exists()
+
 
 class Membership(TimeStampedModel, StatusModel):
     STATUS = Choices(
