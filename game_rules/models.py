@@ -193,6 +193,9 @@ class Power(models.Model):
     def __str__(self):
         return str(self.name)
 
+    def character_template(self):
+        return str(self.power_category.character_template.name)
+
 
 class AnchorCategory(models.Model):
     name = models.CharField(max_length=20)

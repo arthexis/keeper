@@ -54,6 +54,14 @@ class MeritAdmin(admin.ModelAdmin):
     prepopulated_fields = {'reference_code': ('name', )}
 
 
+@admin.register(Power)
+class PowerAdmin(admin.ModelAdmin):
+    model = Power
+    fields = (('name', 'power_category'),)
+    list_display = ('name', 'power_category', 'character_template')
+    list_filter = ('power_category', )
+
+
 class PowerInline(admin.TabularInline):
     model = Power
     fields = ('name', )
