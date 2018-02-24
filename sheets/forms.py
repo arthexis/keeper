@@ -10,7 +10,7 @@ class RequestCharacterForm(Form):
         queryset=CharacterTemplate.objects.all(),
         help_text='This will determine which Storyteller team will approve your request.')
     character_sheet_image = FileField(
-        help_text='Upload your character in PDF or image format.')
+        help_text='Upload your character sheet in PDF or image format.')
     description = CharField(
         widget=Textarea(),
         help_text='Please provide additional background or information about your character. Be concise.')
