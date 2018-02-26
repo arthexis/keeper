@@ -12,7 +12,7 @@ $(document).ready(function() {
         $(this).siblings().each(function () {
             if ($(this).is('[type=radio]')) {
                 var i = parseInt($(this).val().toString())
-                console.log(i)
+                // console.log(i)
                 $(this).prop('checked', i <= val)
             } else {
                 $(this).val(val);

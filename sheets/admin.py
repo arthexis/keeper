@@ -224,9 +224,14 @@ class CharacterAdmin(SimpleActionsModel):
 @admin.register(ApprovalRequest)
 class ApprovalAdmin(admin.ModelAdmin):
     model = ApprovalRequest
-    fields = ('character', 'description', 'created', )
+    fields = ('get_character_link', 'description', 'created', 'download_attachment_link' )
     list_display = ('character', 'description', 'created', 'status')
     list_filter = ('status', )
-    readonly_fields = ('created', )
+    readonly_fields = ('created', 'get_character_link', 'download_attachment_link')
     search_fields = ('character', )
 
+    def get_character_link(self, obj=None):
+        if obj:
+            return obj.get_character_link()
+
+    get_character_link.short_description = "Character"

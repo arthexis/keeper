@@ -135,6 +135,10 @@ class Character(TimeStampedModel, StatusModel):
     def __str__(self):
         return f'[{self.template.game_line.upper()}] {self.name}'
 
+    def get_admin_link(self):
+        url = reverse('admin:sheets_character_change', kwargs={'object_id': self.pk})
+        return format_html('<a href="{}">{}</a>', url, str(self))
+
     # Derived Traits
 
     def speed(self):
@@ -301,7 +305,7 @@ class ApprovalRequest(TimeStampedModel, StatusModel):
         verbose_name = "Approval Request"
 
     def __str__(self):
-        return f'{self.character.name} #{self.pk}'
+        return f'{self.pk}'
 
     def add_attachment(self, attachment):
         try:
@@ -321,6 +325,11 @@ class ApprovalRequest(TimeStampedModel, StatusModel):
 
     def download_attachment_link(self):
         if not self.attachment:
-            return ''
+            return 'Not Available'
         url = reverse('download-attachment', kwargs={'approval': self.pk})
         return format_html('<a href="{}">Download</a>', url)
+
+    download_attachment_link.short_description = 'Attachment'
+
+    def get_character_link(self):
+        return self.character.get_admin_link()
