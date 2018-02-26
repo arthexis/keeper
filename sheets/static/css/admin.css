@@ -130,3 +130,7 @@ textarea#id_background {
     width: 300px;
 }
 
+#approval_requests-group h2 {
+    color: red;
+}
+

@@ -25,8 +25,8 @@ class SkillSpecialityInline(admin.TabularInline):
 
 class PendingApprovalInline(admin.TabularInline):
     model = ApprovalRequest
-    fields = ('request', 'status', 'created')
-    readonly_fields = ('created', )
+    fields = ('description', 'status', 'created', 'download_attachment_link')
+    readonly_fields = ('created', 'download_attachment_link')
     verbose_name_plural = 'Pending Approvals'
 
     def has_add_permission(self, request):
@@ -35,11 +35,16 @@ class PendingApprovalInline(admin.TabularInline):
     def get_queryset(self, request):
         return super().get_queryset(request).filter(status='pending')
 
+    def download_attachment_link(self, obj=None):
+        return obj.download_attachment_link() if obj else ''
+
+    download_attachment_link.short_description = 'Attachment'
+
 
 class ApprovalLogInline(admin.StackedInline):
     model = ApprovalRequest
-    fields = ('request', 'created', 'modified')
-    readonly_fields = ('created', 'modified', 'request')
+    fields = ('description', 'created', 'modified')
+    readonly_fields = ('created', 'modified', 'description')
     verbose_name_plural = 'Approval History'
 
     def has_add_permission(self, request):
@@ -219,8 +224,8 @@ class CharacterAdmin(SimpleActionsModel):
 @admin.register(ApprovalRequest)
 class ApprovalAdmin(admin.ModelAdmin):
     model = ApprovalRequest
-    fields = ('character', 'request', 'created', )
-    list_display = ('character', 'request', 'created', 'status')
+    fields = ('character', 'description', 'created', )
+    list_display = ('character', 'description', 'created', 'status')
     list_filter = ('status', )
     readonly_fields = ('created', )
     search_fields = ('character', )

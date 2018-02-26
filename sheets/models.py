@@ -1,11 +1,14 @@
 import logging
 import uuid
+import os.path
 
 from django.db.models import Model, CharField, ForeignKey, TextField, PositiveIntegerField, \
     PROTECT, DO_NOTHING, CASCADE, UUIDField, SET_NULL, Manager, BinaryField
 from django.contrib.auth.models import User, Group
 from django.shortcuts import redirect
 from django.conf import settings
+from django.urls import reverse
+from django.utils.html import format_html
 from model_utils import Choices
 from model_utils.managers import InheritanceManager, QueryManager
 from model_utils.models import TimeStampedModel, StatusModel
@@ -217,12 +220,16 @@ class Character(TimeStampedModel, StatusModel):
         return ApprovalRequest.objects.filter(uuid=self.uuid).order_by('character__version')
 
     @classmethod
-    def request_initial_approval(cls, user, domain, template, request=None, attachment=None):
-        obj = cls.objects.create(user=user, template=template, domain=domain)
-        obj.request_approval(request, attachment)
+    def request_initial_approval(cls, user, domain, name, template, description=None, attachment=None):
+        obj = cls.objects.create(name=name, user=user, template=template, domain=domain)
+        approval = obj.request_approval(description, attachment)
+        return obj, approval
 
-    def request_approval(self, request=None, attachment=None):
-        return ApprovalRequest.objects.create(character=self, request=request, attachment=attachment)
+    def request_approval(self, description=None, attachment=None):
+        approval = ApprovalRequest.objects.create(character=self, description=description)
+        if attachment:
+            approval.add_attachment(attachment)
+        return approval
 
 
 class CharacterElement(Model):
@@ -280,10 +287,12 @@ class ApprovalRequest(TimeStampedModel, StatusModel):
         ('complete', 'Complete'),
     )
 
-    character = ForeignKey(Character, DO_NOTHING, related_name='approval_requests')
+    character = ForeignKey(Character, CASCADE, related_name='approval_requests')
     user = ForeignKey(settings.AUTH_USER_MODEL, DO_NOTHING, null=True, related_name='approval_requests')
-    request = TextField('Request Information')
+    description = TextField('Request Information')
     attachment = BinaryField(blank=True)
+    attachment_content_type = CharField(max_length=100, blank=True)
+    attachment_filename = CharField(max_length=256, blank=True)
 
     # Keep track of the character UUID
     uuid = UUIDField(editable=False, db_index=True, null=True)
@@ -294,8 +303,24 @@ class ApprovalRequest(TimeStampedModel, StatusModel):
     def __str__(self):
         return f'{self.character.name} #{self.pk}'
 
+    def add_attachment(self, attachment):
+        try:
+            self.attachment = attachment.read()
+            self.attachment_content_type = attachment.content_type
+            filename, extension = os.path.splitext(attachment.name)
+            self.attachment_filename = f'{self.character.name}{extension}'
+            self.save()
+        except RuntimeError:
+            logger.exception('Problem saving attachment.')
+
     def save(self, **kwargs):
         self.uuid = self.character.uuid
         if not self.user and self.character.user:
             self.user = self.character.user
         super().save(**kwargs)
+
+    def download_attachment_link(self):
+        if not self.attachment:
+            return ''
+        url = reverse('download-attachment', kwargs={'approval': self.pk})
+        return format_html('<a href="{}">Download</a>', url)

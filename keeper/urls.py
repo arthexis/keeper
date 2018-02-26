@@ -8,7 +8,7 @@ from django.contrib import admin
 from core.rest import router
 from core.views import Index, EditMyProfile
 from organization.views import AcceptInvite
-from sheets.views import RequestCharacter
+from sheets.views import RequestCharacter, DownloadAttachment
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +41,7 @@ urlpatterns = [
 
     # Request a new character
     path('request/<int:domain>/', RequestCharacter.as_view(), name='request'),
+    path('attachment/<int:approval>', DownloadAttachment.as_view(), name="download-attachment"),
 
     # Main IndexView (homepage)
     path('', Index.as_view(), name='index'),
