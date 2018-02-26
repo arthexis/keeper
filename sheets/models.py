@@ -135,9 +135,10 @@ class Character(TimeStampedModel, StatusModel):
     def __str__(self):
         return f'[{self.template.game_line.upper()}] {self.name}'
 
-    def get_admin_link(self):
+    def get_admin_link(self, full=False):
         url = reverse('admin:sheets_character_change', kwargs={'object_id': self.pk})
-        return format_html('<a href="{}">{}</a>', url, str(self))
+        name = url if full else str(self)
+        return format_html('<a href="{}">{}</a>', url, name)
 
     # Derived Traits
 
@@ -215,6 +216,7 @@ class Character(TimeStampedModel, StatusModel):
         # When a sheet becomes approved, all other approved sheets for the same character are archived
         if self.status == 'approved':
             self.revisions().filter(status='approved').update(status='archived')
+            self.approval_requests.filter(status='pending').update(status='complete')
         super().save(**kwargs)
 
     def revisions(self):
@@ -331,5 +333,5 @@ class ApprovalRequest(TimeStampedModel, StatusModel):
 
     download_attachment_link.short_description = 'Attachment'
 
-    def get_character_link(self):
-        return self.character.get_admin_link()
+    def get_character_link(self, full=False):
+        return self.character.get_admin_link(full)

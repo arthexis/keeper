@@ -1,6 +1,7 @@
-
-from django.forms import Form, CharField, Textarea, ModelChoiceField, FileField
+from django.core.exceptions import ValidationError
+from django.forms import Form, CharField, Textarea, ModelChoiceField, FileField, ModelForm
 from game_rules.models import CharacterTemplate
+from sheets.models import Character, ApprovalRequest
 
 
 class RequestCharacterForm(Form):
@@ -14,3 +15,12 @@ class RequestCharacterForm(Form):
     description = CharField(
         widget=Textarea(),
         help_text='Please provide additional background or information about your character. Be concise.')
+
+
+class CharacterAdminForm(ModelForm):
+    class Meta:
+        model = Character
+        exclude = []
+
+    def clean(self):
+        pass

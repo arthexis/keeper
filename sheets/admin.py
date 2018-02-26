@@ -1,6 +1,7 @@
 from django.contrib import admin
 from core.admin import SimpleActionsModel
 
+from sheets.forms import CharacterAdminForm
 from game_rules.models import PowerCategory, Power, SplatCategory, Splat
 from sheets.models import ApprovalRequest, Character, CharacterMerit, SkillSpeciality, CharacterPower
 from django.forms.widgets import HiddenInput
@@ -23,32 +24,35 @@ class SkillSpecialityInline(admin.TabularInline):
     verbose_name = 'Speciality'
 
 
-class PendingApprovalInline(admin.TabularInline):
-    model = ApprovalRequest
-    fields = ('description', 'status', 'created', 'download_attachment_link')
-    readonly_fields = ('created', 'download_attachment_link')
-    verbose_name_plural = 'Pending Approvals'
-
-    def has_add_permission(self, request):
-        return False
-
-    def get_queryset(self, request):
-        return super().get_queryset(request).filter(status='pending')
+class BaseApprovalMixin:
 
     def download_attachment_link(self, obj=None):
         return obj.download_attachment_link() if obj else ''
 
+    def has_add_permission(self, request):
+        return False
+
     download_attachment_link.short_description = 'Attachment'
 
 
-class ApprovalLogInline(admin.StackedInline):
+class PendingApprovalInline(BaseApprovalMixin, admin.TabularInline):
     model = ApprovalRequest
-    fields = ('description', 'created', 'modified')
-    readonly_fields = ('created', 'modified', 'description')
-    verbose_name_plural = 'Approval History'
+    fields = ('description', 'created', 'download_attachment_link')
+    readonly_fields = ('created', 'download_attachment_link')
+    verbose_name_plural = 'Pending Approvals'
 
-    def has_add_permission(self, request):
-        return False
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(status='pending')
+
+
+class ApprovalLogInline(BaseApprovalMixin, admin.TabularInline):
+
+    # TODO Add link to view original revision
+
+    model = ApprovalRequest
+    fields = ('description', 'created', 'modified', 'download_attachment_link')
+    readonly_fields = ('created', 'modified', 'description', 'download_attachment_link')
+    verbose_name_plural = 'Approval History'
 
     def get_queryset(self, request):
         return super().get_queryset(request).filter(status='complete')
@@ -77,6 +81,7 @@ class BasePowerInline(ParentInlineMixin):
 @admin.register(Character)
 class CharacterAdmin(SimpleActionsModel):
     model = Character
+    form = CharacterAdminForm
     inlines = (SkillSpecialityInline, MeritInline, )
     fieldsets = (
         (None, {
@@ -223,8 +228,11 @@ class CharacterAdmin(SimpleActionsModel):
 
 @admin.register(ApprovalRequest)
 class ApprovalAdmin(admin.ModelAdmin):
+
+    # TODO Add link to view original revision
+
     model = ApprovalRequest
-    fields = ('get_character_link', 'description', 'created', 'download_attachment_link' )
+    fields = ('character', 'get_character_link', 'description', 'created', 'download_attachment_link' )
     list_display = ('character', 'description', 'created', 'status')
     list_filter = ('status', )
     readonly_fields = ('created', 'get_character_link', 'download_attachment_link')
@@ -232,6 +240,6 @@ class ApprovalAdmin(admin.ModelAdmin):
 
     def get_character_link(self, obj=None):
         if obj:
-            return obj.get_character_link()
+            return obj.get_character_link(full=True)
 
-    get_character_link.short_description = "Character"
+    get_character_link.short_description = "Edit Character link"
