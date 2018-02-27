@@ -43,7 +43,7 @@ class SplatCategoryAdmin(SaveRedirectAdmin, HiddenAdmin):
     fields = ('name', 'character_template', 'flavor', 'is_required', )
 
     def get_save_redirect_url(self, request, obj):
-        return reverse('admin:systems_charactertemplate_change', args=[obj.character_template.pk])
+        return reverse('admin:game_rules_charactertemplate_change', args=[obj.character_template.pk])
 
 
 @admin.register(Merit)

@@ -61,7 +61,11 @@
 
             {% block helptext %}
               {% if view.help_text %}
-                <p id="model-help-text">{{ view.help_text }}</p>
+                <div class="row">
+                  <div class="col-lg-12">
+                    <p id="model-help-text">{{ view.help_text }}</p></div>
+                </div>
+
               {% endif %}
             {% endblock %}
 

@@ -32,6 +32,8 @@ class Index(TemplateView):
         context['approvals'] = approvals = self.request.user.approval_requests
         if not approvals.exists():
             context['new_guide'] = True
+        else:
+            context['pending_approvals'] = approvals.filter(status='pending')
         return context
 
 

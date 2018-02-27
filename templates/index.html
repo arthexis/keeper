@@ -8,6 +8,17 @@
     {% if new_guide %}
       {% include 'new_guide.html' %}
     {% else %}
+
+      <div class="row">
+
+        <div class="col-lg-6">
+          {% if pending_approvals %}
+            {% include 'pending.html' %}
+          {% endif %}
+        </div>
+
+      </div>
+
     {% endif %}
   {% else %}
     <h3>No membership is associated with this account</h3>
