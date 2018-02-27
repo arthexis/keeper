@@ -2,8 +2,8 @@ from django.contrib import admin
 from core.admin import SimpleActionsModel
 
 from sheets.forms import CharacterAdminForm
-from game_rules.models import PowerCategory, Power, SplatCategory, Splat
-from sheets.models import ApprovalRequest, Character, CharacterMerit, SkillSpeciality, CharacterPower
+from game_rules.models import PowerCategory, Power, SplatCategory, Splat, TemplateAnchor
+from sheets.models import ApprovalRequest, Character, CharacterMerit, SkillSpeciality, CharacterPower, CharacterAnchor
 from django.forms.widgets import HiddenInput
 from game_rules.admin import ParentInlineMixin
 from game_rules.fields import DotsField, DotsInput
@@ -60,7 +60,7 @@ class ApprovalLogInline(BaseApprovalMixin, admin.TabularInline):
 
 class BasePowerInline(ParentInlineMixin):
     model = CharacterPower
-    fields = ('power', 'rating', 'details' )
+    fields = ('power', 'rating', 'details')
     readonly_fields = ('category',)
     power_category = None
     verbose_name = None
@@ -72,17 +72,28 @@ class BasePowerInline(ParentInlineMixin):
 
     def get_field_queryset(self, db, db_field, request):
         self.formset.power_category = self.power_category
-        queryset = super().get_field_queryset(db, db_field, request)
         if db_field.name == 'power' and self.parent_obj:
             return Power.objects.filter(power_category=self.power_category)
-        return queryset
+        return super().get_field_queryset(db, db_field, request)
+
+
+class BaseAnchorInline(ParentInlineMixin):
+    model = CharacterAnchor
+    fields = ('template_anchor', 'value')
+    character_template = None
+    extra = 0
+
+    def get_field_queryset(self, db, db_field, request):
+        if db_field.name == 'template_anchor' and self.parent_obj:
+            return TemplateAnchor.objects.filter(character_template=self.character_template)
+        return super().get_field_queryset(db, db_field, request)
 
 
 @admin.register(Character)
 class CharacterAdmin(SimpleActionsModel):
     model = Character
     form = CharacterAdminForm
-    inlines = (SkillSpecialityInline, MeritInline, )
+    inlines = (SkillSpecialityInline, MeritInline,)
     fieldsets = (
         (None, {
             'fields': (
@@ -173,6 +184,11 @@ class CharacterAdmin(SimpleActionsModel):
                 extra_inlines.append(PendingApprovalInline)
             if approvals.filter(status='complete').exists():
                 extra_inlines.append(ApprovalLogInline)
+
+            class AnchorInline(BaseAnchorInline):
+                character_template = obj.template
+
+            extra_inlines.append(AnchorInline)
 
         return tuple(extra_inlines)
 

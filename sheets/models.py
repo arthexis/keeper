@@ -14,7 +14,8 @@ from model_utils.managers import InheritanceManager, QueryManager
 from model_utils.models import TimeStampedModel, StatusModel
 
 from organization.models import Domain
-from game_rules.models import CharacterTemplate, Splat, Power, Merit, SplatCategory, ATTRIBUTE_KEYS, SKILLS, SKILL_KEYS
+from game_rules.models import CharacterTemplate, Splat, Power, Merit, SplatCategory, ATTRIBUTE_KEYS, SKILLS, SKILL_KEYS, \
+    TemplateAnchor
 from game_rules.fields import DotsField
 from keeper.utils import missing
 
@@ -284,6 +285,15 @@ class SkillSpeciality(CharacterElement):
     class Meta:
         verbose_name = "Skill Speciality"
         verbose_name_plural = "Skill Specialities"
+
+
+class CharacterAnchor(CharacterElement):
+    character = ForeignKey(Character, CASCADE, related_name='anchors')
+    template_anchor = ForeignKey(TemplateAnchor, PROTECT, related_name='+')
+    value = TextField()
+
+    class Meta:
+        verbose_name = "Anchor"
 
 
 class ApprovalRequest(TimeStampedModel, StatusModel):

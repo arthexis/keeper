@@ -18,7 +18,7 @@ __all__ = (
     "PowerCategory",
     "Merit",
     "Power",
-    "AnchorCategory",
+    "TemplateAnchor",
 )
 
 ATTRIBUTES = Choices(
@@ -197,17 +197,14 @@ class Power(models.Model):
         return str(self.power_category.character_template.name)
 
 
-class AnchorCategory(models.Model):
+class TemplateAnchor(models.Model):
     name = models.CharField(max_length=20)
     character_template = models.ForeignKey(
-        CharacterTemplate, on_delete=models.CASCADE, related_name='anchor_categories')
-    is_required = models.BooleanField(default=False)
-    description = models.TextField()
+        CharacterTemplate, on_delete=models.CASCADE, related_name='template_anchors')
 
     class Meta:
-        verbose_name = "Anchor Category"
-        verbose_name_plural = "Anchor Categories"
+        verbose_name = "Template Anchor"
+        verbose_name_plural = "Template Anchors"
 
     def __str__(self):
         return str(self.name)
-

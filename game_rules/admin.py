@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import reverse
 
-from game_rules.models import Splat, SplatCategory, Merit, Power, PowerCategory, CharacterTemplate
+from game_rules.models import Splat, SplatCategory, Merit, Power, PowerCategory, CharacterTemplate, TemplateAnchor
 from core.admin import SaveRedirectAdmin, HiddenAdmin
 
 
@@ -83,8 +83,15 @@ class PowerCategoryAdmin(SaveRedirectAdmin, HiddenAdmin):
 
 class PowerCategoryInline(admin.TabularInline):
     model = PowerCategory
-    fields = ('name', 'power_names', )
-    readonly_fields = ('power_names', )
+    fields = ('name', 'power_names',)
+    readonly_fields = ('power_names',)
+    extra = 0
+    show_change_link = True
+
+
+class TemplateAnchorInline(admin.TabularInline):
+    model = TemplateAnchor
+    fields = ('name', )
     extra = 0
     show_change_link = True
 
@@ -107,5 +114,5 @@ class TemplateAdmin(admin.ModelAdmin):
             'fields': ('reference_code',)
         })
     )
-    inlines = (SplatCategoryInline, PowerCategoryInline)
+    inlines = (SplatCategoryInline, PowerCategoryInline, TemplateAnchorInline)
     prepopulated_fields = {'reference_code': ('name', 'game_line')}
