@@ -133,7 +133,7 @@ class CharacterAdmin(SimpleActionsModel):
         }),
         ('Information', {
             'fields': (
-                'background', 'alt_names',
+                'storyteller_notes', 'player_notes',
             ),
         }),
     )

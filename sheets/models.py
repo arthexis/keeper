@@ -27,6 +27,7 @@ __all__ = (
     "Character",
     "CharacterMerit",
     "CharacterPower",
+    "CharacterAnchor",
     "SkillSpeciality",
 )
 
@@ -45,8 +46,8 @@ class Character(TimeStampedModel, StatusModel):
     template = ForeignKey(CharacterTemplate, CASCADE, null=True)
     power_stat = DotsField(default=1, clear=False)
     integrity = DotsField(default=7)
-    background = TextField(blank=True)
-    alt_names = CharField("Other Names", max_length=500, blank=True)
+    storyteller_notes = TextField(blank=True, help_text="Hidden from player.")
+    player_notes = TextField(blank=True, help_text="Visible in player sheet.")
     resource = PositiveIntegerField(default=10, blank=True, null=True)
     resource_max = PositiveIntegerField(default=10, blank=True, null=True)
     concept = CharField(max_length=200, blank=True)
@@ -294,6 +295,9 @@ class CharacterAnchor(CharacterElement):
 
     class Meta:
         verbose_name = "Anchor"
+
+    def __str__(self):
+        return str(self.template_anchor.name)
 
 
 class ApprovalRequest(TimeStampedModel, StatusModel):
