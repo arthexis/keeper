@@ -118,7 +118,7 @@ class CharacterAdmin(SimpleActionsModel):
         }),
         ('Advantages', {
             'fields': (
-                ('integrity', 'power_stat', 'resource',),
+                ('integrity', 'power_stat', 'resource_max',),
             ),
         }),
         ('Information', {
@@ -138,8 +138,9 @@ class CharacterAdmin(SimpleActionsModel):
         DotsField: {'widget': DotsInput}
     }
     rename_traits = (
-        'power_stat', 'integrity', 'resource', 'primary_anchor',
+        'power_stat', 'integrity', 'primary_anchor',
         'secondary_anchor', 'character_group',
+        ('resource_max', 'resource_name', lambda x: f'{x} Capacity')
     )
     change_form_template = 'sheets/change_form.html'
     change_actions = (
@@ -186,6 +187,7 @@ class CharacterAdmin(SimpleActionsModel):
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
         if obj is not None:
+
             # Rename splats and filter their choices
             for flavor, flavor_text in SplatCategory.FLAVORS:
                 field = form.base_fields[flavor + '_splat']
@@ -197,10 +199,16 @@ class CharacterAdmin(SimpleActionsModel):
                         field.required = True
                 except SplatCategory.DoesNotExist:
                     field.widget = HiddenInput()
+
             # Modify other template specific labels
             if obj.template:
                 for trait in self.rename_traits:
-                    label = getattr(obj.template, "{}_name".format(trait))
+                    if isinstance(trait, str):
+                        trait_name = f'{trait}_name'
+                        label = getattr(obj.template, trait_name)
+                    else:
+                        trait, trait_name, func = trait
+                        label = func(getattr(obj.template, trait_name))
                     if label:
                         form.base_fields[trait].label = label
                     else:

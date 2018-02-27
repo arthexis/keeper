@@ -114,7 +114,6 @@ class Character(TimeStampedModel, StatusModel):
     aggravated_damage = PositiveIntegerField(default=0)
     willpower_points_spent = PositiveIntegerField(default=0)
     willpower_dots_spent = PositiveIntegerField(default=0)
-    supernatural_energy = PositiveIntegerField(default=0)
     extra_health_levels = PositiveIntegerField(default=0)
 
     # Character Anchors (ie. Virtue / Vice)
