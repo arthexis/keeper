@@ -82,11 +82,10 @@ class BaseAnchorInline(ParentInlineMixin):
     fields = ('template_anchor', 'value')
     character_template = None
     extra = 0
+    field_querysets = ('template_anchor', )
 
-    def get_field_queryset(self, db, db_field, request):
-        if db_field.name == 'template_anchor' and self.parent_obj:
-            return TemplateAnchor.objects.filter(character_template=self.character_template)
-        return super().get_field_queryset(db, db_field, request)
+    def get_template_anchor_queryset(self, request, qs=None):
+        return TemplateAnchor.objects.filter(character_template=self.character_template)
 
 
 @admin.register(Character)

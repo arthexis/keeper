@@ -6,6 +6,8 @@ from core.admin import SaveRedirectAdmin, HiddenAdmin
 
 
 class ParentInlineMixin(admin.TabularInline):
+    field_querysets = []
+
     def __init__(self, parent_mode, admin_site):
         super().__init__(parent_mode, admin_site)
         self.parent_obj = None
@@ -13,6 +15,14 @@ class ParentInlineMixin(admin.TabularInline):
     def get_formset(self, request, obj=None, **kwargs):
         self.parent_obj = obj
         return super().get_formset(request, obj, **kwargs)
+
+    def get_field_queryset(self, db, db_field, request):
+        qs = super().get_field_queryset(db, db_field, request)
+        if self.parent_obj:
+            for target in self.field_querysets:
+                if db_field.name == target:
+                    return getattr(self, f'get_{target}_queryset')(request, qs=None)
+        return qs
 
 
 class SplatInline(admin.TabularInline):

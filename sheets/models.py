@@ -14,8 +14,8 @@ from model_utils.managers import InheritanceManager, QueryManager
 from model_utils.models import TimeStampedModel, StatusModel
 
 from organization.models import Domain
-from game_rules.models import CharacterTemplate, Splat, Power, Merit, SplatCategory, ATTRIBUTE_KEYS, SKILLS, SKILL_KEYS, \
-    TemplateAnchor
+from game_rules.models import CharacterTemplate, Splat, Power, Merit, SplatCategory, \
+    ATTRIBUTE_KEYS, SKILLS, SKILL_KEYS, TemplateAnchor
 from game_rules.fields import DotsField
 from keeper.utils import missing
 
@@ -255,13 +255,13 @@ class CharacterMerit(CharacterElement):
         verbose_name = "Merit"
 
     def __str__(self):
-        return f'{self.merit.name} self.rating'
+        return f'{self.merit.name} {self.rating}'
 
 
 class CharacterPower(CharacterElement):
     character = ForeignKey(Character, CASCADE, related_name='powers')
     power = ForeignKey(Power, PROTECT, related_name='+')
-    rating = DotsField(default=1, clear=False)
+    rating = DotsField(default=1, circles=5, clear=False)
     details = CharField(max_length=200, blank=True)
 
     class Meta:
