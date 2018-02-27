@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import FormView
+from django.views.generic import FormView, DeleteView
 
 from .models import Character, ApprovalRequest
 from organization.models import Domain

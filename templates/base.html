@@ -2,81 +2,80 @@
 
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Keeper</title>
-    {% bootstrap_css %}
-    <link rel="stylesheet" type="text/css" href="{% static 'css/site.css' %}">
-    {% block extrastyle %}{% endblock %}
-    <script
-        src="https://code.jquery.com/jquery-3.2.1.min.js"
-        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
-        crossorigin="anonymous"></script>
-    {% bootstrap_javascript %}
-    {% block extrahead %}
-      {% if not user.is_authenticated %}
-        {% providers_media_js %}
-      {% endif %}
-    {% endblock %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Keeper</title>
+  {% bootstrap_css %}
+  <link rel="stylesheet" type="text/css" href="{% static 'css/site.css' %}">
+  {% block extrastyle %}{% endblock %}
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"
+    integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+    crossorigin="anonymous"></script>
+  {% bootstrap_javascript %}
+  {% block extrahead %}
+    {% if not user.is_authenticated %}
+      {% providers_media_js %}
+    {% endif %}
+  {% endblock %}
 </head>
 <body>
-    <div id="content" class="container">{% block body %}
-        {% if user.is_authenticated %}
+<div id="content" class="container">{% block body %}
+  {% if user.is_authenticated %}
 
-            {% block navbar %}
-                {% include 'navbar.html' %}
-            {% endblock %}
-            {% block messages %}
-                {% bootstrap_messages %}
-            {% endblock %}
+    {% block navbar %}
+      {% include 'navbar.html' %}
+    {% endblock %}
+    {% block messages %}
+      {% bootstrap_messages %}
+    {% endblock %}
 
-            {% block header %}
-              <div class="row">
-                <div class="col-lg-6 col-sm12">
-                  <h1 class="content-title">
-                    {% block actiontitle %}
-                      {% if view.title %}
-                        {{ view.title }}
-                      {% elif view.model_name %}
-                        {% if object %}
-                          <h1>Edit {{ view.model_name }}</h1>
-                        {% else %}
-                          <h1>Create {{ view.model_name }}</h1>
-                        {% endif %}
-                      {% endif %}
-                    {% endblock %}
-                  </h1>
-                </div>
-                <div class="col-lg-6 col-sm12 chapter-header">
-                  {% block memberhead %}
-                    {% if membership %}
-                      {{ membership.chapter.name }}
-                    {% else %}
-
-                    {% endif %}
-                  {% endblock %}
-                </div>
-              </div>
-            {% endblock %}
-
-            {% block helptext %}
-              {% if view.help_text %}
-                <div class="row">
-                  <div class="col-lg-12">
-                    <p id="model-help-text">{{ view.help_text }}</p></div>
-                </div>
-
+    {% block header %}
+      <div class="row">
+        <div class="col-lg-6 col-sm12">
+          <h1 class="content-title">
+            {% block actiontitle %}
+              {% if view.title %}
+                {{ view.title }}
+              {% elif view.model_name %}
+                {% if object %}
+                  <h1>Edit {{ view.model_name }}</h1>
+                {% else %}
+                  <h1>Create {{ view.model_name }}</h1>
+                {% endif %}
               {% endif %}
             {% endblock %}
+          </h1>
+        </div>
+        <div class="col-lg-6 col-sm12 chapter-header">
+          {% block memberhead %}
+            {% if membership %}
+              {{ membership.chapter.name }}
+            {% else %}
 
-            <hr>
-            {% block content %}{% endblock %}
+            {% endif %}
+          {% endblock %}
+        </div>
+      </div>
+    {% endblock %}
 
-        {% else %}{# Not Authenticated #}
-            <p>
-            <a href="{% url 'account_login' %}">Please login or signup here.</a>
-            </p>
-        {% endif %}
-    {% endblock %}</div>
+    {% block helptext %}
+      {% if view.help_text %}
+        <div class="row">
+          <div class="col-lg-12">
+            <p id="model-help-text">{{ view.help_text }}</p></div>
+        </div>
+
+      {% endif %}
+    {% endblock %}
+
+    <hr>
+    {% block content %}{% endblock %}
+
+    {% else %}{# Not Authenticated #}
+    <p>
+      <a href="{% url 'account_login' %}">Please login or signup here.</a>
+    </p>
+  {% endif %}
+{% endblock %}</div>
 </body>
 </html>

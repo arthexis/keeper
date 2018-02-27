@@ -9,7 +9,6 @@ from django.shortcuts import redirect
 from django.conf import settings
 from django.urls import reverse
 from django.utils.html import format_html
-from django_extensions.db.fields import AutoSlugField
 from model_utils import Choices
 from model_utils.managers import InheritanceManager, QueryManager
 from model_utils.models import TimeStampedModel, StatusModel

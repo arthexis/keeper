@@ -79,7 +79,3 @@ if settings.SITE_ID == 1:
     except (OperationalError, ProgrammingError):
         # This happens when the app starts before running migrations, just skip it
         pass
-
-
-
-
