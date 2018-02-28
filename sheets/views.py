@@ -9,7 +9,7 @@ from django.views import View
 from django.views.generic import FormView, DeleteView
 
 from .models import Character, ApprovalRequest
-from organization.models import Domain
+from organization.models import Chronicle
 from .forms import RequestCharacterForm
 
 logger = logging.getLogger(__name__)
@@ -29,11 +29,11 @@ class RequestCharacter(FormView):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.domain = None
+        self.chronicle = None
 
     def dispatch(self, request, *args, **kwargs):
-        self.domain = get_object_or_404(Domain, pk=kwargs.get('domain'))
-        if not self.domain.is_member(request.user):
+        self.chronicle = get_object_or_404(Chronicle, pk=kwargs.get('chronicle'))
+        if not self.chronicle.is_member(request.user):
             raise PermissionDenied()
         return super().dispatch(request, *args, **kwargs)
 
@@ -45,7 +45,7 @@ class RequestCharacter(FormView):
         try:
             Character.request_initial_approval(
                 user=self.request.user,
-                domain=self.domain,
+                chronicle=self.chronicle,
                 name=form.cleaned_data['character_name'],
                 template=form.cleaned_data['character_template'],
                 description=form.cleaned_data['description'],

@@ -22,7 +22,7 @@ class AcceptInvite(RedirectView):
             return reverse('account_login')
 
         session = self.request.session
-        session['chapter'] = invitation.chapter.name
+        session['organization'] = invitation.organization.name
         session['invite_code'] = invitation.code
         session['invite_email'] = invitation.email_address
         return reverse('account_signup')

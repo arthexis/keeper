@@ -14,10 +14,10 @@
 {% endblock %}
 
 {% block formactions %}
-  {% if request.session.chapter %}
+  {% if request.session.organization %}
     <br>
     <h4 style="text-align: center;">
-      <strong>Chapter: </strong> {{ request.session.chapter }}
+      <strong>organization: </strong> {{ request.session.organization }}
     </h4>
   {% endif %}
 

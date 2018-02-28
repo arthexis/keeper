@@ -40,7 +40,7 @@ urlpatterns = [
     path('join/<str:code>/', AcceptInvite.as_view(), name='accept_invite'),
 
     # Request a new character
-    path('request/<int:domain>/', RequestCharacter.as_view(), name='request'),
+    path('request/<int:chronicle>/', RequestCharacter.as_view(), name='request'),
     path('attachment/<int:approval>', DownloadAttachment.as_view(), name="download-attachment"),
 
     # Main IndexView (homepage)

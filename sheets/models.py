@@ -13,7 +13,7 @@ from model_utils import Choices
 from model_utils.managers import InheritanceManager, QueryManager
 from model_utils.models import TimeStampedModel, StatusModel
 
-from organization.models import Domain
+from organization.models import Chronicle
 from game_rules.models import CharacterTemplate, Splat, Power, Merit, SplatCategory, \
     ATTRIBUTE_KEYS, SKILLS, SKILL_KEYS, TemplateAnchor
 from game_rules.fields import DotsField
@@ -108,7 +108,7 @@ class Character(TimeStampedModel, StatusModel):
 
     # Organization related fields
     user = ForeignKey(settings.AUTH_USER_MODEL, SET_NULL, null=True, blank=True, related_name='characters')
-    domain = ForeignKey(Domain, SET_NULL, null=True, blank=True, related_name='characters')
+    chronicle = ForeignKey(Chronicle, SET_NULL, null=True, blank=True, related_name='characters')
 
     # Tracking of spent resources
     bashing_damage = PositiveIntegerField(default=0)
@@ -227,8 +227,8 @@ class Character(TimeStampedModel, StatusModel):
         return ApprovalRequest.objects.filter(uuid=self.uuid).order_by('character__version')
 
     @classmethod
-    def request_initial_approval(cls, user, domain, name, template, description=None, attachment=None):
-        obj = cls.objects.create(name=name, user=user, template=template, domain=domain)
+    def request_initial_approval(cls, user, chronicle, name, template, description=None, attachment=None):
+        obj = cls.objects.create(name=name, user=user, template=template, chronicle=chronicle)
         approval = obj.request_approval(description, attachment)
         return obj, approval
 

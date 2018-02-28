@@ -1,7 +1,7 @@
 from rest_framework import routers, serializers, viewsets
 from rest_framework.relations import StringRelatedField
 
-from organization.models import Chapter
+from organization.models import Organization
 from sheets.models import Character
 from game_rules.models import Merit
 
@@ -29,9 +29,9 @@ class MeritSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('name',)
 
 
-class ChapterSerializer(serializers.HyperlinkedModelSerializer):
+class organizationSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Chapter
+        model = Organization
         fields = ('name', 'rules_url')
 
 
@@ -48,13 +48,13 @@ class MeritViewSet(viewsets.ModelViewSet):
     serializer_class = MeritSerializer
 
 
-class ChapterViewSet(viewsets.ModelViewSet):
-    queryset = Chapter.objects.all()
-    serializer_class = ChapterSerializer
+class organizationViewSet(viewsets.ModelViewSet):
+    queryset = Organization.objects.all()
+    serializer_class = organizationSerializer
 
 
 router = routers.DefaultRouter()
 router.register(r'character', CharacterViewSet)
 router.register(r'merit', MeritViewSet)
-router.register(r'chapter', ChapterViewSet)
+router.register(r'organization', organizationViewSet)
 

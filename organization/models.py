@@ -15,8 +15,8 @@ from model_utils.models import StatusModel, TimeStampedModel, TimeFramedModel
 logger = logging.getLogger(__name__)
 
 __all__ = (
-    'Chapter',
-    'Domain',
+    'Organization',
+    'Chronicle',
     'Membership',
     'Prestige',
     'PrestigeReport',
@@ -25,9 +25,8 @@ __all__ = (
 )
 
 
-class Organization(Model):
-    name = CharField(
-        max_length=200, help_text="Required. Must be unique.", unique=True)
+class BaseOrganization(Model):
+    name = CharField(max_length=200, help_text="Required. Must be unique.", unique=True)
 
     class Meta:
         abstract = True
@@ -36,48 +35,44 @@ class Organization(Model):
         return f'{self.name}'
 
 
-class Chapter(Organization):
+class Organization(BaseOrganization):
 
-    # Chapters represent regional play organizations with multiple domains
-    # Prestige is granted at Chapter level
+    # organizations represent regional play organizations with multiple chronicles
+    # Prestige is granted at organization level
 
-    site = ForeignKey(Site, DO_NOTHING, related_name='chapters', null=True)  # Django Site
-    rules_url = URLField('Rules URL', blank=True, help_text='URL pointing to the Chapter rules document.')
+    site = ForeignKey(Site, DO_NOTHING, related_name='organizations', null=True)  # Django Site
+    rules_url = URLField('Rules URL', blank=True, help_text='URL pointing to the organization rules document.')
     reference_code = AutoSlugField(populate_from='name')
     prestige_cutoff = DateField(blank=True, null=True)
 
     class Meta:
-        verbose_name = 'Chapter'
-        verbose_name_plural = 'Chapters and Domains'
+        verbose_name = 'Organization'
 
     def get_membership(self, user):
         return self.memberships.get(user=user)
 
 
-class Domain(Organization):
+class Chronicle(BaseOrganization):
 
-    # Domains represent one or more venues sharing the same fictional universe
-    # Characters are approved at Domain level
+    # chronicles represent one or more venues sharing the same fictional universe
+    # Characters are approved at chronicle level
 
-    rules_url = URLField('Rules URL', blank=True, help_text='URL pointing to the Domain game and approval rules.')
-    chronicle_name = CharField(max_length=100, blank=True)
-    chapter = ForeignKey('Chapter', CASCADE, related_name='domains')
+    rules_url = URLField('Rules URL', blank=True, help_text='URL pointing to the chronicle game and approval rules.')
+    organization = ForeignKey('Organization', CASCADE, related_name='chronicles')
     short_description = TextField(blank=True)
-    reference_code = AutoSlugField(populate_from=('name', 'chapter__name'))
+    reference_code = AutoSlugField(populate_from=('name', 'organization__name'))
 
     class Meta:
-        verbose_name = 'Domain'
+        verbose_name = 'Chronicle'
 
     def __str__(self):
-        return f'{self.name} ({self.chapter})'
+        return f'{self.name} ({self.organization})'
 
     def name_and_chronicle(self):
-        if self.chronicle_name:
-            return f'{self.name}: {self.chronicle_name}'
         return str(self.name)
 
     def is_member(self, user):
-        return Membership.objects.filter(chapter=self.chapter, user=user).exists()
+        return Membership.objects.filter(organization=self.organization, user=user).exists()
 
 
 class Membership(TimeStampedModel, StatusModel):
@@ -91,7 +86,7 @@ class Membership(TimeStampedModel, StatusModel):
     )
 
     user = ForeignKey(settings.AUTH_USER_MODEL, CASCADE, related_name="memberships")
-    chapter = ForeignKey(Chapter, CASCADE, related_name="memberships")
+    organization = ForeignKey(Organization, CASCADE, related_name="memberships")
     title = CharField(max_length=20, choices=TITLES, blank=True)
     external_id = CharField(max_length=20, blank=True, verbose_name='External ID')
 
@@ -103,8 +98,8 @@ class Membership(TimeStampedModel, StatusModel):
     coordinators = QueryManager(title='coordinator')
 
     class Meta:
-        unique_together = ('user', 'chapter',)
-        ordering = ('chapter__name', 'user__username')
+        unique_together = ('user', 'organization',)
+        ordering = ('organization__name', 'user__username')
 
     def __str__(self):
         return f'#{self.external_id or self.pk} {self.user}'
@@ -114,20 +109,22 @@ class Membership(TimeStampedModel, StatusModel):
         self.prestige_total = total
         try:
             self.prestige_level = PrestigeLevel.objects.filter(
-                chapter=self.chapter, prestige_required__lte=total).order_by('-prestige_required').first()
+                organization=self.organization, prestige_required__lte=total).order_by('-prestige_required').first()
         except PrestigeLevel.DoesNotExist:
             logger.error(f'Missing prestige level for total >= {total}')
         self.save()
 
 
-class PrestigeReport(TimeFramedModel):
-    chapter = ForeignKey('Chapter', CASCADE, related_name='prestige')
+class PrestigeReport(Model):
+    organization = ForeignKey('Organization', CASCADE, related_name='prestige')
+    start = DateField()
+    end = DateField()
 
     class Meta:
         verbose_name = 'Prestige Report'
 
     def __str__(self):
-        return f'Prestige {self.chapter} {self.start}'
+        return f'Prestige {self.organization} {self.start}'
 
 
 class Prestige(TimeStampedModel):
@@ -138,6 +135,7 @@ class Prestige(TimeStampedModel):
 
     class Meta:
         verbose_name = 'Prestige Line'
+        unique_together = ('report', 'membership')
 
     def __str__(self):
         return f'{self.membership} +{self.amount}'
@@ -150,12 +148,12 @@ class Prestige(TimeStampedModel):
 class PrestigeLevel(Model):
     level = CharField(max_length=40)
     prestige_required = PositiveSmallIntegerField()
-    chapter = ForeignKey(Chapter, CASCADE, related_name='prestige_levels')
+    organization = ForeignKey(Organization, CASCADE, related_name='prestige_levels')
 
     class Meta:
         verbose_name = 'Prestige Level'
         ordering = ('prestige_required', )
-        unique_together = ('chapter', 'level')
+        unique_together = ('organization', 'level')
 
     def __str__(self):
         return str(self.level)
@@ -167,7 +165,7 @@ class PrestigeLevel(Model):
 
 
 class Invitation(TimeStampedModel):
-    chapter = ForeignKey(Chapter, CASCADE, related_name='invitations')
+    organization = ForeignKey(Organization, CASCADE, related_name='invitations')
     code = RandomCharField(length=8, unique=True)
     is_accepted = BooleanField(default=False)
     external_id = CharField(max_length=20, blank=True, verbose_name='External ID')
@@ -184,11 +182,12 @@ class Invitation(TimeStampedModel):
     def redeem(cls, user):
         invitations = cls.objects.filter(email_address=user.email, is_accepted=True)
         for inv in invitations:
-            Membership.objects.create(user=user, chapter=inv.chapter, external_id=inv.external_id, status='active')
+            Membership.objects.create(
+                user=user, organization=inv.organization, external_id=inv.external_id, status='active')
         invitations.delete()
 
     def invite_link(self):
-        if self.code and self.chapter.site:
+        if self.code and self.organization.site:
             path = reverse('accept_invite', args=[self.code])
-            url = f'{self.chapter.site.domain}{path}'
+            url = f'{self.organization.site.domain}{path}'
             return format_html(f'<a href="{url}">{url}</a>')

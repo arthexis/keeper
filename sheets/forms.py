@@ -6,7 +6,7 @@ from sheets.models import Character, ApprovalRequest
 
 class RequestCharacterForm(Form):
     character_name = CharField(
-        help_text='Your character name or alias. Please ensure it complies with Domain rules.')
+        help_text='Your character name or alias. Please ensure it complies with chronicle rules.')
     character_template = ModelChoiceField(
         queryset=CharacterTemplate.objects.all(),
         help_text='This will determine which Storyteller team will approve your request.')

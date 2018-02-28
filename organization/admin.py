@@ -2,13 +2,13 @@ from django.contrib import admin
 
 from core.admin import SimpleActionsModel
 from core.models import UserProfile
-from organization.models import Prestige, Membership, Domain, Chapter, PrestigeReport, PrestigeLevel, Invitation
+from organization.models import Prestige, Membership, Chronicle, Organization, PrestigeReport, PrestigeLevel, Invitation
 from keeper.utils import missing
 
 
 class ProfileMemberInline(admin.TabularInline):
     model = Membership
-    fields = ('chapter', 'title', 'status', 'external_id', 'prestige_level')
+    fields = ('organization', 'title', 'status', 'external_id', 'prestige_level')
     readonly_fields = ('prestige_level', )
     extra = 0
 
@@ -22,16 +22,16 @@ class ProfileAdmin(SimpleActionsModel):
     change_actions = ('change_password',)
 
 
-class ChapterMemberInline(admin.TabularInline):
+class OrganizationMemberInline(admin.TabularInline):
     model = Membership
     fields = ('user', 'title', 'status', 'external_id', 'prestige_level')
     readonly_fields = ('prestige_level',)
     extra = 1
 
 
-class DomainInline(admin.StackedInline):
-    model = Domain
-    fields = ('name', 'rules_url', 'chronicle_name', 'short_description')
+class ChronicleInline(admin.StackedInline):
+    model = Chronicle
+    fields = ('name', 'rules_url', 'short_description')
     extra = 0
     min_num = 1
 
@@ -55,16 +55,16 @@ class InviteInline(admin.TabularInline):
         return obj.invite_link()
 
 
-@admin.register(Chapter)
-class ChapterAdmin(admin.ModelAdmin):
-    model = Domain
-    inlines = (DomainInline, PrestigeLevelInline, ChapterMemberInline, InviteInline)
+@admin.register(Organization)
+class OrganizationAdmin(admin.ModelAdmin):
+    model = Chronicle
+    inlines = (ChronicleInline, PrestigeLevelInline, OrganizationMemberInline, InviteInline)
     fields = ('name', 'rules_url', 'site')
-    list_display = ('name', 'rules_url', 'domains')
+    list_display = ('name', 'rules_url', 'chronicles')
 
-    def domains(self, obj: Chapter =None):
+    def chronicles(self, obj: Organization =None):
         if obj:
-            return ','.join(obj.domains.values_list('name', flat=True))
+            return ','.join(obj.chronicles.values_list('name', flat=True))
 
 
 class ReportPrestigeInline(admin.TabularInline):
@@ -78,7 +78,7 @@ class ReportPrestigeInline(admin.TabularInline):
 class PrestigeReport(admin.ModelAdmin):
     model = PrestigeReport
     inlines = (ReportPrestigeInline,)
-    fields = ('chapter', 'start', 'end')
+    fields = ('organization', 'start', 'end')
 
 
 

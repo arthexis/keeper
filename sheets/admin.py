@@ -97,7 +97,7 @@ class CharacterAdmin(SimpleActionsModel):
         (None, {
             'fields': (
                 ('name', 'template', 'status'),
-                ('user', 'domain', 'version'),
+                ('user', 'chronicle', 'version'),
             ),
         }),
         ('Template', {
@@ -137,7 +137,7 @@ class CharacterAdmin(SimpleActionsModel):
             ),
         }),
     )
-    list_display = ('name', 'template', 'user', 'domain', 'status')
+    list_display = ('name', 'template', 'user', 'chronicle', 'status')
     list_filter = ('template', )
     search_fields = ('name', 'user')
     readonly_fields = (
