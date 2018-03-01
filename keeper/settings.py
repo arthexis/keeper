@@ -318,6 +318,10 @@ SEED_DATA_SERIALIZERS = {
     },
     'Merits': {
         'model': 'game_rules.models.Merit',
+    },
+    'Organizations': {
+        'model': 'organization.models.Organization',
+        'exclude': ('prestige_reports', 'invitations', 'memberships')
     }
 }
 
@@ -333,6 +337,7 @@ SEED_DATA_PLAN = {
         'werewolf-wtf',
     ),
     'Merits': (lambda obj: True),
+    'Organizations': (lambda obj: True),
 }
 
 # Directory that will store the seed data

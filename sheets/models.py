@@ -3,7 +3,7 @@ import uuid
 import os.path
 
 from django.db.models import Model, CharField, ForeignKey, TextField, PositiveIntegerField, \
-    PROTECT, DO_NOTHING, CASCADE, UUIDField, SET_NULL, Manager, BinaryField
+    PROTECT, DO_NOTHING, CASCADE, UUIDField, SET_NULL, Manager, BinaryField, PositiveSmallIntegerField
 from django.contrib.auth.models import User, Group
 from django.shortcuts import redirect
 from django.conf import settings
@@ -16,7 +16,7 @@ from model_utils.models import TimeStampedModel, StatusModel
 from organization.models import Chronicle
 from game_rules.models import CharacterTemplate, Splat, Power, Merit, SplatCategory, \
     ATTRIBUTE_KEYS, SKILLS, SKILL_KEYS, TemplateAnchor
-from game_rules.fields import DotsField
+from game_rules.fields import DotsField, BoxesField
 from keeper.utils import missing
 
 logger = logging.getLogger(__name__)
@@ -47,8 +47,8 @@ class Character(TimeStampedModel, StatusModel):
     power_stat = DotsField(default=1, clear=False)
     integrity = DotsField(default=7)
     storyteller_notes = TextField(blank=True, help_text="Hidden from player.")
-    player_notes = TextField(blank=True, help_text="Visible in player sheet.")
-    resource = PositiveIntegerField(default=10, blank=True, null=True)
+    player_notes = TextField(blank=True, help_text="Shown in player sheet.")
+    resource_start = PositiveIntegerField(default=10, blank=True, null=True)
     resource_max = PositiveIntegerField(default=10, blank=True, null=True)
     concept = CharField(max_length=200, blank=True)
     faction = CharField(max_length=200, blank=True)
@@ -70,34 +70,39 @@ class Character(TimeStampedModel, StatusModel):
     composure = DotsField(default=1, clear=False)
 
     # Mental Skills
-    academics = DotsField(circles=5)
-    computer = DotsField(circles=5)
-    crafts = DotsField(circles=5)
-    investigation = DotsField(circles=5)
-    medicine = DotsField(circles=5)
-    occult = DotsField(circles=5)
-    politics = DotsField(circles=5)
-    science = DotsField(circles=5)
+    academics = DotsField(number=5)
+    computer = DotsField(number=5)
+    crafts = DotsField(number=5)
+    investigation = DotsField(number=5)
+    medicine = DotsField(number=5)
+    occult = DotsField(number=5)
+    politics = DotsField(number=5)
+    science = DotsField(number=5)
 
     # Physical Skills
-    athletics = DotsField(circles=5)
-    brawl = DotsField(circles=5)
-    drive = DotsField(circles=5)
-    firearms = DotsField(circles=5)
-    larceny = DotsField(circles=5)
-    stealth = DotsField(circles=5)
-    survival = DotsField(circles=5)
-    weaponry = DotsField(circles=5)
+    athletics = DotsField(number=5)
+    brawl = DotsField(number=5)
+    drive = DotsField(number=5)
+    firearms = DotsField(number=5)
+    larceny = DotsField(number=5)
+    stealth = DotsField(number=5)
+    survival = DotsField(number=5)
+    weaponry = DotsField(number=5)
 
     # Social Skills
-    animal_ken = DotsField(circles=5)
-    empathy = DotsField(circles=5)
-    expression = DotsField(circles=5)
-    intimidation = DotsField(circles=5)
-    persuasion = DotsField(circles=5)
-    socialize = DotsField(circles=5)
-    streetwise = DotsField(circles=5)
-    subterfuge = DotsField(circles=5)
+    animal_ken = DotsField(number=5)
+    empathy = DotsField(number=5)
+    expression = DotsField(number=5)
+    intimidation = DotsField(number=5)
+    persuasion = DotsField(number=5)
+    socialize = DotsField(number=5)
+    streetwise = DotsField(number=5)
+    subterfuge = DotsField(number=5)
+
+    # Other traits
+    size = PositiveSmallIntegerField(default=5)
+    speed = PositiveSmallIntegerField(default=0)
+    initiative = PositiveSmallIntegerField(default=0)
 
     # Splat foreign Keys
     primary_splat = ForeignKey(Splat, PROTECT, related_name='+', null=True, blank=True)
@@ -114,9 +119,8 @@ class Character(TimeStampedModel, StatusModel):
     bashing_damage = PositiveIntegerField(default=0)
     lethal_damage = PositiveIntegerField(default=0)
     aggravated_damage = PositiveIntegerField(default=0)
-    willpower_points_spent = PositiveIntegerField(default=0)
-    willpower_dots_spent = PositiveIntegerField(default=0)
-    extra_health_levels = PositiveIntegerField(default=0)
+    willpower = DotsField()
+    health = DotsField(number=20, break_after=10)
 
     # Character Anchors (ie. Virtue / Vice)
     primary_anchor = CharField(max_length=40, blank=True)
@@ -143,23 +147,11 @@ class Character(TimeStampedModel, StatusModel):
 
     # Derived Traits
 
-    def speed(self):
-        return 5 + self.strength + self.dexterity
-
-    def initiative(self):
-        return self.dexterity + self.composure
-
     def defense(self):
         return min((self.dexterity, self.wits)) + self.defense_skill()
 
     def defense_skill(self):
         return self.athletics
-
-    def willpower_dots(self):
-        return (self.resolve + self.composure) - self.willpower_dots_spent
-
-    def health_levels(self):
-        return 5 + self.stamina + self.extra_health_levels
 
     # Retrieve related or summarized values
 
@@ -214,6 +206,18 @@ class Character(TimeStampedModel, StatusModel):
         return redirect('admin:sheets_character_change', object_id=self.pk)
 
     def save(self, **kwargs):
+
+        # TODO Create automatic first approval when creating the sheet in the admin
+
+        # Automatically calculate empty advantage fields
+        self.size = self.size or 5
+        self.speed = self.speed or (5 + self.strength + self.dexterity)
+        self.initiative = self.initiative or (self.dexterity + self.composure)
+        self.resource_max = self.resource_max or 8 + (self.resource_max * 2)
+        self.resource_start = self.resource_start or self.resource_start // 2
+        self.health = self.health or self.size + self.stamina
+        self.willpower = self.willpower or self.resolve + self.composure
+
         # When a sheet becomes approved, all other approved sheets for the same character are archived
         if self.status == 'approved':
             self.revisions().filter(status='approved').update(status='archived')
@@ -262,7 +266,7 @@ class CharacterMerit(CharacterElement):
 class CharacterPower(CharacterElement):
     character = ForeignKey(Character, CASCADE, related_name='powers')
     power = ForeignKey(Power, PROTECT, related_name='+')
-    rating = DotsField(default=1, circles=5, clear=False)
+    rating = DotsField(default=1, number=5, clear=False)
     details = CharField(max_length=200, blank=True)
 
     class Meta:

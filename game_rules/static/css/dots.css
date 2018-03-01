@@ -6,10 +6,26 @@
     cursor: hand;
     outline: none;
 }
-.dots input[type='radio'] {
+.dots input[type='radio'],
+.dots input[type='checkbox'] {
     transform: scale(1.3);
     margin-right: 3px;
 }
 .dots {
     padding-top: 6px;
 }
+
+.fields .description {
+    font-size: 12px;
+    padding-bottom: 15px;
+}
+
+.vIntegerField {
+    width: 80px;
+}
+
+.form-group.field-box.field-health {
+    padding-bottom: 10px;
+}
+
+

@@ -62,6 +62,7 @@ class MeritAdmin(admin.ModelAdmin):
     fields = (('name', 'reference_code'), )
     list_display = ('name', )
     prepopulated_fields = {'reference_code': ('name', )}
+    search_fields = ('name', )
 
 
 @admin.register(Power)

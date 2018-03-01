@@ -116,7 +116,7 @@ class Membership(TimeStampedModel, StatusModel):
 
 
 class PrestigeReport(Model):
-    organization = ForeignKey('Organization', CASCADE, related_name='prestige')
+    organization = ForeignKey('Organization', CASCADE, related_name='prestige_reports')
     start = DateField()
     end = DateField()
 

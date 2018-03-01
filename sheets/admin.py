@@ -6,7 +6,8 @@ from game_rules.models import PowerCategory, Power, SplatCategory, Splat, Templa
 from sheets.models import ApprovalRequest, Character, CharacterMerit, SkillSpeciality, CharacterPower, CharacterAnchor
 from django.forms.widgets import HiddenInput
 from game_rules.admin import ParentInlineMixin
-from game_rules.fields import DotsField, DotsInput
+from game_rules.fields import DotsField
+from game_rules.widgets import DotsInput
 
 
 class MeritInline(admin.TabularInline):
@@ -127,8 +128,11 @@ class CharacterAdmin(SimpleActionsModel):
             ),
         }),
         ('Advantages', {
+            'description': "If left blank, advantages will be calculated automatically on save.",
             'fields': (
                 ('integrity', 'power_stat', 'resource_max',),
+                ('willpower', 'health', 'resource_start'),
+                ('size', 'speed', 'initiative'),
             ),
         }),
         ('Information', {
@@ -141,16 +145,17 @@ class CharacterAdmin(SimpleActionsModel):
     list_filter = ('template', )
     search_fields = ('name', 'user')
     readonly_fields = (
-        'template', 'health_levels', 'created', 'modified', 'version',
+        'template', 'created', 'modified', 'version',
     )
     readonly_fields_new = ('version', 'status',)
     formfield_overrides = {
-        DotsField: {'widget': DotsInput}
+        DotsField: {'widget': DotsInput},
     }
     rename_traits = (
         'power_stat', 'integrity', 'primary_anchor',
         'secondary_anchor', 'character_group',
-        ('resource_max', 'resource_name', lambda x: f'{x} Capacity')
+        ('resource_max', 'resource_name', lambda x: f'{x} Capacity'),
+        ('resource_start', 'resource_name', lambda x: f'Starting {x}')
     )
     change_form_template = 'sheets/change_form.html'
     change_actions = (
