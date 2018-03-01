@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django.urls import reverse
 
-from game_rules.models import Splat, SplatCategory, Merit, Power, PowerCategory, CharacterTemplate, TemplateAnchor
+from game_rules.models import Splat, SplatCategory, Merit, Power, PowerCategory, CharacterTemplate, TemplateAnchor, \
+    PowerOption
 from core.admin import SaveRedirectAdmin, HiddenAdmin
 
 
@@ -80,13 +81,20 @@ class PowerInline(admin.TabularInline):
     show_change_link = True
 
 
+class PowerOptionInline(admin.TabularInline):
+    model = PowerOption
+    fields = ('name',)
+    extra = 0
+    show_change_link = True
+
+
 @admin.register(PowerCategory)
 class PowerCategoryAdmin(SaveRedirectAdmin, HiddenAdmin):
     model = PowerCategory
     fields = ('name', 'character_template')
     list_display = ('name', 'character_template', 'power_names', )
     readonly_fields = ('power_names', )
-    inlines = (PowerInline, )
+    inlines = (PowerOptionInline, PowerInline, )
 
     def get_save_redirect_url(self, request, obj):
         return reverse('admin:game_rules_charactertemplate_change', args=[obj.character_template.pk])

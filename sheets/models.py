@@ -15,8 +15,8 @@ from model_utils.models import TimeStampedModel, StatusModel
 
 from organization.models import Chronicle
 from game_rules.models import CharacterTemplate, Splat, Power, Merit, SplatCategory, \
-    ATTRIBUTE_KEYS, SKILLS, SKILL_KEYS, TemplateAnchor
-from game_rules.fields import DotsField, BoxesField
+    ATTRIBUTE_KEYS, SKILLS, SKILL_KEYS, TemplateAnchor, PowerOption
+from game_rules.fields import DotsField
 from keeper.utils import missing
 
 logger = logging.getLogger(__name__)
@@ -268,6 +268,7 @@ class CharacterPower(CharacterElement):
     power = ForeignKey(Power, PROTECT, related_name='+')
     rating = DotsField(default=1, number=5, clear=False)
     details = CharField(max_length=200, blank=True)
+    power_option = ForeignKey(PowerOption, CASCADE, blank=True, null=True, verbose_name='Option', related_name='+')
 
     class Meta:
         verbose_name = "Power"

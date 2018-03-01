@@ -2,7 +2,7 @@ from django.contrib import admin
 from core.admin import SimpleActionsModel
 
 from sheets.forms import CharacterAdminForm
-from game_rules.models import PowerCategory, Power, SplatCategory, Splat, TemplateAnchor
+from game_rules.models import PowerCategory, Power, SplatCategory, Splat, TemplateAnchor, PowerOption
 from sheets.models import ApprovalRequest, Character, CharacterMerit, SkillSpeciality, CharacterPower, CharacterAnchor
 from django.forms.widgets import HiddenInput
 from game_rules.admin import ParentInlineMixin
@@ -13,6 +13,7 @@ from game_rules.widgets import DotsInput
 class MeritInline(admin.TabularInline):
     model = CharacterMerit
     fields = ('merit', 'rating', 'details', )
+    # autocomplete_fields = ('merit', )
     extra = 0
 
 
@@ -61,7 +62,7 @@ class ApprovalLogInline(BaseApprovalMixin, admin.TabularInline):
 
 class BasePowerInline(ParentInlineMixin):
     model = CharacterPower
-    fields = ('power', 'rating', 'details')
+    fields = ('power', 'power_option', 'rating', 'details')
     readonly_fields = ('category',)
     power_category = None
     verbose_name = None
@@ -75,6 +76,8 @@ class BasePowerInline(ParentInlineMixin):
         self.formset.power_category = self.power_category
         if db_field.name == 'power' and self.parent_obj:
             return Power.objects.filter(power_category=self.power_category)
+        if db_field.name == 'power_option' and self.parent_obj:
+            return PowerOption.objects.filter(power_category=self.power_category)
         return super().get_field_queryset(db, db_field, request)
 
 

@@ -16,6 +16,7 @@ __all__ = (
     "SplatCategory",
     "Splat",
     "PowerCategory",
+    "PowerOption",
     "Merit",
     "Power",
     "TemplateAnchor",
@@ -195,6 +196,18 @@ class Power(models.Model):
 
     def character_template(self):
         return str(self.power_category.character_template.name)
+
+
+class PowerOption(models.Model):
+    name = models.CharField(max_length=40)
+    power_category = models.ForeignKey('PowerCategory', CASCADE, related_name='power_options')
+
+    class Meta:
+        unique_together = ('name', 'power_category',)
+        ordering = ('power_category', 'name',)
+
+    def __str__(self):
+        return str(self.name)
 
 
 class TemplateAnchor(models.Model):
