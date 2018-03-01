@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from django.db.models import CASCADE, CharField, ForeignKey, Manager, Model, URLField, \
     DO_NOTHING, DateField, PositiveSmallIntegerField, PositiveIntegerField, SET_NULL, Sum, EmailField, BooleanField, \
-    TextField
+    TextField, SlugField
 from django.urls import reverse
 from django.utils.html import format_html
 from django_extensions.db.fields import AutoSlugField, RandomCharField
@@ -42,7 +42,7 @@ class Organization(BaseOrganization):
 
     site = ForeignKey(Site, DO_NOTHING, related_name='organizations', null=True)  # Django Site
     rules_url = URLField('Rules URL', blank=True, help_text='URL pointing to the organization rules document.')
-    reference_code = AutoSlugField(populate_from='name')
+    reference_code = SlugField('Unique short name or acronym.')
     prestige_cutoff = DateField(blank=True, null=True)
 
     class Meta:
@@ -60,7 +60,7 @@ class Chronicle(BaseOrganization):
     rules_url = URLField('Rules URL', blank=True, help_text='URL pointing to the chronicle game and approval rules.')
     organization = ForeignKey('Organization', CASCADE, related_name='chronicles')
     short_description = TextField(blank=True)
-    reference_code = AutoSlugField(populate_from=('name', 'organization__name'))
+    reference_code = SlugField('Unique short name or acronym.')
 
     class Meta:
         verbose_name = 'Chronicle'
@@ -73,6 +73,20 @@ class Chronicle(BaseOrganization):
 
     def is_member(self, user):
         return Membership.objects.filter(organization=self.organization, user=user).exists()
+
+
+class GameEvent(Model):
+    chronicle = ForeignKey(Chronicle, CASCADE, related_name='game_events')
+    event_date = DateField(null=True, blank=True)
+    number = PositiveSmallIntegerField()
+    title = CharField(max_length=200, blank=True)
+
+    class Meta:
+        unique_together = ('number', 'chronicle')
+        ordering = ('-event_date', )
+
+    def __str__(self):
+        return f'{self.chronicle.reference_code} {self.number}'
 
 
 class Membership(TimeStampedModel, StatusModel):
@@ -135,7 +149,7 @@ class Prestige(TimeStampedModel):
 
     class Meta:
         verbose_name = 'Prestige Line'
-        unique_together = ('report', 'membership')
+        ordering = ('membership', )
 
     def __str__(self):
         return f'{self.membership} +{self.amount}'
