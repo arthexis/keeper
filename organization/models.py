@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 __all__ = (
     'Organization',
     'Chronicle',
+    'GameEvent',
     'Membership',
     'Prestige',
     'PrestigeReport',

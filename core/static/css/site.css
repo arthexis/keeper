@@ -19,3 +19,7 @@ h1.content-title {
     background-color: #4267b2;
 
 }
+
+.alert-dismissable .close {
+    right: -10px!important;
+}

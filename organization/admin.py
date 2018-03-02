@@ -2,7 +2,8 @@ from django.contrib import admin
 
 from core.admin import SimpleActionsModel
 from core.models import UserProfile
-from organization.models import Prestige, Membership, Chronicle, Organization, PrestigeReport, PrestigeLevel, Invitation
+from organization.models import Prestige, Membership, Chronicle, Organization, PrestigeReport, PrestigeLevel, \
+    Invitation, GameEvent
 from keeper.utils import missing
 
 
@@ -81,4 +82,8 @@ class PrestigeReport(admin.ModelAdmin):
     fields = ('organization', 'start', 'end')
 
 
-
+@admin.register(GameEvent)
+class GameEventAdmin(admin.ModelAdmin):
+    model = GameEvent
+    fields = ('chronicle', ('event_date', 'number'), 'title', )
+    list_display = ('chronicle', 'event_date', )
