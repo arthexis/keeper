@@ -24,7 +24,7 @@ class Command(BaseCommand):
         parser.add_argument('--dir', default=None)
         parser.add_argument('--update', action='store_true')
         parser.add_argument('--migrate', action='store_true')
-        parser.add_argument('--start', choices=STEPS)
+        parser.add_argument('--start', choices=list(STEPS))
 
     def handle(self, *args, **options):
         if options['dir']:

@@ -12,7 +12,7 @@ class Command(BaseCommand):
     help = 'Export configuration items.'
 
     def add_arguments(self, parser):
-        parser.add_argument('entity', choices=SERIALIZERS.keys())
+        parser.add_argument('entity', choices=list(SERIALIZERS.keys()))
         parser.add_argument('-o')
         parser.add_argument('--filter', nargs='*')
         parser.add_argument('--pks', nargs='*')
