@@ -116,7 +116,7 @@ class TemplateAnchorInline(admin.TabularInline):
 
 
 @admin.register(CharacterTemplate)
-class TemplateAdmin(admin.ModelAdmin):
+class CharacterTemplateAdmin(admin.ModelAdmin):
     model = CharacterTemplate
     list_display = ('name', 'game_line', 'power_stat_name', 'integrity_name', 'resource_name')
     fieldsets = (
@@ -126,7 +126,6 @@ class TemplateAdmin(admin.ModelAdmin):
                 ('integrity_name', 'power_stat_name',),
                 ('resource_name', 'character_group_name',),
                 ('primary_anchor_name', 'secondary_anchor_name',),
-                ('experiences_prefix',),
             ),
         }),
         ('Configuration', {

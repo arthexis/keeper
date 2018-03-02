@@ -131,3 +131,6 @@ textarea#id_player_notes {
     width: 300px;
 }
 
+.field-notes input {
+    width: 400px;
+}

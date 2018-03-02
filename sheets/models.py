@@ -314,6 +314,7 @@ class ApprovalRequest(TimeStampedModel, StatusModel):
     character = ForeignKey(Character, CASCADE, related_name='approval_requests')
     user = ForeignKey(settings.AUTH_USER_MODEL, DO_NOTHING, null=True, related_name='approval_requests')
     description = TextField('Request Information')
+    experience_cost = PositiveSmallIntegerField(default=0)
     attachment = BinaryField(blank=True)
     attachment_content_type = CharField(max_length=100, blank=True)
     attachment_filename = CharField(max_length=256, blank=True)

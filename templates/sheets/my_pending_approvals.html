@@ -1,0 +1,22 @@
+
+  <div class="panel panel-default">
+    <div class="panel-heading"><strong>My Pending Approvals</strong></div>
+    <div class="panel-body">
+      Some approvals you have requested are still pending. You will receive a notification
+      when these approvals have been completed.
+    </div>
+    <table class="table">
+    <tr>
+      <th>#</th>
+      <th>Character</th>
+      <th>Request date</th>
+    </tr>
+      {% for approval in pending_approvals %}
+        <tr>
+        <td>{{ approval.pk }}</td>
+        <td>{{ approval.character.name }}</td>
+        <td>{{ approval.created }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  </div>

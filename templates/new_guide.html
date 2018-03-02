@@ -32,6 +32,7 @@
         </li>
       </ol>
     </div>
+
     <div class="col-lg-6" style="text-align: center">
       {% for chronicle in membership.organization.chronicles.all %}
         <br>
@@ -44,7 +45,7 @@
           </div>
           <div class="panel-footer">
             <a href="{{ chronicle.rules_url }}">
-              chronicle Rules and Chronicle Info</a> |
+              Chronicle Rules and Information</a> |
             <a href="{% url 'request' chronicle.pk %}">
               Request Character
             </a>
@@ -52,6 +53,7 @@
         </div>
       {% endfor %}
     </div>
+
   </div>
 
 

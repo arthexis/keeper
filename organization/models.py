@@ -18,6 +18,7 @@ __all__ = (
     'Organization',
     'Chronicle',
     'GameEvent',
+    'ExperienceAward',
     'Membership',
     'Prestige',
     'PrestigeReport',
@@ -79,7 +80,7 @@ class Chronicle(BaseOrganization):
 class GameEvent(Model):
     chronicle = ForeignKey(Chronicle, CASCADE, related_name='game_events')
     event_date = DateField(null=True, blank=True)
-    number = PositiveSmallIntegerField()
+    number = PositiveSmallIntegerField(null=True, blank=True, editable=False)
     title = CharField(max_length=200, blank=True)
 
     class Meta:
@@ -88,6 +89,22 @@ class GameEvent(Model):
 
     def __str__(self):
         return f'{self.chronicle.reference_code} {self.number}'
+
+    def save(self, **kwargs):
+        if not self.number:
+            self.number = 1 + GameEvent.objects.filter(chronicle=self.chronicle).count()
+        super().save(**kwargs)
+
+
+class ExperienceAward(TimeStampedModel):
+    game_event = ForeignKey(GameEvent, CASCADE, related_name='experience_awards')
+    character = ForeignKey('sheets.Character', CASCADE, related_name='experience_awards')
+    experience = PositiveSmallIntegerField(default=0)
+    beats = PositiveSmallIntegerField(default=0)
+    notes = CharField(max_length=400, blank=True)
+
+    def __str__(self):
+        return f'{self.character.name}'
 
 
 class Membership(TimeStampedModel, StatusModel):

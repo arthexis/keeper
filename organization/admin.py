@@ -3,7 +3,7 @@ from django.contrib import admin
 from core.admin import SimpleActionsModel
 from core.models import UserProfile
 from organization.models import Prestige, Membership, Chronicle, Organization, PrestigeReport, PrestigeLevel, \
-    Invitation, GameEvent
+    Invitation, GameEvent, ExperienceAward
 from keeper.utils import missing
 
 
@@ -82,8 +82,25 @@ class PrestigeReport(admin.ModelAdmin):
     fields = ('organization', 'start', 'end')
 
 
+class ExperienceAwardInline(admin.TabularInline):
+    model = ExperienceAward
+    fields = ('character', 'experience', 'beats', 'notes')
+    extra = 3
+    min_num = 0
+
+
 @admin.register(GameEvent)
 class GameEventAdmin(admin.ModelAdmin):
     model = GameEvent
-    fields = ('chronicle', ('event_date', 'number'), 'title', )
-    list_display = ('chronicle', 'event_date', )
+    fields = ('chronicle', 'number', 'event_date', 'title', )
+    list_display = ('chronicle', 'number', 'event_date', )
+    readonly_fields = ('number', )
+    inlines = (ExperienceAwardInline, )
+
+    def get_fields(self, request, obj=None):
+        fields = list(super().get_fields(request, obj))
+        if not obj:
+            fields.remove('number')
+        return fields
+
+

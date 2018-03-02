@@ -96,8 +96,6 @@ class CharacterTemplate(models.Model):
         max_length=20, verbose_name="Secondary Anchor", default="Vice", blank=True)
     character_group_name = models.CharField(
         max_length=20, verbose_name="Group Name", default="Group", blank=True)
-    experiences_prefix = models.CharField(
-        max_length=20, verbose_name="Experiences Prefix", blank=True, null=True)
 
     # Used for seed data storage
     reference_code = models.SlugField('Code', unique=True)

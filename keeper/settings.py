@@ -404,4 +404,6 @@ ADMIN_LOGIN_PASSWORD = getenv('ADMIN_LOGIN_PASSWORD')
 
 SHOW_HIDDEN_ADMIN_MODULES = False
 
+# Used for experience calculations
 
+BEATS_PER_EXPERIENCE = 5
