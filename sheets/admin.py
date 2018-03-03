@@ -3,7 +3,8 @@ from core.admin import SimpleActionsModel
 
 from sheets.forms import CharacterAdminForm
 from game_rules.models import PowerCategory, Power, SplatCategory, Splat, TemplateAnchor, PowerOption
-from sheets.models import ApprovalRequest, Character, CharacterMerit, SkillSpeciality, CharacterPower, CharacterAnchor
+from sheets.models import ApprovalRequest, Character, CharacterMerit, SkillSpeciality, CharacterPower, \
+    CharacterAnchor, Advancement
 from django.forms.widgets import HiddenInput
 from game_rules.admin import ParentInlineMixin
 from game_rules.fields import DotsField
@@ -58,6 +59,13 @@ class ApprovalLogInline(BaseApprovalMixin, admin.TabularInline):
 
     def get_queryset(self, request):
         return super().get_queryset(request).filter(status='complete')
+
+
+class AdvancementInline(admin.TabularInline):
+    model = Advancement
+    fields = ('created', 'game_event', 'experience', 'beats', 'notes')
+    readonly_fields = ('created', )
+    extra = 0
 
 
 class BasePowerInline(ParentInlineMixin):
@@ -196,6 +204,7 @@ class CharacterAdmin(SimpleActionsModel):
                 character_template = obj.template
 
             extra_inlines.append(AnchorInline)
+            extra_inlines.append(AdvancementInline)
 
         return tuple(extra_inlines)
 

@@ -3,7 +3,8 @@ from django.contrib import admin
 from core.admin import SimpleActionsModel
 from core.models import UserProfile
 from organization.models import Prestige, Membership, Chronicle, Organization, PrestigeReport, PrestigeLevel, \
-    Invitation, GameEvent, ExperienceAward
+    Invitation, GameEvent
+from sheets.models import Advancement
 from keeper.utils import missing
 
 
@@ -32,7 +33,7 @@ class OrganizationMemberInline(admin.TabularInline):
 
 class ChronicleInline(admin.StackedInline):
     model = Chronicle
-    fields = ('name', 'rules_url', 'short_description')
+    fields = ('name', 'rules_url', 'reference_code', 'short_description')
     extra = 0
     min_num = 1
 
@@ -60,8 +61,8 @@ class InviteInline(admin.TabularInline):
 class OrganizationAdmin(admin.ModelAdmin):
     model = Chronicle
     inlines = (ChronicleInline, PrestigeLevelInline, OrganizationMemberInline, InviteInline)
-    fields = ('name', 'rules_url', 'site')
-    list_display = ('name', 'rules_url', 'chronicles')
+    fields = ('name', 'rules_url', 'site', 'reference_code', )
+    list_display = ('name', 'rules_url', 'chronicles', 'reference_code',)
 
     def chronicles(self, obj: Organization =None):
         if obj:
@@ -78,13 +79,13 @@ class ReportPrestigeInline(admin.TabularInline):
 @admin.register(PrestigeReport)
 class PrestigeReport(admin.ModelAdmin):
     model = PrestigeReport
-    inlines = (ReportPrestigeInline,)
-    fields = ('organization', 'start', 'end')
+    inlines = (ReportPrestigeInline, )
+    fields = ('organization', 'start', 'end', )
 
 
 class ExperienceAwardInline(admin.TabularInline):
-    model = ExperienceAward
-    fields = ('character', 'experience', 'beats', 'notes')
+    model = Advancement
+    fields = ('character', 'experience', 'beats', 'notes', )
     extra = 3
     min_num = 0
 

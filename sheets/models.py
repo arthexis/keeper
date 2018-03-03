@@ -29,6 +29,7 @@ __all__ = (
     "CharacterPower",
     "CharacterAnchor",
     "SkillSpeciality",
+    "Advancement",
 )
 
 
@@ -199,8 +200,9 @@ class Character(TimeStampedModel, StatusModel):
         for cls in (CharacterMerit, CharacterPower, SkillSpeciality):
             cls.objects.filter(character_id=old_pk).update(id=None, character_id=self.pk)
 
-        # Move pending approval requests to new revision
-        ApprovalRequest.objects.filter(uuid=self.uuid, status='pending').update(character=self)
+        # Move pending approval requests and experience awards to new revision
+        for cls in (ApprovalRequest, Advancement):
+            cls.objects.filter(uuid=self.uuid).update(character=self)
 
         # Return a redirect to new revision
         return redirect('admin:sheets_character_change', object_id=self.pk)
@@ -243,7 +245,13 @@ class Character(TimeStampedModel, StatusModel):
         return approval
 
 
+# There are 2 kinds of models related to Character: CharacterTrackers and CharacterElements
+# CharacterElements get copied anew with every revision of the character
+# CharacterTrackers get moved to the new revision of the character when its created
+
+
 class CharacterElement(Model):
+    character = None
     objects = InheritanceManager()
 
     class Meta:
@@ -305,7 +313,19 @@ class CharacterAnchor(CharacterElement):
         return str(self.template_anchor.name)
 
 
-class ApprovalRequest(TimeStampedModel, StatusModel):
+class CharacterTracker(Model):
+    character = None
+    uuid = UUIDField(editable=False, db_index=True, null=True)
+
+    class Meta:
+        abstract = True
+
+    def save(self, **kwargs):
+        self.uuid = self.character.uuid
+        super().save(**kwargs)
+
+
+class ApprovalRequest(TimeStampedModel, StatusModel, CharacterTracker):
     STATUS = Choices(
         ('pending', 'Pending'),
         ('complete', 'Complete'),
@@ -318,9 +338,6 @@ class ApprovalRequest(TimeStampedModel, StatusModel):
     attachment = BinaryField(blank=True)
     attachment_content_type = CharField(max_length=100, blank=True)
     attachment_filename = CharField(max_length=256, blank=True)
-
-    # Keep track of the character UUID
-    uuid = UUIDField(editable=False, db_index=True, null=True)
 
     class Meta:
         verbose_name = "Approval Request"
@@ -339,7 +356,6 @@ class ApprovalRequest(TimeStampedModel, StatusModel):
             logger.exception('Problem saving attachment.')
 
     def save(self, **kwargs):
-        self.uuid = self.character.uuid
         if not self.user and self.character.user:
             self.user = self.character.user
         super().save(**kwargs)
@@ -354,3 +370,14 @@ class ApprovalRequest(TimeStampedModel, StatusModel):
 
     def get_character_link(self, full=False):
         return self.character.get_admin_link(full)
+
+
+class Advancement(TimeStampedModel, CharacterTracker):
+    game_event = ForeignKey('organization.GameEvent', CASCADE, related_name='experience_awards')
+    character = ForeignKey('sheets.Character', CASCADE, related_name='experience_awards')
+    experience = PositiveSmallIntegerField(default=0)
+    beats = PositiveSmallIntegerField(default=0)
+    notes = CharField(max_length=400, blank=True)
+
+    def __str__(self):
+        return f'{self.character.name}'

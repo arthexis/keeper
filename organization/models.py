@@ -7,7 +7,7 @@ from django.db.models import CASCADE, CharField, ForeignKey, Manager, Model, URL
     TextField, SlugField
 from django.urls import reverse
 from django.utils.html import format_html
-from django_extensions.db.fields import AutoSlugField, RandomCharField
+from django_extensions.db.fields import RandomCharField
 from model_utils import Choices
 from model_utils.managers import QueryManager
 from model_utils.models import StatusModel, TimeStampedModel, TimeFramedModel
@@ -18,7 +18,6 @@ __all__ = (
     'Organization',
     'Chronicle',
     'GameEvent',
-    'ExperienceAward',
     'Membership',
     'Prestige',
     'PrestigeReport',
@@ -44,7 +43,7 @@ class Organization(BaseOrganization):
 
     site = ForeignKey(Site, DO_NOTHING, related_name='organizations', null=True)  # Django Site
     rules_url = URLField('Rules URL', blank=True, help_text='URL pointing to the organization rules document.')
-    reference_code = SlugField('Unique short name or acronym.')
+    reference_code = SlugField('Reference Code', help_text='Unique short name or acronym.')
     prestige_cutoff = DateField(blank=True, null=True)
 
     class Meta:
@@ -62,7 +61,7 @@ class Chronicle(BaseOrganization):
     rules_url = URLField('Rules URL', blank=True, help_text='URL pointing to the chronicle game and approval rules.')
     organization = ForeignKey('Organization', CASCADE, related_name='chronicles')
     short_description = TextField(blank=True)
-    reference_code = SlugField('Unique short name or acronym.')
+    reference_code = SlugField('Reference Code', help_text='Unique short name or acronym.')
 
     class Meta:
         verbose_name = 'Chronicle'
@@ -94,17 +93,6 @@ class GameEvent(Model):
         if not self.number:
             self.number = 1 + GameEvent.objects.filter(chronicle=self.chronicle).count()
         super().save(**kwargs)
-
-
-class ExperienceAward(TimeStampedModel):
-    game_event = ForeignKey(GameEvent, CASCADE, related_name='experience_awards')
-    character = ForeignKey('sheets.Character', CASCADE, related_name='experience_awards')
-    experience = PositiveSmallIntegerField(default=0)
-    beats = PositiveSmallIntegerField(default=0)
-    notes = CharField(max_length=400, blank=True)
-
-    def __str__(self):
-        return f'{self.character.name}'
 
 
 class Membership(TimeStampedModel, StatusModel):

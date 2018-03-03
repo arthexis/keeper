@@ -95,7 +95,6 @@ textarea#id_player_notes {
 
 .objectaction-item a:link,
 .objectaction-item a:visited {
-    /*background-color: skyblue;*/
     margin-top: 10px!important;
     padding-top: 5px!important;
     padding-bottom: 5px!important;
@@ -133,4 +132,9 @@ textarea#id_player_notes {
 
 .field-notes input {
     width: 400px;
+}
+
+#id_reference_code,
+.field-reference_code input {
+    width: 200px;
 }
