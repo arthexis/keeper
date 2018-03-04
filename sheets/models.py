@@ -30,6 +30,7 @@ __all__ = (
     "CharacterAnchor",
     "SkillSpeciality",
     "Advancement",
+    'DowntimeAction',
 )
 
 
@@ -201,7 +202,7 @@ class Character(TimeStampedModel, StatusModel):
             cls.objects.filter(character_id=old_pk).update(id=None, character_id=self.pk)
 
         # Move pending approval requests and experience awards to new revision
-        for cls in (ApprovalRequest, Advancement):
+        for cls in (ApprovalRequest, Advancement, DowntimeAction):
             cls.objects.filter(uuid=self.uuid).update(character=self)
 
         # Return a redirect to new revision
@@ -383,4 +384,8 @@ class Advancement(TimeStampedModel, CharacterTracker):
         return f'{self.character.name}'
 
 
-
+class DowntimeAction(TimeStampedModel, CharacterTracker):
+    game_event = ForeignKey('organization.GameEvent', CASCADE, related_name='downtime_actions')
+    character = ForeignKey('sheets.Character', CASCADE, related_name='downtime_actions')
+    player_request = TextField()
+    storyteller_response = TextField(blank=True)

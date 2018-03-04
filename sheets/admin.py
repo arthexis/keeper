@@ -4,7 +4,7 @@ from core.admin import SimpleActionsModel
 from sheets.forms import CharacterAdminForm
 from game_rules.models import PowerCategory, Power, SplatCategory, Splat, TemplateAnchor, PowerOption
 from sheets.models import ApprovalRequest, Character, CharacterMerit, SkillSpeciality, CharacterPower, \
-    CharacterAnchor, Advancement
+    CharacterAnchor, Advancement, DowntimeAction
 from django.forms.widgets import HiddenInput
 from game_rules.admin import ParentInlineMixin
 from game_rules.fields import DotsField
@@ -14,7 +14,6 @@ from game_rules.widgets import DotsInput
 class MeritInline(admin.TabularInline):
     model = CharacterMerit
     fields = ('merit', 'rating', 'details', )
-    # autocomplete_fields = ('merit', )
     extra = 0
 
 
@@ -65,6 +64,12 @@ class AdvancementInline(admin.TabularInline):
     model = Advancement
     fields = ('created', 'game_event', 'experience', 'beats', 'notes')
     readonly_fields = ('created', )
+    extra = 0
+
+
+class DowntimeActionInline(admin.TabularInline):
+    model = DowntimeAction
+    fields = ('game_event', 'player_request', 'storyteller_response', )
     extra = 0
 
 
@@ -205,6 +210,7 @@ class CharacterAdmin(SimpleActionsModel):
 
             extra_inlines.append(AnchorInline)
             extra_inlines.append(AdvancementInline)
+            extra_inlines.append(DowntimeActionInline)
 
         return tuple(extra_inlines)
 
