@@ -210,8 +210,6 @@ class Character(TimeStampedModel, StatusModel):
 
     def save(self, **kwargs):
 
-        # TODO Create automatic first approval when creating the sheet in the admin
-
         # Automatically calculate empty advantage fields
         self.size = self.size or 5
         self.speed = self.speed or (5 + self.strength + self.dexterity)
@@ -389,3 +387,6 @@ class DowntimeAction(TimeStampedModel, CharacterTracker):
     character = ForeignKey('sheets.Character', CASCADE, related_name='downtime_actions')
     player_request = TextField()
     storyteller_response = TextField(blank=True)
+
+    class Meta:
+        verbose_name = "Downtime Action"

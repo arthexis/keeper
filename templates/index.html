@@ -11,11 +11,17 @@
 
       <div class="row">
 
-        <div class="col-lg-6">
           {% if pending_approvals %}
-            {% include 'sheets/my_pending_approvals.html' %}
+            <div class="col-lg-12">
+                {% include 'sheets/pending_approvals.html' %}
+            </div>
           {% endif %}
-        </div>
+
+          {% if approved_characters %}
+              <div class="col-lg-12">
+                  {% include 'sheets/approved_characters.html' %}
+              </div>
+          {% endif %}
 
       </div>
 

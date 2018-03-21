@@ -109,32 +109,32 @@ textarea#id_player_notes {
 .hidden {
     display: none;
 }
-
 #content-main div.items .well legend {
     padding-top: 0;
 }
-
 #content-main #fieldset-1 {
     padding-top: 15px;
 }
-
 #id_game_line {
     width: 240px
 }
-
 .field-information textarea.form-control {
     height: 100px;
 }
-
 #membership_form .fields select {
     width: 300px;
 }
-
 .field-notes input {
     width: 400px;
 }
-
 #id_reference_code,
 .field-reference_code input {
     width: 200px;
+}
+.field-player_request textarea.vLargeTextField,
+.field-storyteller_response textarea.vLargeTextField {
+    height: 100px;
+    max-height: 300px;
+    max-width: 800px;
+    min-height: 40px;
 }

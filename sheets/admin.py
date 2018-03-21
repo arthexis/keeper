@@ -1,4 +1,5 @@
-from django.contrib import admin
+from django.contrib import admin, messages
+
 from core.admin import SimpleActionsModel
 
 from sheets.forms import CharacterAdminForm
@@ -67,7 +68,7 @@ class AdvancementInline(admin.TabularInline):
     extra = 0
 
 
-class DowntimeActionInline(admin.TabularInline):
+class DowntimeActionInline(admin.StackedInline):
     model = DowntimeAction
     fields = ('game_event', 'player_request', 'storyteller_response', )
     extra = 0
@@ -199,20 +200,32 @@ class CharacterAdmin(SimpleActionsModel):
             extra_inlines.append(PowerInline)
 
         if obj:
+            class AnchorInline(BaseAnchorInline):
+                character_template = obj.template
+            extra_inlines.append(AnchorInline)
+
             approvals = obj.approval_requests
             if approvals.filter(status='pending').exists():
                 extra_inlines.append(PendingApprovalInline)
             if approvals.filter(status='complete').exists():
                 extra_inlines.append(ApprovalLogInline)
 
-            class AnchorInline(BaseAnchorInline):
-                character_template = obj.template
-
-            extra_inlines.append(AnchorInline)
             extra_inlines.append(AdvancementInline)
             extra_inlines.append(DowntimeActionInline)
 
         return tuple(extra_inlines)
+
+    def save_model(self, request, obj: Character, form, change):
+        super().save_model(request, obj, form, change)
+
+        # If there is no existing approval on save, create an initial approval
+        manager = ApprovalRequest.objects
+        if not manager.filter(character=obj).exists():
+            approval = manager.create(character=obj, user=obj.user, description='Initial Approval')
+            if obj.status == 'approved':
+                approval.status = 'complete'
+                approval.save()
+            messages.info(request, 'Initial Approval request created automatically')
 
     def save_formset(self, request, form, formset, change):
         instances = formset.save(commit=False)

@@ -1,0 +1,25 @@
+
+  <div class="panel panel-default">
+    <div class="panel-heading"><h4>My Approved Characters</h4></div>
+    <div class="panel-body">
+      These are your currently approved characters.
+    </div>
+    <table class="table">
+    <tr>
+      <th>#</th>
+      <th>Character</th>
+      <th>Chronicle</th>
+      <th>Template</th>
+      <th>Updated on</th>
+    </tr>
+      {% for character in approved_characters %}
+        <tr>
+        <td>{{ character.pk }}</td>
+        <td>{{ character.name }}</td>
+        <td>{{ character.chronicle.name }}</td>
+        <td>{{ character.template }}</td>
+        <td>{{ character.modified }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  </div>

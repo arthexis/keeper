@@ -34,6 +34,9 @@ class Index(TemplateView):
             context['new_guide'] = True
         else:
             context['pending_approvals'] = approvals.filter(status='pending')
+        context['characters'] = characters = self.request.user.characters
+        if characters.exists():
+            context['approved_characters'] = characters.filter(status='approved')
         return context
 
 
