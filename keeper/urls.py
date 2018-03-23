@@ -8,7 +8,7 @@ from django.contrib import admin
 from core.rest import router
 from core.views import Index, EditMyProfile
 from organization.views import AcceptInvite
-from sheets.views import RequestCharacter, DownloadAttachment
+from sheets.views import RequestCharacter, DownloadAttachment, CharacterDetail
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +42,9 @@ urlpatterns = [
     # Request a new character
     path('request/<int:chronicle>/', RequestCharacter.as_view(), name='request'),
     path('attachment/<int:approval>', DownloadAttachment.as_view(), name="download-attachment"),
+
+    # Dashboard links
+    path('sheets/character/<int:pk>', CharacterDetail.as_view(), name="character-detail"),
 
     # Main IndexView (homepage)
     path('', Index.as_view(), name='index'),

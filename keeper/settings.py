@@ -3,8 +3,9 @@ import sys
 import uuid
 
 import dj_database_url
+from model_utils import Choices
 
-from .utils import getenv
+from keeper.utils import getenv
 
 # Sites Framework configuration
 # This will be automatically updated
@@ -407,3 +408,51 @@ SHOW_HIDDEN_ADMIN_MODULES = False
 # Used for experience calculations
 
 BEATS_PER_EXPERIENCE = 5
+
+
+# Names of Attributes and Skills used in the entire system
+
+ATTRIBUTES = Choices(
+    ("strength", "Strength"),
+    ("dexterity", "Dexterity"),
+    ("stamina", "Stamina"),
+    ("intelligence", "Intelligence"),
+    ("wits", "Wits"),
+    ("resolve", "Resolve"),
+    ("presence", "Presence"),
+    ("manipulation", "Manipulation"),
+    ("composure", "Composure"),
+)
+
+ATTRIBUTE_KEYS = [k for k, _ in ATTRIBUTES]
+ATTRIBUTE_NAMES = [v for _, v in ATTRIBUTES]
+
+SKILLS = Choices(
+    ("academics", "Academics"),
+    ("computer", "Computer"),
+    ("crafts", "Crafts"),
+    ("investigation", "Investigation"),
+    ("medicine", "Medicine"),
+    ("occult", "Occult"),
+    ("politics", "Politics"),
+    ("science", "Science"),
+    ("athletics", "Athletics"),
+    ("brawl", "Brawl"),
+    ("drive", "Drive"),
+    ("firearms", "Firearms"),
+    ("larceny", "Larceny"),
+    ("stealth", "Stealth"),
+    ("survival", "Survival"),
+    ("weaponry", "Weaponry"),
+    ("animal_ken", "Animal Ken"),
+    ("empathy", "Empathy"),
+    ("expression", "Expression"),
+    ("intimidation", "Intimidation"),
+    ("persuasion", "Persuasion"),
+    ("socialize", "Socialize"),
+    ("streetwise", "Streetwise"),
+    ("subterfuge", "Subterfuge"),
+)
+
+SKILL_KEYS = [k for k, _ in SKILLS]
+SKILL_NAMES = [v for _, v in SKILLS]

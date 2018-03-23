@@ -15,7 +15,8 @@ from model_utils.models import TimeStampedModel, StatusModel
 
 from organization.models import Chronicle
 from game_rules.models import CharacterTemplate, Splat, Power, Merit, SplatCategory, \
-    ATTRIBUTE_KEYS, SKILLS, SKILL_KEYS, TemplateAnchor, PowerOption
+    TemplateAnchor, PowerOption
+from keeper.settings import ATTRIBUTE_KEYS, SKILLS, SKILL_KEYS
 from game_rules.fields import DotsField
 from keeper.utils import missing
 
@@ -135,12 +136,11 @@ class Character(TimeStampedModel, StatusModel):
     # This UUID is shared by all versions of the same character
     uuid = UUIDField(default=uuid.uuid4, editable=False, db_index=True)
 
-    class Meta:
-        pass
-        # unique_together = (('uuid', 'version'),)
-
     def __str__(self):
         return f'[{self.template.game_line.upper()}] {self.name}'
+
+    def get_absolute_url(self):
+        return reverse('character-detail', kwargs={'pk': self.pk})
 
     def get_admin_link(self, full=False):
         url = reverse('admin:sheets_character_change', kwargs={'object_id': self.pk})
@@ -162,8 +162,10 @@ class Character(TimeStampedModel, StatusModel):
         return qs.first().rating
 
     def splats(self):
-        flavors = SplatCategory.FLAVORS
-        return [x for x in (getattr(self, s, None) for k, s in flavors) if x is not None]
+        results = []
+        for category in self.template.splat_categories.all():
+            results.append((category.name, getattr(self, category.storage_column())))
+        return results
 
     def attributes_total(self):
         return sum(int(getattr(self, k)) for k in ATTRIBUTE_KEYS)
@@ -180,6 +182,30 @@ class Character(TimeStampedModel, StatusModel):
     @missing("Vice")
     def secondary_anchor_name(self):
         return self.template.secondary_anchor_name
+
+    def attributes(self):
+        return {v: getattr(self, k) for k, v in settings.ATTRIBUTES}
+
+    def attribute_sections(self):
+        return {v: getattr(self, k) for k, v in settings.ATTRIBUTES}
+
+    def __getattribute__(self, name: str):
+        if '_specialties' in name:
+            skill = name.split('_specialties')[0]
+            qs = self.specialities.filter(skill=skill)
+            if qs.exists():
+                return ', '.join(qs.values_list('speciality', flat=True))
+            else:
+                return ''
+        return super().__getattribute__(name)
+
+    def powers_by_category(self):
+        categories = []
+        for category in self.template.power_categories.all():
+            powers = [p for p in self.powers.filter(power__power_category=category)]
+            if powers:
+                categories.append((category.name, powers))
+        return categories
 
     # Methods related to revisions and approvals
 

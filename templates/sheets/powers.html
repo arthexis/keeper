@@ -1,0 +1,34 @@
+
+{% for category, powers in character.powers_by_category %}
+
+    <div class="row">
+        <div class="col-lg-4 col-xs-12">
+            <h3 class="power-title">{{ category }}</h3>
+        </div>
+    </div>
+
+    {% for power in powers %}
+        <div class="row">
+            <div class="col-lg-1 col-xs-4">
+                <span class="character-col-title">{{ power.power.name }}</span>
+            </div>
+            <div class="col-lg-2 col-sm-2 col-xs-4">
+                <span class="skill-specialty">{{ power.power_option|default:"" }}</span>
+            </div>
+            <div class="col-lg-1 col-xs-4 character-dots">
+                {% for i in cap|default:five %}
+                    {% if i < power.rating %}&#9679;{% else %}&#9675;{% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    {% endfor %}
+
+    <div class="row">
+        <div class="col-lg-4 col-xs-12">
+            <br><hr>
+        </div>
+    </div>
+
+{% endfor %}
+
+

@@ -1,0 +1,11 @@
+<div class="col-lg-1 col-sm-2 col-xs-4"><span class="character-col-title">{{ title }}</span></div>
+{% with cap=cap|default:five %}
+    <div class="col-lg-2 col-sm-2 col-xs-4">
+        <span class="skill-specialty">{{ option }}</span>
+    </div>
+    <div class="col-lg-1 col-sm-2 col-xs-4 character-dots">
+        {% for i in cap %}
+            {% if i < value %}&#9679;{% else %}&#9675;{% endif %}
+        {% endfor %}
+    </div>
+{% endwith %}

@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import FormView, DeleteView
+from django.views.generic import FormView, DeleteView, DetailView
 
 from .models import Character, ApprovalRequest
 from organization.models import Chronicle
@@ -67,3 +67,18 @@ class DownloadAttachment(View):
         response['Content-Disposition'] = f'attachment; filename={approval.attachment_filename}'
         response.write(approval.attachment)
         return response
+
+
+class CharacterDetail(DetailView):
+    model = Character
+    template_name = 'sheets/character_detail.html'
+    context_object_name = 'character'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['five'] = range(5)
+        context['ten'] = range(10)
+        return context
+
+
+

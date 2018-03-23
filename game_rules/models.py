@@ -1,17 +1,13 @@
 import logging
 
 from django.db import models
-from django.db.models import CASCADE, CharField, PositiveSmallIntegerField, ForeignKey, SlugField
+from django.db.models import CASCADE, CharField, SlugField
 from model_utils import Choices
 
 logger = logging.getLogger(__name__)
 
 
 __all__ = (
-    "SKILLS",
-    "SKILL_KEYS",
-    "ATTRIBUTES",
-    "ATTRIBUTE_KEYS",
     "CharacterTemplate",
     "SplatCategory",
     "Splat",
@@ -21,49 +17,6 @@ __all__ = (
     "Power",
     "TemplateAnchor",
 )
-
-ATTRIBUTES = Choices(
-    ("strength", "Strength"),
-    ("dexterity", "Dexterity"),
-    ("stamina", "Stamina"),
-    ("intelligence", "Intelligence"),
-    ("wits", "Wits"),
-    ("resolve", "Resolve"),
-    ("presence", "Presence"),
-    ("manipulation", "Manipulation"),
-    ("composure", "Composure"),
-)
-
-ATTRIBUTE_KEYS = [k for k, _ in ATTRIBUTES]
-
-SKILLS = Choices(
-    ("academics", "Academics"),
-    ("computer", "Computer"),
-    ("crafts", "Crafts"),
-    ("investigation", "Investigation"),
-    ("medicine", "Medicine"),
-    ("occult", "Occult"),
-    ("politics", "Politics"),
-    ("science", "Science"),
-    ("athletics", "Athletics"),
-    ("brawl", "Brawl"),
-    ("drive", "Drive"),
-    ("firearms", "Firearms"),
-    ("larceny", "Larceny"),
-    ("stealth", "Stealth"),
-    ("survival", "Survival"),
-    ("weaponry", "Weaponry"),
-    ("animal_ken", "Animal Ken"),
-    ("empathy", "Empathy"),
-    ("expression", "Expression"),
-    ("intimidation", "Intimidation"),
-    ("persuasion", "Persuasion"),
-    ("socialize", "Socialize"),
-    ("streetwise", "Streetwise"),
-    ("subterfuge", "Subterfuge"),
-)
-
-SKILL_KEYS = [k for k, _ in SKILLS]
 
 
 class ReferenceBook(models.Model):
@@ -140,8 +93,7 @@ class SplatCategory(models.Model):
 
 class Splat(models.Model):
     name = models.CharField(max_length=40)
-    splat_category = models.ForeignKey(
-        SplatCategory, on_delete=models.CASCADE, related_name='splats')
+    splat_category = models.ForeignKey(SplatCategory, on_delete=models.CASCADE, related_name='splats')
 
     class Meta:
         unique_together = ('name', 'splat_category')

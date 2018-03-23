@@ -6,7 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Keeper</title>
   {% bootstrap_css %}
-  <link rel="stylesheet" type="text/css" href="{% static 'css/site.css' %}">
+    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet'>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/site.css' %}">
   {% block extrastyle %}{% endblock %}
   <script src="https://code.jquery.com/jquery-3.2.1.min.js"
     integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
@@ -19,18 +20,24 @@
   {% endblock %}
 </head>
 <body>
+
+{% if user.is_authenticated %}
+    {% block navbar %}
+        {% include 'navbar.html' %}
+    {% endblock %}
+    {% block messages %}
+        {% bootstrap_messages %}
+    {% endblock %}
+{% endif %}
+
+
 <div id="content" class="container">{% block body %}
   {% if user.is_authenticated %}
 
-    {% block navbar %}
-      {% include 'navbar.html' %}
-    {% endblock %}
-    {% block messages %}
-      {% bootstrap_messages %}
-    {% endblock %}
-
     {% block header %}
+
       <div class="row">
+
         <div class="col-lg-6 col-sm12">
           <h1 class="content-title">
             {% block actiontitle %}
@@ -46,6 +53,7 @@
             {% endblock %}
           </h1>
         </div>
+
         <div class="col-lg-6 col-sm12 organization-header">
           {% block memberhead %}
             {% if membership %}
@@ -55,7 +63,9 @@
             {% endif %}
           {% endblock %}
         </div>
-      </div>
+
+      </div>{# row #}
+
     {% endblock %}
 
     {% block helptext %}
@@ -69,12 +79,15 @@
     {% endblock %}
 
     <hr>
+
     {% block content %}{% endblock %}
 
-    {% else %}{# Not Authenticated #}
+  {% else %}{# Not Authenticated #}
+
     <p>
       <a href="{% url 'account_login' %}">Please login or signup here.</a>
     </p>
+
   {% endif %}
 {% endblock %}</div>
 </body>

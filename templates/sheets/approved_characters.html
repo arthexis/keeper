@@ -10,15 +10,13 @@
       <th>Character</th>
       <th>Chronicle</th>
       <th>Template</th>
-      <th>Updated on</th>
     </tr>
       {% for character in approved_characters %}
         <tr>
         <td>{{ character.pk }}</td>
-        <td>{{ character.name }}</td>
+        <td><a href="{{ character.get_absolute_url }}">{{ character.name }}</a></td>
         <td>{{ character.chronicle.name }}</td>
         <td>{{ character.template }}</td>
-        <td>{{ character.modified }}</td>
         </tr>
       {% endfor %}
     </table>

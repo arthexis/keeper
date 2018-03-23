@@ -49,3 +49,35 @@
 hr {
     margin-top: 5px;
 }
+
+.character-col-title {
+    font-weight: bold;
+}
+
+.character-col-title,
+.character-col-value {
+    font-family: "Roboto Condensed", sans-serif;
+    font-size: 16px;
+}
+
+.character-dots {
+    font-size: 25px;
+    letter-spacing: -4px;
+    line-height: 80%;
+    text-align: right;
+    padding-right: 20px;
+}
+
+.skill-specialty {
+    font-family: "Roboto Condensed", sans-serif;
+    font-size: 12px;
+    color: grey;
+    vertical-align: bottom;
+    width: 100%;
+    border-bottom:  0.5px solid lightgrey;
+}
+
+.power-title {
+    margin-top: 0;
+    color: grey;
+}
