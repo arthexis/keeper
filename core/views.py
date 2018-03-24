@@ -44,8 +44,8 @@ class EditMyProfile(UpdateView):
     template_name = 'change_form.html'
     model = UserProfile
     fields = (
-        "username", "email",
-        "first_name", "last_name", "phone",
+        "username", "email", "first_name", "last_name", "phone",
+        "email_opt_out",
     )
     model_name = "Profile"
     success_url = reverse_lazy('index')

@@ -19,7 +19,7 @@ __all__ = (
 class UserProfile(AbstractUser):
     phone = CharField(max_length=20, blank=True, help_text="Optional.")
     last_visit = DateTimeField(blank=True, null=True, editable=False)
-    email_opt_out = BooleanField(default=False)
+    email_opt_out = BooleanField(default=False, help_text="Do not send me email notifications")
 
     class Meta:
         verbose_name = 'User Profile'

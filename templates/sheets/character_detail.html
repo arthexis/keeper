@@ -27,22 +27,26 @@
         {% include 'sheets/column.html' with title=character.template.character_group_name value=character.character_group %}
     </div>
     <br><hr>
+
     <div class="row">
         <div class="col-lg-4 col-xs-12">
             <h3 class="power-title">Attributes</h3>
         </div>
     </div>
+
     <div class="row">
         {% include 'sheets/attributes.html' %}
     </div>
 
     <div class="row">
+
         <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
             <hr>
             <div class="container" style="padding: 0">
                 {% include 'sheets/skills.html' %}
             </div>
         </div>
+
         <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
             <hr>
             <div class="container" style="padding: 0">
@@ -50,6 +54,19 @@
                 {% include 'sheets/merits.html' %}
             </div>
         </div>
+
+        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+            <hr>
+            <h3 class="power-title">Advantages</h3>
+            <div class="container" style="padding: 0">
+                <div class="row">
+                    <div class="row">
+                        {% include 'sheets/column_dots.html' with title=character.template.power_stat_name value=character.power_stat cap=ten %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <br><br>
