@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 __all__ = (
     'RequestCharacter',
     'DownloadAttachment',
+    'RequestApproval',
 )
 
 
@@ -81,4 +82,6 @@ class CharacterDetail(DetailView):
         return context
 
 
+class RequestApproval(FormView):
+    model = ApprovalRequest
 

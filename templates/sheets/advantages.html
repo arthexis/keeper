@@ -1,0 +1,15 @@
+<div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+    <hr>
+    <h3 class="power-title">Advantages</h3>
+    <div class="container" style="padding: 0">
+        <div class="row">
+            {% include 'sheets/column_dots.html' with title=character.template.power_stat_name value=character.power_stat cap=ten %}
+        </div>
+        <div class="row">
+            {% include 'sheets/column_dots.html' with title=character.template.integrity_name value=character.integrity cap=ten %}
+        </div>
+        <div class="row">
+            {% include 'sheets/column_dots.html' with title="Willpower" value=character.willpower cap=ten %}
+        </div>
+    </div>
+</div>

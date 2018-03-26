@@ -351,6 +351,17 @@ class CharacterTracker(Model):
 
 
 class ApprovalRequest(TimeStampedModel, StatusModel, CharacterTracker):
+
+    # When the user sends a request that requires spending Experience, one must be chosen
+    # Should be left blank for other kinds of requests
+    EXPERIENCE_COSTS = Choices(
+        (4, 'Attribute = 4 XP'),
+        (2, 'Skill = 2 XP'),
+        (1, 'Merit / Power = 1 XP per dot'),
+        (5, 'Power Stat = 5 XP'),
+        (0, 'Prestige / Other = No XP'),
+    )
+
     STATUS = Choices(
         ('pending', 'Pending'),
         ('complete', 'Complete'),
@@ -359,7 +370,9 @@ class ApprovalRequest(TimeStampedModel, StatusModel, CharacterTracker):
     character = ForeignKey(Character, CASCADE, related_name='approval_requests')
     user = ForeignKey(settings.AUTH_USER_MODEL, DO_NOTHING, null=True, related_name='approval_requests')
     description = TextField('Request Information')
-    experience_cost = PositiveSmallIntegerField(default=0)
+    experience_cost = PositiveSmallIntegerField(default=0, choices=EXPERIENCE_COSTS)
+    quantity = PositiveSmallIntegerField(default=1)
+    prestige_level = ForeignKey('organization.PrestigeLevel', on_delete=CASCADE, null=True, blank=True)
     attachment = BinaryField(blank=True)
     attachment_content_type = CharField(max_length=100, blank=True)
     attachment_filename = CharField(max_length=256, blank=True)
@@ -416,3 +429,4 @@ class DowntimeAction(TimeStampedModel, CharacterTracker):
 
     class Meta:
         verbose_name = "Downtime Action"
+
