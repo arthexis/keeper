@@ -369,9 +369,11 @@ class ApprovalRequest(TimeStampedModel, StatusModel, CharacterTracker):
 
     character = ForeignKey(Character, CASCADE, related_name='approval_requests')
     user = ForeignKey(settings.AUTH_USER_MODEL, DO_NOTHING, null=True, related_name='approval_requests')
-    description = TextField('Request Information')
+    additional_information = TextField('Additional Information', blank=True)
     experience_cost = PositiveSmallIntegerField(default=0, choices=EXPERIENCE_COSTS)
     quantity = PositiveSmallIntegerField(default=1)
+    total_cost = PositiveSmallIntegerField(default=0)
+    detail = CharField(max_length=100, blank=True)
     prestige_level = ForeignKey('organization.PrestigeLevel', on_delete=CASCADE, null=True, blank=True)
     attachment = BinaryField(blank=True)
     attachment_content_type = CharField(max_length=100, blank=True)
@@ -396,6 +398,8 @@ class ApprovalRequest(TimeStampedModel, StatusModel, CharacterTracker):
     def save(self, **kwargs):
         if not self.user and self.character.user:
             self.user = self.character.user
+        if self.experience_cost:
+            self.total_cost = self.experience_cost * self.quantity
         super().save(**kwargs)
 
     def download_attachment_link(self):
