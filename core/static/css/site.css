@@ -27,3 +27,11 @@ h1.content-title {
 .alert-dismissable .close {
     right: -10px!important;
 }
+
+.navbar {
+    margin-bottom: 0!important;
+}
+
+.container.main {
+    margin-top: 20px;
+}
