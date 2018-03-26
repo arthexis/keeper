@@ -73,6 +73,31 @@
 
     </div>
 
+    <br><hr>
+
+    {% if character.player_notes %}
+        <div class="row">
+            <div class="col-lg-12">
+                <h3 class="power-title">Player Notes</h3>
+                <span class="player-notes">{{ character.player_notes }}</span>
+            </div>
+        </div>
+    {% endif %}
+
+    <br><hr>
+
+    <div class="row">
+    <div class="col-lg-12">
+        <h3 class="power-title">Tools</h3>
+    </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-2 col-xs-12">
+            Request Approval
+        </div>
+    </div>
+
     <br><br>
 
 {% endblock %}
