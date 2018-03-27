@@ -207,6 +207,14 @@ class Character(TimeStampedModel, StatusModel):
                 categories.append((category.name, powers))
         return categories
 
+    def anchors_by_category(self):
+        categories = []
+        for category in self.template.template_anchors.all():
+            anchors = [p for p in self.anchors.filter(template_anchor=category)]
+            if anchors:
+                categories.append((category.name, anchors))
+        return categories
+
     # Methods related to revisions and approvals
 
     def is_locked(self):
@@ -390,7 +398,7 @@ class ApprovalRequest(TimeStampedModel, StatusModel, CharacterTracker):
         verbose_name = "Approval Request"
 
     def __str__(self):
-        return f'#{self.pk} - {self.detail}'
+        return f'#{self.pk}'
 
     def is_prestige(self):
         return bool(self.prestige_level)

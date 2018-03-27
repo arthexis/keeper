@@ -35,13 +35,14 @@ class BaseApprovalMixin:
     def has_add_permission(self, request):
         return False
 
+    show_change_link = True
     download_attachment_link.short_description = 'Attachment'
 
 
 class PendingApprovalInline(BaseApprovalMixin, admin.StackedInline):
     model = ApprovalRequest
     fields = (
-        'experience_cost', 'prestige_level', 'quantity', 'total_cost',
+        ('experience_cost', 'prestige_level'), ('quantity', 'total_cost'),
         'detail', 'additional_information', 'created', 'download_attachment_link'
     )
     readonly_fields = ('created', 'download_attachment_link', 'total_cost')
@@ -56,8 +57,9 @@ class ApprovalLogInline(BaseApprovalMixin, admin.TabularInline):
     # TODO Add link to view original revision
 
     model = ApprovalRequest
-    fields = ('description', 'modified', 'download_attachment_link')
-    readonly_fields = ('created', 'modified', 'additional_information', 'download_attachment_link')
+    fields = ('detail', 'total_cost', 'modified', 'download_attachment_link')
+    readonly_fields = (
+        'total_cost', 'modified', 'detail', 'download_attachment_link')
     verbose_name_plural = 'Approval History'
 
     def get_queryset(self, request):
@@ -291,29 +293,27 @@ class CharacterAdmin(SimpleActionsModel):
 @admin.register(ApprovalRequest)
 class ApprovalAdmin(admin.ModelAdmin):
 
-    # TODO Add link to view original revision
-
     model = ApprovalRequest
     fields = (
         'character',
         'get_character_link',
-        'experience_cost',
-        'quantity',
+        ('experience_cost', 'prestige_level'),
+        ('quantity', 'total_cost'),
         'detail',
-        'total_cost',
-        'prestige_level',
         'additional_information',
-        'created',
+        ('created', 'modified'),
         'download_attachment_link',
         'status'
     )
-    list_display = ('character', 'detail', 'created', 'status')
+    list_display = ('character', 'user', 'detail', 'created', 'status')
     list_filter = ('status', )
-    readonly_fields = ('created', 'get_character_link', 'download_attachment_link', 'status', 'total_cost')
-    search_fields = ('character', )
+    readonly_fields = (
+        'created', 'get_character_link', 'modified',
+        'download_attachment_link', 'status', 'total_cost')
+    search_fields = ('character', 'user', 'detail')
 
     def get_character_link(self, obj=None):
         if obj:
             return obj.get_character_link(full=True)
 
-    get_character_link.short_description = "Edit Character link"
+    get_character_link.short_description = "Edit Character"

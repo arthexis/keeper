@@ -10,12 +10,14 @@
       <th>#</th>
       <th>Character</th>
       <th>Chronicle</th>
+      <th>Detail</th>
     </tr>
       {% for approval in pending_approvals %}
         <tr>
         <td>{{ approval.pk }}</td>
         <td>{{ approval.character.name }}</td>
         <td>{{ approval.character.chronicle.name }}</td>
+        <td>{{ approval.detail }}</td>
         </tr>
       {% endfor %}
     </table>

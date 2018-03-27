@@ -35,3 +35,7 @@ h1.content-title {
 .container.main {
     margin-top: 20px;
 }
+
+ul.anchors {
+    padding-left: 15px;
+}

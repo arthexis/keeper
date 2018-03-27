@@ -53,6 +53,7 @@
             <div class="container" style="padding: 0">
                 {% include 'sheets/powers.html' %}
                 {% include 'sheets/merits.html' %}
+                {% include 'sheets/anchors.html' %}
             </div>
         </div>
 
@@ -80,11 +81,13 @@
         </div>
     </div>
 
+    <br>
+
     <div class="row">
         <div class="col-lg-2 col-xs-6">
-            <button class="btn btn-default" style="width: 100%"
+            <a class="btn btn-default" style="width: 100%"
                     href="{% url 'request-approval' character.pk %}">
-                Request Approval</button>
+                Request Approval</a>
         </div>
     </div>
 
