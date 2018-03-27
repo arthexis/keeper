@@ -1,7 +1,7 @@
 import logging
 
 from django.db import models
-from django.db.models import CASCADE, CharField, SlugField
+from django.db.models import CASCADE, CharField, SlugField, PositiveSmallIntegerField
 from model_utils import Choices
 
 logger = logging.getLogger(__name__)
@@ -59,6 +59,25 @@ class CharacterTemplate(models.Model):
 
     def __str__(self):
         return f'{self.name} [{self.game_line.upper()}]'
+
+    def get_experience_costs(self):
+        costs = [
+            (4, 'Attribute +1 = 4 XP'),
+            (2, 'Skill +1 = 2 XP'),
+            (1, 'Speciality = 1 XP'),
+            (1, 'Merit = 1 XP per dot'),
+            (5, f'{self.power_stat_name} +1 = 5 XP'),
+            (2, f'{self.integrity_name} +1 = 2 XP'),
+            (1, 'Recover 1 Willpower = 1 XP'),
+            (0, 'Prestige / Other '),
+        ]
+        for pc in self.power_categories.all():
+            if pc.experience_splat_cost and pc.splat_discount_name:
+                costs.append((pc.experience_splat_cost, f'{pc.name} ({pc.splat_discount_name})'))
+                costs.append((pc.experience_cost, f'{pc.name} (Others)'))
+            else:
+                costs.append((pc.experience_cost, f'{pc.name}'))
+        return costs
 
 
 class SplatCategory(models.Model):
@@ -121,6 +140,10 @@ class PowerCategory(models.Model):
     name = models.CharField(max_length=20)
     character_template = models.ForeignKey(
         'CharacterTemplate', on_delete=models.CASCADE, related_name='power_categories', null=True)
+
+    experience_cost = PositiveSmallIntegerField(default=4)
+    experience_splat_cost = PositiveSmallIntegerField(default=0)
+    splat_discount_name = CharField(max_length=20, blank=True)
 
     class Meta:
         verbose_name = "Power Category"

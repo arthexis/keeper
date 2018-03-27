@@ -38,10 +38,13 @@ class BaseApprovalMixin:
     download_attachment_link.short_description = 'Attachment'
 
 
-class PendingApprovalInline(BaseApprovalMixin, admin.TabularInline):
+class PendingApprovalInline(BaseApprovalMixin, admin.StackedInline):
     model = ApprovalRequest
-    fields = ('description', 'created', 'download_attachment_link')
-    readonly_fields = ('created', 'download_attachment_link')
+    fields = (
+        'experience_cost', 'prestige_level', 'quantity', 'total_cost',
+        'detail', 'additional_information', 'created', 'download_attachment_link'
+    )
+    readonly_fields = ('created', 'download_attachment_link', 'total_cost')
     verbose_name_plural = 'Pending Approvals'
 
     def get_queryset(self, request):
@@ -53,8 +56,8 @@ class ApprovalLogInline(BaseApprovalMixin, admin.TabularInline):
     # TODO Add link to view original revision
 
     model = ApprovalRequest
-    fields = ('description', 'created', 'modified', 'download_attachment_link')
-    readonly_fields = ('created', 'modified', 'description', 'download_attachment_link')
+    fields = ('description', 'modified', 'download_attachment_link')
+    readonly_fields = ('created', 'modified', 'additional_information', 'download_attachment_link')
     verbose_name_plural = 'Approval History'
 
     def get_queryset(self, request):
@@ -291,10 +294,22 @@ class ApprovalAdmin(admin.ModelAdmin):
     # TODO Add link to view original revision
 
     model = ApprovalRequest
-    fields = ('character', 'get_character_link', 'description', 'created', 'download_attachment_link', 'status')
-    list_display = ('character', 'description', 'created', 'status')
+    fields = (
+        'character',
+        'get_character_link',
+        'experience_cost',
+        'quantity',
+        'detail',
+        'total_cost',
+        'prestige_level',
+        'additional_information',
+        'created',
+        'download_attachment_link',
+        'status'
+    )
+    list_display = ('character', 'detail', 'created', 'status')
     list_filter = ('status', )
-    readonly_fields = ('created', 'get_character_link', 'download_attachment_link', 'status')
+    readonly_fields = ('created', 'get_character_link', 'download_attachment_link', 'status', 'total_cost')
     search_fields = ('character', )
 
     def get_character_link(self, obj=None):

@@ -1,7 +1,13 @@
-from django.core.exceptions import ValidationError
 from django.forms import Form, CharField, Textarea, ModelChoiceField, FileField, ModelForm
 from game_rules.models import CharacterTemplate
 from sheets.models import Character, ApprovalRequest
+
+
+__all__ = (
+    'RequestCharacterForm',
+    'CharacterAdminForm',
+    'RequestApprovalForm',
+)
 
 
 class RequestCharacterForm(Form):
@@ -24,3 +30,17 @@ class CharacterAdminForm(ModelForm):
 
     def clean(self):
         pass
+
+
+class RequestApprovalForm(ModelForm):
+    class Meta:
+        model = ApprovalRequest
+        fields = (
+            'experience_cost',
+            'quantity',
+            'detail',
+            'prestige_level',
+            'additional_information',
+        )
+
+

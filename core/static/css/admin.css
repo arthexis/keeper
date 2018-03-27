@@ -138,3 +138,14 @@ textarea#id_player_notes {
     max-width: 800px;
     min-height: 40px;
 }
+
+.field-additional_information textarea {
+    max-height: 100px;
+    max-width: 100%;
+}
+
+/*.field-detail .vTextField {*/
+    /*width: 670px;*/
+    /*max-width: 100%;*/
+/*}*/
+

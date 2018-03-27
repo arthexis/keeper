@@ -40,7 +40,7 @@ class ChronicleInline(admin.StackedInline):
 
 class PrestigeLevelInline(admin.TabularInline):
     model = PrestigeLevel
-    fields = ('level', 'prestige_required')
+    fields = ('level',  'name', 'prestige_required')
     min_num = 0
     extra = 1
 

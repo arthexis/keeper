@@ -20,14 +20,29 @@
         </div>
     </div>
 
+</div>
+
+<div class="row">
+
     <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12">
 
-        <table>
+        <table class="approval-table">
             <tr>
-                <th>Cost</th>
-                <th>Quantity</th>
                 <th>Detail</th>
+                <th>Cost</th>
+                <th>Status</th>
             </tr>
+            {% for approval in character.approval_requests.all %}
+                <tr>
+                    <td>{{ approval.detail }}</td>
+                    {% if approval.is_prestige %}
+                        <td>P{{ approval.prestige_level }}</td>
+                    {% else %}
+                        <td>{{ approval.total_cost }}XP</td>
+                    {% endif %}
+                    <td>{{ approval.status }}</td>
+                </tr>
+            {% endfor %}
         </table>
 
     </div>

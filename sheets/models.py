@@ -259,12 +259,18 @@ class Character(TimeStampedModel, StatusModel):
 
     @classmethod
     def request_initial_approval(cls, user, chronicle, name, template, description=None, attachment=None):
-        obj = cls.objects.create(name=name, user=user, template=template, chronicle=chronicle)
-        approval = obj.request_approval(description, attachment)
+        obj = cls.objects.create(
+            name=name,
+            user=user,
+            template=template,
+            chronicle=chronicle,
+            player_notes=description,
+        )
+        approval = obj.request_approval(attachment)
         return obj, approval
 
-    def request_approval(self, description=None, attachment=None):
-        approval = ApprovalRequest.objects.create(character=self, description=description)
+    def request_approval(self, attachment=None):
+        approval = ApprovalRequest.objects.create(character=self, detail='New Character')
         if attachment:
             approval.add_attachment(attachment)
         return approval
@@ -354,13 +360,6 @@ class ApprovalRequest(TimeStampedModel, StatusModel, CharacterTracker):
 
     # When the user sends a request that requires spending Experience, one must be chosen
     # Should be left blank for other kinds of requests
-    EXPERIENCE_COSTS = Choices(
-        (4, 'Attribute = 4 XP'),
-        (2, 'Skill = 2 XP'),
-        (1, 'Merit / Power = 1 XP per dot'),
-        (5, 'Power Stat = 5 XP'),
-        (0, 'Prestige / Other = No XP'),
-    )
 
     STATUS = Choices(
         ('pending', 'Pending'),
@@ -369,12 +368,20 @@ class ApprovalRequest(TimeStampedModel, StatusModel, CharacterTracker):
 
     character = ForeignKey(Character, CASCADE, related_name='approval_requests')
     user = ForeignKey(settings.AUTH_USER_MODEL, DO_NOTHING, null=True, related_name='approval_requests')
+
+    experience_cost = PositiveSmallIntegerField(
+        'Exp. Cost', default=0, help_text="Base Experiences cost based on the trait type.")
+    quantity = PositiveSmallIntegerField(
+        default=1, help_text="Number of total dots being requested.")
+    total_cost = PositiveSmallIntegerField(
+        default=0, editable=False, help_text="Total Experiences cost. Calculated automatically.")
+    detail = CharField(
+        max_length=100, blank=True,
+        help_text="Indicate which specific trait or approval you are requesting.")
     additional_information = TextField('Additional Information', blank=True)
-    experience_cost = PositiveSmallIntegerField(default=0, choices=EXPERIENCE_COSTS)
-    quantity = PositiveSmallIntegerField(default=1)
-    total_cost = PositiveSmallIntegerField(default=0)
-    detail = CharField(max_length=100, blank=True)
-    prestige_level = ForeignKey('organization.PrestigeLevel', on_delete=CASCADE, null=True, blank=True)
+    prestige_level = PositiveSmallIntegerField(
+        default=0, help_text="Used to specify that this request is for a Prestige reward.")
+
     attachment = BinaryField(blank=True)
     attachment_content_type = CharField(max_length=100, blank=True)
     attachment_filename = CharField(max_length=256, blank=True)
@@ -383,7 +390,10 @@ class ApprovalRequest(TimeStampedModel, StatusModel, CharacterTracker):
         verbose_name = "Approval Request"
 
     def __str__(self):
-        return f'{self.pk}'
+        return f'#{self.pk} - {self.detail}'
+
+    def is_prestige(self):
+        return bool(self.prestige_level)
 
     def add_attachment(self, attachment):
         try:
@@ -398,8 +408,7 @@ class ApprovalRequest(TimeStampedModel, StatusModel, CharacterTracker):
     def save(self, **kwargs):
         if not self.user and self.character.user:
             self.user = self.character.user
-        if self.experience_cost:
-            self.total_cost = self.experience_cost * self.quantity
+        self.total_cost = self.experience_cost * self.quantity
         super().save(**kwargs)
 
     def download_attachment_link(self):

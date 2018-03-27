@@ -166,17 +166,18 @@ class Prestige(TimeStampedModel):
 
 
 class PrestigeLevel(Model):
-    level = CharField(max_length=40)
+    level = PositiveSmallIntegerField()
+    name = CharField(max_length=40)
     prestige_required = PositiveSmallIntegerField()
     organization = ForeignKey(Organization, CASCADE, related_name='prestige_levels')
 
     class Meta:
         verbose_name = 'Prestige Level'
         ordering = ('prestige_required', )
-        unique_together = ('organization', 'level')
+        unique_together = (('organization', 'level'), ('organization', 'name'))
 
     def __str__(self):
-        return str(self.level)
+        return str(self.name)
 
     def save(self, **kwargs):
         super().save(**kwargs)

@@ -6,11 +6,11 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import FormView, DeleteView, DetailView
+from django.views.generic import FormView, DetailView
 
 from .models import Character, ApprovalRequest
 from organization.models import Chronicle
-from .forms import RequestCharacterForm
+from .forms import RequestCharacterForm, RequestApprovalForm
 
 logger = logging.getLogger(__name__)
 
@@ -83,5 +83,5 @@ class CharacterDetail(DetailView):
 
 
 class RequestApproval(FormView):
-    model = ApprovalRequest
+    form_class = RequestApprovalForm
 
