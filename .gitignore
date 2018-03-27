@@ -92,11 +92,7 @@ ENV/
 *.sqlite3
 *.sqlite3-journal
 
-.idea/dataSources.local.xml
-.idea/dataSources.xml
-.idea/dataSources/
-.idea/webResources.xml
-.idea/workspace.xml
+.idea
 
 staticfiles/*
 
