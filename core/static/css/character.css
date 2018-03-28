@@ -81,3 +81,19 @@ hr {
     margin-top: 0;
     color: grey;
 }
+
+ul.anchors {
+    padding-left: 15px;
+}
+
+.approval-table th {
+    font-family: "Roboto Condensed", sans-serif;
+    font-size: 14px;
+}
+
+.approval-table td {
+    font-family: "Roboto Condensed", sans-serif;
+    font-size: 12px;
+}
+
+

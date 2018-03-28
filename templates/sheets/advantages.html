@@ -12,7 +12,17 @@
             {% include 'sheets/column_dots.html' with title="Willpower" value=character.willpower cap=ten %}
         </div>
         <div class="row">
-            {% include 'sheets/column_dots.html' with title="Health" value=character.health cap=ten %}
+            {% include 'sheets/column_dots.html' with title="Size" value=character.size cap=ten %}
+        </div>
+        <div class="row">
+            {% if character.health > 10 %}
+                {% include 'sheets/column_dots.html' with title="Health" value=character.health cap=twenty %}
+            {% else %}
+                {% include 'sheets/column_dots.html' with title="Health" value=character.health cap=ten %}
+            {% endif %}
+        </div>
+        <div class="row">
+            {% include 'sheets/column_dots.html' with title="Defense" value=character.defense cap=ten %}
         </div>
     </div>
 </div>

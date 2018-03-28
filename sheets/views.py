@@ -79,6 +79,7 @@ class CharacterDetail(DetailView):
         context = super().get_context_data(**kwargs)
         context['five'] = range(5)
         context['ten'] = range(10)
+        context['twenty'] = range(20)
         return context
 
 

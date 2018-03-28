@@ -54,7 +54,7 @@ def missing(val):
         def wrapper(*args, **kwargs):
             try:
                 return func(*args, **kwargs)
-            except (IndexError, AttributeError):
+            except (IndexError, AttributeError, TypeError):
                 return val
         return wrapper
 

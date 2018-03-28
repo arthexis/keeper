@@ -3,7 +3,7 @@ import uuid
 import os.path
 
 from django.db.models import Model, CharField, ForeignKey, TextField, PositiveIntegerField, \
-    PROTECT, DO_NOTHING, CASCADE, UUIDField, SET_NULL, Manager, BinaryField, PositiveSmallIntegerField
+    PROTECT, DO_NOTHING, CASCADE, UUIDField, SET_NULL, Manager, BinaryField, PositiveSmallIntegerField, Sum
 from django.contrib.auth.models import User, Group
 from django.shortcuts import redirect
 from django.conf import settings
@@ -119,9 +119,6 @@ class Character(TimeStampedModel, StatusModel):
     chronicle = ForeignKey(Chronicle, SET_NULL, null=True, blank=True, related_name='characters')
 
     # Tracking of spent resources
-    bashing_damage = PositiveIntegerField(default=0)
-    lethal_damage = PositiveIntegerField(default=0)
-    aggravated_damage = PositiveIntegerField(default=0)
     willpower = DotsField()
     health = DotsField(number=20, break_after=10)
 
@@ -172,6 +169,17 @@ class Character(TimeStampedModel, StatusModel):
 
     def skills_total(self):
         return sum(int(getattr(self, k)) for k in SKILL_KEYS)
+
+    @missing(0)
+    def experiences_gained(self):
+        return int(self.experience_awards.aggregate(Sum('experience'))['experience__sum'])
+
+    @missing(0)
+    def experiences_used(self):
+        return int(self.approval_requests.filter(status='complete').aggregate(Sum('total_cost'))['total_cost__sum'])
+
+    def experiences(self):
+        return self.experiences_gained() - self.experiences_used()
 
     # The following methods are useful to have around for template rendering
 
@@ -450,4 +458,8 @@ class DowntimeAction(TimeStampedModel, CharacterTracker):
 
     class Meta:
         verbose_name = "Downtime Action"
+
+
+class ResourceTracker(CharacterTracker):
+    pass
 
