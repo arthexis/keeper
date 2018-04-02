@@ -85,4 +85,12 @@ class CharacterDetail(DetailView):
 
 class RequestApproval(FormView):
     form_class = RequestApprovalForm
+    template_name = 'sheets/request_approval.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['character'] = get_object_or_404(Character, pk=self.kwargs['pk'])
+        return context
+
+
 

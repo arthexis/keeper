@@ -89,6 +89,16 @@
                     href="{% url 'request-approval' character.pk %}">
                 Request Approval</a>
         </div>
+
+        {% if user.is_staff %}
+            <div class="col-lg-2 col-xs-6">
+                <a class="btn btn-default" style="width: 100%"
+                   href="{% url 'admin:sheets_character_change' character.pk %}">
+                    Edit as Admin</a>
+            </div>
+        {% endif %}
+
+
     </div>
 
     <br><br>

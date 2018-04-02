@@ -1,10 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}{% load static %}
 
-</body>
-</html>
+{% block actiontitle %}Approval Request{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-lg-12">
+            <h2>{{ character.name }}</h2>
+            <h4>{{ character.chronicle.name }}</h4>
+            <p>What kind of request is this?</p>
+            <select>
+            {% for option in character.template.get_experience_costs %}
+                <option value=""></option>
+            {% endfor %}
+            </select>
+        </div>
+    </div>
+{% endblock %}
