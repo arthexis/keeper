@@ -3,16 +3,47 @@
 {% block actiontitle %}Approval Request{% endblock %}
 
 {% block content %}
+    <form>
+    {% csrf_token %}
     <div class="row">
-        <div class="col-lg-12">
+        <div class="col-lg-6">
             <h2>{{ character.name }}</h2>
             <h4>{{ character.chronicle.name }}</h4>
-            <p>What kind of request is this?</p>
-            <select>
-            {% for option in character.template.get_experience_costs %}
-                <option value=""></option>
-            {% endfor %}
-            </select>
+            <hr>
+            <br>
+            <div class="form-group">
+                <label for="id-experience_cost">What kind of request is this?</label>
+                <select id="id-experience_cost" name="experience_cost" class="form-control" required>
+                    {% for cost, option in character.template.get_experience_costs %}
+                        <option value="{{ cost }}">{{ option }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+                <br>
+            <div class="form-group">
+                <label for="id-detail">Requested Trait:</label>
+                <input type="text" id="id-detail" name="detail" class="form-control" >
+                <p>This is where you specify which specific trait you want (Strength, Dominate, Allies, etc.)</p>
+            </div>
+        <br>
+
+            <div class="form-group">
+                <label for="id-additional_information">Additional Information:</label>
+                <textarea id="id-additional_information" name="additional_information" class="form-control" rows="4">
+                </textarea>
+                <p>Optional. Tell the Storyteller why your character should have this.</p>
+            </div>
+
+        <br>
+
+            <div class="form-group">
+                <input type="button" class="btn btn-primary btn-lg" value="Submit">
+            </div>
+
+        </div>
+
+
         </div>
     </div>
+    </form>
 {% endblock %}

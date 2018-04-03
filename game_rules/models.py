@@ -69,14 +69,17 @@ class CharacterTemplate(models.Model):
             (5, f'{self.power_stat_name} +1 = 5 XP'),
             (2, f'{self.integrity_name} +1 = 2 XP'),
             (1, 'Recover 1 Willpower = 1 XP'),
-            (0, 'Prestige / Other '),
         ]
         for pc in self.power_categories.all():
             if pc.experience_splat_cost and pc.splat_discount_name:
-                costs.append((pc.experience_splat_cost, f'{pc.name} ({pc.splat_discount_name})'))
-                costs.append((pc.experience_cost, f'{pc.name} (Others)'))
+                costs.append((
+                    pc.experience_splat_cost,
+                    f'{pc.name} +1 ({pc.splat_discount_name}) = {pc.experience_cost} XP'
+                ))
+                costs.append((pc.experience_cost, f'{pc.name} +1 (Others) = {pc.experience_cost} XP'))
             else:
-                costs.append((pc.experience_cost, f'{pc.name}'))
+                costs.append((pc.experience_cost, f'{pc.name} +1 = {pc.experience_cost} XP'))
+        costs.append((0, 'Prestige / Other = 0 XP'))
         return costs
 
 
