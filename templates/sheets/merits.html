@@ -8,13 +8,13 @@
 {% for merit in character.merits.all %}
 
     <div class="row">
-        <div class="col-lg-2 col-xs-6">
+        <div class="col-lg-2 col-md-1 col-xs-6">
             <span class="character-col-title">{{ merit.merit.name }}</span>
         </div>
-        <div class="col-lg-1 col-sm-2 col-xs-2">
+        <div class="col-lg-1 col-md-1 col-sm-2 col-xs-2">
             <span class="skill-specialty">{{ merit.details|default:"" }}</span>
         </div>
-        <div class="col-lg-1 col-xs-4 character-dots">
+        <div class="col-lg-1 col-md-2 col-xs-4 character-dots">
             {% for i in cap|default:five %}
                 {% if i < merit.rating %}&#9679;{% else %}&#9675;{% endif %}
             {% endfor %}
