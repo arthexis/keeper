@@ -176,7 +176,7 @@ class Character(TimeStampedModel, StatusModel):
 
     @missing(0)
     def experiences_used(self):
-        return int(self.approval_requests.filter(status='complete').aggregate(Sum('total_cost'))['total_cost__sum'])
+        return int(self.approval_requests.filter(status='complete').aggregate(Sum('total_experience_cost'))['total_cost__sum'])
 
     def experiences(self):
         return self.experiences_gained() - self.experiences_used()
@@ -385,16 +385,16 @@ class ApprovalRequest(TimeStampedModel, StatusModel, CharacterTracker):
     character = ForeignKey(Character, CASCADE, related_name='approval_requests')
     user = ForeignKey(settings.AUTH_USER_MODEL, DO_NOTHING, null=True, related_name='approval_requests')
 
-    experience_cost = PositiveSmallIntegerField(
+    base_experience_cost = PositiveSmallIntegerField(
         'Exp. Cost', default=0, help_text="Base Experiences cost based on the trait type.")
     quantity = PositiveSmallIntegerField(
         default=1, help_text="Number of total dots being requested.")
-    total_cost = PositiveSmallIntegerField(
+    total_experience_cost = PositiveSmallIntegerField(
         default=0, editable=False, help_text="Total Experiences cost. Calculated automatically.")
     detail = CharField(
         max_length=100, blank=True,
         help_text="Indicate which specific trait or approval you are requesting.")
-    additional_information = TextField('Additional Information', blank=True)
+    additional_info = TextField('Additional Information', blank=True)
     prestige_level = PositiveSmallIntegerField(
         default=0, help_text="Used to specify that this request is for a Prestige reward.")
 
@@ -424,7 +424,7 @@ class ApprovalRequest(TimeStampedModel, StatusModel, CharacterTracker):
     def save(self, **kwargs):
         if not self.user and self.character.user:
             self.user = self.character.user
-        self.total_cost = self.experience_cost * self.quantity
+        self.total_experience_cost = self.base_experience_cost * self.quantity
         super().save(**kwargs)
 
     def download_attachment_link(self):

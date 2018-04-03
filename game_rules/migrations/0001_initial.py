@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=20)),
-                ('experience_cost', models.PositiveSmallIntegerField(default=4)),
+                ('base_experience_cost', models.PositiveSmallIntegerField(default=4)),
                 ('experience_splat_cost', models.PositiveSmallIntegerField(default=0)),
                 ('splat_discount_name', models.CharField(blank=True, max_length=20)),
                 ('character_template', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='power_categories', to='game_rules.CharacterTemplate')),

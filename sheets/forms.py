@@ -36,11 +36,11 @@ class RequestApprovalForm(ModelForm):
     class Meta:
         model = ApprovalRequest
         fields = (
-            'experience_cost',
+            'base_experience_cost',
             'quantity',
             'detail',
             'prestige_level',
-            'additional_information',
+            'additional_info',
         )
 
 

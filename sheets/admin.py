@@ -42,10 +42,10 @@ class BaseApprovalMixin:
 class PendingApprovalInline(BaseApprovalMixin, admin.StackedInline):
     model = ApprovalRequest
     fields = (
-        ('experience_cost', 'prestige_level'), ('quantity', 'total_cost'),
-        'detail', 'additional_information', 'created', 'download_attachment_link'
+        ('base_experience_cost', 'prestige_level'), ('quantity', 'total_experience_cost'),
+        'detail', 'additional_info', 'created', 'download_attachment_link'
     )
-    readonly_fields = ('created', 'download_attachment_link', 'total_cost')
+    readonly_fields = ('created', 'download_attachment_link', 'total_experience_cost')
     verbose_name_plural = 'Pending Approvals'
 
     def get_queryset(self, request):
@@ -57,9 +57,9 @@ class ApprovalLogInline(BaseApprovalMixin, admin.TabularInline):
     # TODO Add link to view original revision
 
     model = ApprovalRequest
-    fields = ('detail', 'total_cost', 'modified', 'download_attachment_link')
+    fields = ('detail', 'total_experience_cost', 'modified', 'download_attachment_link')
     readonly_fields = (
-        'total_cost', 'modified', 'detail', 'download_attachment_link')
+        'total_experience_cost', 'modified', 'detail', 'download_attachment_link')
     verbose_name_plural = 'Approval History'
 
     def get_queryset(self, request):
@@ -297,10 +297,10 @@ class ApprovalAdmin(admin.ModelAdmin):
     fields = (
         'character',
         'get_character_link',
-        ('experience_cost', 'prestige_level'),
-        ('quantity', 'total_cost'),
+        ('base_experience_cost', 'prestige_level'),
+        ('quantity', 'total_experience_cost'),
         'detail',
-        'additional_information',
+        'additional_info',
         ('created', 'modified'),
         'download_attachment_link',
         'status'
@@ -309,7 +309,7 @@ class ApprovalAdmin(admin.ModelAdmin):
     list_filter = ('status', )
     readonly_fields = (
         'created', 'get_character_link', 'modified',
-        'download_attachment_link', 'status', 'total_cost')
+        'download_attachment_link', 'status', 'total_experience_cost')
     search_fields = ('character', 'user', 'detail')
 
     def get_character_link(self, obj=None):
