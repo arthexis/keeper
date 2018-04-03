@@ -32,7 +32,7 @@ class MeritSerializer(serializers.HyperlinkedModelSerializer):
 class OrganizationSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Organization
-        fields = ('name', 'rules_url')
+        fields = ('name', 'rules_url', 'reference_code', 'chronicle')
 
 
 class ApprovalSerializer(serializers.HyperlinkedModelSerializer):
