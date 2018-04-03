@@ -26,6 +26,10 @@ class Command(BaseCommand):
         source = os.path.join(settings.SEED_DATA_DIRECTORY, filename)
         print("Loading file {}".format(source))
 
+        if not os.path.isfile(source):
+            print("File not found, skipping import.")
+            return
+
         # Open the zipfile for reading
         with transaction.atomic():
 

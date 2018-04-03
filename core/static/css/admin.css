@@ -149,3 +149,8 @@ textarea#id_player_notes {
     /*max-width: 100%;*/
 /*}*/
 
+
+.field-additional_info .vLargeTextField {
+    max-height: 100px;
+}
+

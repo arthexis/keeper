@@ -42,14 +42,18 @@ class BaseApprovalMixin:
 class PendingApprovalInline(BaseApprovalMixin, admin.StackedInline):
     model = ApprovalRequest
     fields = (
-        ('base_experience_cost', 'prestige_level'), ('quantity', 'total_experience_cost'),
-        'detail', 'additional_info', 'created', 'download_attachment_link'
+        'detail', 'additional_info', ('cost', 'created'), 'download_attachment_link'
     )
-    readonly_fields = ('created', 'download_attachment_link', 'total_experience_cost')
+    readonly_fields = ('created', 'cost', 'download_attachment_link', 'total_experience_cost')
     verbose_name_plural = 'Pending Approvals'
 
     def get_queryset(self, request):
         return super().get_queryset(request).filter(status='pending')
+
+    def cost(self, obj = None):
+        if obj:
+            return obj.cost()
+    cost.short_description = 'Cost'
 
 
 class ApprovalLogInline(BaseApprovalMixin, admin.TabularInline):
@@ -57,9 +61,8 @@ class ApprovalLogInline(BaseApprovalMixin, admin.TabularInline):
     # TODO Add link to view original revision
 
     model = ApprovalRequest
-    fields = ('detail', 'total_experience_cost', 'modified', 'download_attachment_link')
-    readonly_fields = (
-        'total_experience_cost', 'modified', 'detail', 'download_attachment_link')
+    fields = ('detail', 'cost' 'download_attachment_link')
+    readonly_fields = ('cost', 'detail', 'download_attachment_link')
     verbose_name_plural = 'Approval History'
 
     def get_queryset(self, request):
@@ -226,7 +229,7 @@ class CharacterAdmin(SimpleActionsModel):
         # If there is no existing approval on save, create an initial approval
         manager = ApprovalRequest.objects
         if not manager.filter(character=obj).exists():
-            approval = manager.create(character=obj, user=obj.user, description='Initial Approval')
+            approval = manager.create(character=obj, user=obj.user, detail='Initial Approval')
             if obj.status == 'approved':
                 approval.status = 'complete'
                 approval.save()

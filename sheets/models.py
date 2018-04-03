@@ -1,4 +1,5 @@
 import logging
+import random
 import uuid
 import os.path
 
@@ -291,6 +292,22 @@ class Character(TimeStampedModel, StatusModel):
             approval.add_attachment(attachment)
         return approval
 
+    # Randomize character creation process
+
+    def randomize_missing_traits(self):
+        attr_dots = min(settings.INITIAL_ATTRIBUTE_DOTS - self.attributes_total(), 0)
+        self.add_random_traits(settings.ATTRIBUTE_KEYS, attr_dots)
+
+        skill_dots = min(settings.INITIAL_SKILL_DOTS - self.skills_total(), 0)
+        self.add_random_traits(settings.SKILL_KEYS, skill_dots)
+
+    def add_random_traits(self, traits, dots):
+        while dots > 0:
+            attr = getattr(self, random.choice(traits))
+            if attr < max(5, self.power_stat):
+                attr += 1
+                dots -= 1
+
 
 # There are 2 kinds of models related to Character: CharacterTrackers and CharacterElements
 # CharacterElements get copied anew with every revision of the character
@@ -437,6 +454,16 @@ class ApprovalRequest(TimeStampedModel, StatusModel, CharacterTracker):
 
     def get_character_link(self, full=False):
         return self.character.get_admin_link(full)
+
+    def cost(self):
+        result = []
+        if self.prestige_level:
+            result.append(f'Prestige Level {self.prestige_level}')
+        if self.base_experience_cost:
+            result.append(f'{self.base_experience_cost} x {self.quantity} = {self.total_experience_cost} Experience')
+        if not result:
+            return 'None'
+        return ', '.join(result)
 
 
 class Advancement(TimeStampedModel, CharacterTracker):

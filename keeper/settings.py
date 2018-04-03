@@ -323,6 +323,10 @@ SEED_DATA_SERIALIZERS = {
     'Organizations': {
         'model': 'organization.models.Organization',
         'exclude': ('prestige_reports', 'invitations', 'memberships')
+    },
+    'Chronicles': {
+        'model': 'organization.models.Chronicle',
+        'exclude': ('characters', 'game_events')
     }
 }
 
@@ -339,6 +343,7 @@ SEED_DATA_PLAN = {
     ),
     'Merits': (lambda obj: True),
     'Organizations': (lambda obj: True),
+    'Chronicles': (lambda obj: True),
 }
 
 # Directory that will store the seed data
@@ -456,3 +461,8 @@ SKILLS = Choices(
 
 SKILL_KEYS = [k for k, _ in SKILLS]
 SKILL_NAMES = [v for _, v in SKILLS]
+
+INITIAL_ATTRIBUTE_DOTS = 12
+INITIAL_SKILL_DOTS = 22
+
+
