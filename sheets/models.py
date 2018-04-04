@@ -145,6 +145,11 @@ class Character(TimeStampedModel, StatusModel):
         name = url if full else str(self)
         return format_html('<a href="{}">{}</a>', url, name)
 
+    def member_link(self, full=False):
+        url = reverse('character-detail', kwargs={'pk': self.pk})
+        name = url if full else str(self)
+        return format_html('<a href="{}">{}</a>', url, name)
+
     # Derived Traits
 
     def defense(self):
@@ -177,7 +182,7 @@ class Character(TimeStampedModel, StatusModel):
 
     @missing(0)
     def experiences_used(self):
-        return int(self.approval_requests.filter(status='complete').aggregate(Sum('total_experience_cost'))['total_cost__sum'])
+        return int(self.approval_requests.filter(status='complete').aggregate(x=Sum('total_experience_cost'))['x'])
 
     def experiences(self):
         return self.experiences_gained() - self.experiences_used()
@@ -303,6 +308,8 @@ class Character(TimeStampedModel, StatusModel):
         return approval
 
     # Randomize character creation process
+    def can_randomize(self, user=None):
+        return self.status != 'approved'
 
     def randomize(self, user=None):
         attr_dots = max(settings.INITIAL_ATTRIBUTE_DOTS - self.attributes_total(), 0)
@@ -417,17 +424,17 @@ class ApprovalRequest(TimeStampedModel, StatusModel, CharacterTracker):
     user = ForeignKey(settings.AUTH_USER_MODEL, DO_NOTHING, null=True, related_name='approval_requests')
 
     base_experience_cost = PositiveSmallIntegerField(
-        'Exp. Cost', default=0, help_text="Base Experiences cost based on the trait type.")
+        'Exp. Cost', default=0, help_text="Base Experience cost based on the trait type.")
     quantity = PositiveSmallIntegerField(
-        default=1, help_text="Number of total dots being requested.")
+        default=1, help_text="Number of total instances being requested.")
     total_experience_cost = PositiveSmallIntegerField(
         default=0, editable=False, help_text="Total Experiences cost. Calculated automatically.")
     detail = CharField(
         max_length=100, blank=True,
-        help_text="Indicate which specific trait or approval you are requesting.")
+        help_text="Specific trait or approval you are requesting.")
     additional_info = TextField('Additional Information', blank=True)
     prestige_level = PositiveSmallIntegerField(
-        default=0, help_text="Used to specify that this request is for a Prestige reward.")
+        default=0, help_text="Specifies that this request is for a Prestige reward.")
 
     attachment = BinaryField(blank=True)
     attachment_content_type = CharField(max_length=100, blank=True)

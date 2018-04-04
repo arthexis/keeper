@@ -74,11 +74,11 @@ class CharacterTemplate(models.Model):
             if pc.experience_splat_cost and pc.splat_discount_name:
                 costs.append((
                     pc.experience_splat_cost,
-                    f'{pc.name} +1 ({pc.splat_discount_name}) = {pc.base_experience_cost} XP'
+                    f'{pc.name} +1 ({pc.splat_discount_name}) = {pc.experience_splat_cost} XP'
                 ))
-                costs.append((pc.experience_cost, f'{pc.name} +1 (Others) = {pc.base_experience_cost} XP'))
+                costs.append((pc.experience_cost, f'{pc.name} +1 (Others) = {pc.experience_cost} XP'))
             else:
-                costs.append((pc.experience_cost, f'{pc.name} +1 = {pc.base_experience_cost} XP'))
+                costs.append((pc.experience_cost, f'{pc.name} +1 = {pc.experience_cost} XP'))
         costs.append((0, 'Prestige / Other = 0 XP'))
         return costs
 

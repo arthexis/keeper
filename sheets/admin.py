@@ -61,7 +61,7 @@ class ApprovalLogInline(BaseApprovalMixin, admin.TabularInline):
     # TODO Add link to view original revision
 
     model = ApprovalRequest
-    fields = ('detail', 'cost' 'download_attachment_link')
+    fields = ('detail', 'cost', 'download_attachment_link')
     readonly_fields = ('cost', 'detail', 'download_attachment_link')
     verbose_name_plural = 'Approval History'
 
@@ -124,6 +124,7 @@ class CharacterAdmin(SimpleActionsModel):
             'fields': (
                 ('name', 'template', 'status'),
                 ('user', 'chronicle', 'version'),
+                'member_link',
             ),
         }),
         ('Template', {
@@ -170,7 +171,7 @@ class CharacterAdmin(SimpleActionsModel):
     list_filter = ('template', )
     search_fields = ('name', 'user')
     readonly_fields = (
-        'template', 'created', 'modified', 'version',
+        'template', 'created', 'modified', 'version', 'member_link',
     )
     readonly_fields_new = ('version', 'status',)
     formfield_overrides = {

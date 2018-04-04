@@ -111,4 +111,8 @@ def exists(model, instance=None, **kwargs):
     return qs.exists()
 
 
+def aggregate(queryset, operator, field):
+    return queryset.aggregate(x=operator(field))['x']
+
+
 

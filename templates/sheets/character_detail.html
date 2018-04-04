@@ -84,11 +84,16 @@
     <br>
 
     <div class="row">
-        <div class="col-lg-2 col-xs-6">
-            <a class="btn btn-default" style="width: 100%"
-                    href="{% url 'request-approval' character.pk %}">
-                Request Approval</a>
-        </div>
+
+        {% if character.user == user %}
+
+            <div class="col-lg-2 col-xs-6">
+                <a class="btn btn-default" style="width: 100%"
+                        href="{% url 'request-approval' character.pk %}">
+                    Request Approval</a>
+            </div>
+
+        {% endif %}
 
         {% if user.is_staff %}
             <div class="col-lg-2 col-xs-6">

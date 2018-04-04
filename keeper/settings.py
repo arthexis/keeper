@@ -54,7 +54,7 @@ LOGGING = {
             'propagate': True,
         },
         'django.server': {
-            'level': 'DEBUG' if DEBUG else 'INFO',
+            'level': 'WARNING',
             'handlers': ['console'],
         },
     }
