@@ -251,9 +251,16 @@ class Character(TimeStampedModel, StatusModel):
         # Return a redirect to new revision
         return redirect('admin:sheets_character_change', object_id=self.pk)
 
-    def save(self, **kwargs):
+    def reset_derived_traits(self):
+        self.size = 5
+        self.speed = (5 + self.strength + self.dexterity)
+        self.initiative = (self.dexterity + self.composure)
+        self.resource_max = (self.resource_max * 2)
+        self.resource_start = self.resource_start // 2
+        self.health = self.size + self.stamina
+        self.willpower = self.resolve + self.composure
 
-        # Automatically calculate empty advantage fields
+    def update_derived_traits(self):
         self.size = self.size or 5
         self.speed = self.speed or (5 + self.strength + self.dexterity)
         self.initiative = self.initiative or (self.dexterity + self.composure)
@@ -261,6 +268,9 @@ class Character(TimeStampedModel, StatusModel):
         self.resource_start = self.resource_start or self.resource_start // 2
         self.health = self.health or self.size + self.stamina
         self.willpower = self.willpower or self.resolve + self.composure
+
+    def save(self, **kwargs):
+        self.update_derived_traits()
 
         # When a sheet becomes approved, all other approved sheets for the same character are archived
         if self.status == 'approved':
@@ -294,18 +304,22 @@ class Character(TimeStampedModel, StatusModel):
 
     # Randomize character creation process
 
-    def randomize_missing_traits(self):
-        attr_dots = min(settings.INITIAL_ATTRIBUTE_DOTS - self.attributes_total(), 0)
+    def randomize(self, user=None):
+        attr_dots = max(settings.INITIAL_ATTRIBUTE_DOTS - self.attributes_total(), 0)
         self.add_random_traits(settings.ATTRIBUTE_KEYS, attr_dots)
 
-        skill_dots = min(settings.INITIAL_SKILL_DOTS - self.skills_total(), 0)
+        skill_dots = max(settings.INITIAL_SKILL_DOTS - self.skills_total(), 0)
         self.add_random_traits(settings.SKILL_KEYS, skill_dots)
+
+        self.reset_derived_traits()
+        self.save()
 
     def add_random_traits(self, traits, dots):
         while dots > 0:
-            attr = getattr(self, random.choice(traits))
-            if attr < max(5, self.power_stat):
-                attr += 1
+            trait = random.choice(traits)
+            trait_value = getattr(self, trait)
+            if trait_value < max(5, self.power_stat):
+                setattr(self, trait, trait_value + 1)
                 dots -= 1
 
 

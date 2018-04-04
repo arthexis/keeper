@@ -185,6 +185,7 @@ class CharacterAdmin(SimpleActionsModel):
     change_form_template = 'sheets/change_form.html'
     change_actions = (
         'create_revision',
+        'randomize',
     )
 
     def get_fieldsets(self, request, obj: Character=None):
