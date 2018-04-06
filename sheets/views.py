@@ -75,6 +75,9 @@ class CharacterDetail(DetailView):
     template_name = 'sheets/character.html'
     context_object_name = 'character'
 
+    def title(self):
+        return self.object.name
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['five'] = range(5)
