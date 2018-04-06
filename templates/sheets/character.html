@@ -1,76 +1,91 @@
-{% extends 'base.html' %}{% load static %}
+{% extends 'base.html' %}{% load static i18n %}
 
 {% block extrastyle %}
     <link href='https://fonts.googleapis.com/css?family=Roboto Condensed' rel='stylesheet'>
     <link rel="stylesheet" type="text/css" href="{% static 'css/character.css' %}">
 {% endblock %}
 
+{% block header %}{% endblock %}
+{% block postheader %}{% endblock %}
+
 {% block content %}
 
-    {% include 'sheets/basic_info.html' %}
-    <br><hr>
+    <div class="character">
 
-    <div class="row">
-        <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
-            <h3 class="power-title">Attributes</h3>
-        </div>
-    </div>
-
-    <div class="row">
-        {% include 'sheets/attributes.html' %}
-    </div>
-
-    <div class="row">
-
-        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
-            <hr>
-            <div class="container inner">
-                {% include 'sheets/skills.html' %}
-            </div>
-        </div>
-
-        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
-            <hr>
-            <div class="container inner">
-                {% include 'sheets/powers.html' %}
-                {% include 'sheets/merits.html' %}
-                {% include 'sheets/anchors.html' %}
-            </div>
-        </div>
-
-        {% include 'sheets/advantages.html' %}
-
-    </div>
-
-    <br><hr>
-
-    {% if character.player_notes %}
         <div class="row">
-            <div class="col-lg-12">
-                <h3 class="power-title">Player Notes</h3>
-                <span class="player-notes">{{ character.player_notes }}</span>
+            <div class="col-lg-12 header">
+                <h1>{{ character.name }}</h1>
             </div>
         </div>
+
+        {% include 'sheets/basic_info.html' %}
         <br><hr>
-    {% endif %}
 
-    {% include 'sheets/approval_log.html' %}
-
-    <div class="row">
-        <div class="col-lg-12">
-            <h3 class="power-title">Tools</h3>
+        <div class="row">
+            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                <h3 class="power-title">{% trans 'Attributes' %}</h3>
+            </div>
         </div>
+
+        <div class="row">
+            {% include 'sheets/attributes.html' %}
+        </div>
+
+        <div class="row">
+
+            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                <hr>
+                <div class="container inner">
+                    {% include 'sheets/skills.html' %}
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                <hr>
+                <div class="container inner">
+                    {% include 'sheets/powers.html' %}
+                    {% include 'sheets/merits.html' %}
+                    {% include 'sheets/anchors.html' %}
+                </div>
+            </div>
+
+            {% include 'sheets/advantages.html' %}
+
+        </div>
+
+        <br><hr>
+
+        {% if character.player_notes %}
+            <div class="row">
+                <div class="col-lg-12">
+                    <h3 class="power-title">{% trans 'Player Notes' %}</h3>
+                    <span class="player-notes">{{ character.player_notes }}</span>
+                </div>
+            </div>
+            <br><hr>
+        {% endif %}
+
+        {% include 'sheets/approval_log.html' %}
+
+
     </div>
 
     <br>
 
     <div class="row">
+        <div class="col-lg-12">
+            <h3 class="power-title">{% trans 'Tools' %}</h3>
+        </div>
+    </div>
+
+    <hr>
+    <div class="row">
 
         {% if character.user == user %}
 
             <div class="col-lg-2 col-xs-6">
-                <a class="btn btn-default" href="{% url 'request-approval' character.pk %}">
-                    Request Approval</a>
+                <a class="btn btn-default full-width" href="{% url 'request-approval' character.pk %}">
+                    {% trans 'Request Approval' %}</a>
             </div>
 
         {% endif %}
@@ -78,8 +93,8 @@
         {% if user.is_staff %}
 
             <div class="col-lg-2 col-xs-6">
-                <a class="btn btn-default" href="{% url 'admin:sheets_character_change' character.pk %}">
-                    Edit as Admin</a>
+                <a class="btn btn-default full-width" href="{% url 'admin:sheets_character_change' character.pk %}">
+                    {% trans 'Edit as Admin' %}</a>
             </div>
 
         {% endif %}
@@ -87,6 +102,6 @@
 
     </div>
 
-    <br><br>
+    <br>
 
 {% endblock %}

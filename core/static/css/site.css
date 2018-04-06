@@ -9,6 +9,10 @@ body {
     margin-bottom: 60px;
 }
 
+hr {
+    margin-top: 5px;
+}
+
 .header h1 {
     margin-top: 5px;
 }
@@ -58,4 +62,13 @@ body {
     padding: 20px 0;
     color: darkgrey;
 }
+
+.hidden {
+    display: none;
+}
+
+.full-width {
+    width: 100%;
+}
+
 

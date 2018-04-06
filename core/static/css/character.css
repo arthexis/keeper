@@ -1,3 +1,13 @@
+.container.main {
+    padding: 5px;
+}
+
+.character {
+    border-radius: 10px;
+    background: white;
+    padding: 10px;
+}
+
 .inline-dots {
     padding: 10px 10px;
 }
@@ -13,10 +23,6 @@
 
 .inline-dots .form-group {
     margin-bottom: 5px;
-}
-
-.hidden {
-    display: none;
 }
 
 .resource-num,
@@ -46,10 +52,6 @@
     min-width: 34px;
 }
 
-hr {
-    margin-top: 5px;
-}
-
 .character-col-title {
     font-weight: bold;
 }
@@ -74,7 +76,8 @@ hr {
     color: grey;
     vertical-align: bottom;
     width: 100%;
-    border-bottom:  0.5px solid lightgrey;
+    border-bottom: 0.5px solid lightgrey;
+    padding-top: 3px;
 }
 
 .power-title {
@@ -95,5 +98,11 @@ ul.anchors {
     font-family: "Roboto Condensed", sans-serif;
     font-size: 12px;
 }
+
+.advantages span.label-default {
+    font-size: 125%;
+}
+
+
 
 

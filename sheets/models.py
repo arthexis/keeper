@@ -107,6 +107,8 @@ class Character(TimeStampedModel, StatusModel):
     size = PositiveSmallIntegerField(default=5)
     speed = PositiveSmallIntegerField(default=0)
     initiative = PositiveSmallIntegerField(default=0)
+    armor_general = PositiveSmallIntegerField(default=0)
+    armor_ballistic = PositiveSmallIntegerField(default=0)
 
     # Splat foreign Keys
     primary_splat = ForeignKey(Splat, PROTECT, related_name='+', null=True, blank=True)

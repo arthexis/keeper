@@ -13,11 +13,13 @@
       <th>Detail</th>
     </tr>
       {% for approval in pending_approvals %}
-        <tr>
-        <td>{{ approval.pk }}</td>
-        <td>{{ approval.character.name }}</td>
-        <td>{{ approval.character.chronicle.name }}</td>
-        <td>{{ approval.detail }}</td>
+          {% with c=approval.character %}
+                <tr>
+                <td>{{ approval.pk }}</td>
+                <td><a href="{{ c.get_absolute_url }}">{{ c.name }}</a></td>
+                <td>{{ c.chronicle.name }}</td>
+                <td>{{ approval.detail }}</td>
+            {% endwith %}
         </tr>
       {% endfor %}
     </table>

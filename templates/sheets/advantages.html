@@ -1,28 +1,42 @@
+{% load i18n %}
+
 <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
     <hr>
-    <h3 class="power-title">Advantages</h3>
-    <div class="container" style="padding: 0">
-        <div class="row">
-            {% include 'sheets/col/dots.html' with title=character.template.power_stat_name value=character.power_stat cap=ten %}
+    <h3 class="power-title">{% trans 'Advantages' %}</h3>
+
+    {% with c=character %}
+
+        <div class="container inner advantages">
+            <div class="row">
+                {% include 'sheets/col/dots.html' with title=c.template.power_stat_name value=c.power_stat cap=ten %}
+            </div>
+            <div class="row">
+                {% include 'sheets/col/dots.html' with title=c.template.integrity_name value=c.integrity cap=ten %}
+            </div>
+
+            <br>
+
+            <div class="row text-center">
+                <div class="col-lg-1 col-md-1 col-xs-3">
+                    <div><h4>Initiative</h4> <span class="label label-default">{{ c.initiative }}</span></div>
+                </div>
+                <div class="col-lg-1 col-md-1 col-xs-3">
+                    <div><h4>Defense </h4><span class="label label-default">{{ c.defense }}</span></div>
+                </div>
+                <div class="col-lg-1 col-md-1 col-xs-3">
+                    <div><h4>Speed </h4><span class="label label-default">{{ c.speed }}</span></div>
+                </div>
+                <div class="col-lg-1 col-md-1 col-xs-3">
+                    <div><h4>Armor </h4><span class="label label-default">
+                        {{ c.armor_general }}/{{ c.armor_ballistic }}
+                    </span></div>
+                </div>
+            </div>
+
         </div>
-        <div class="row">
-            {% include 'sheets/col/dots.html' with title=character.template.integrity_name value=character.integrity cap=ten %}
-        </div>
-        <div class="row">
-            {% include 'sheets/col/dots.html' with title="Willpower" value=character.willpower cap=ten %}
-        </div>
-        <div class="row">
-            {% include 'sheets/col/dots.html' with title="Size" value=character.size cap=ten %}
-        </div>
-        <div class="row">
-            {% if character.health > 10 %}
-                {% include 'sheets/col/dots.html' with title="Health" value=character.health cap=twenty %}
-            {% else %}
-                {% include 'sheets/col/dots.html' with title="Health" value=character.health cap=ten %}
-            {% endif %}
-        </div>
-        <div class="row">
-            {% include 'sheets/col/dots.html' with title="Defense" value=character.defense cap=ten %}
-        </div>
-    </div>
+
+    {% endwith %}
+<br>
+    <hr>
+
 </div>
