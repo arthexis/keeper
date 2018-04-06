@@ -4,21 +4,23 @@
 {% block formtitle %}<h2>Login</h2>{% endblock %}
 
 {% block formactions %}
-  <a href="{% url 'account_reset_password' %}">
-    Forgot your password?
-  </a>
-  <br><br>
-  <input class="btn btn-lg btn-primary" type="submit"
-    value="Login with Keeper" style="width: 100%">
-  <br><br>
+    <a href="{% url 'account_reset_password' %}">
+        Forgot your password?
+    </a>
+    <br><br>
+    <input class="btn btn-lg btn-primary" type="submit"
+           value="Login with Keeper" style="width: 100%">
+    <br><br>
 
-  <a class="btn btn-lg btn-primary facebook-login-btn"
-    href="{% provider_login_url "facebook" method="js_sdk" %}">
-      Facebook Connect</a>
+    {% if settings.FACEBOOK_LOGIN_ENABLED %}
+        <a class="btn btn-lg btn-primary facebook-login-btn"
+           href="{% provider_login_url "facebook" method="js_sdk" %}">
+            Facebook Connect</a>
+    {% endif %}
 
-  <br><br>
+    <br><br>
 
-  <a href="{% url 'account_signup' %}" style="text-align: center">
-    <h3>Create new Account</h3>
-  </a>
+    <a href="{% url 'account_signup' %}" style="text-align: center">
+        <h3>Create new Account</h3>
+    </a>
 {% endblock %}
