@@ -84,6 +84,11 @@ class CharacterDetail(DetailView):
         context['five'] = range(5)
         context['ten'] = range(10)
         context['twenty'] = range(20)
+
+        if self.object.status == 'in_progress':
+            messages.warning(
+                self.request, "You are viewing an unsanctioned version of this character. "
+                              "It may be incomplete and/or wrong.")
         return context
 
 
