@@ -264,15 +264,23 @@ class Character(TimeStampedModel, StatusModel):
         self.save()
 
         # Copy character elements
-        for cls in (CharacterMerit, CharacterPower, SkillSpeciality):
+        for cls in self.get_character_elements():
             cls.objects.filter(character_id=old_pk).update(id=None, character_id=self.pk)
 
         # Move pending approval requests and experience awards to new revision
-        for cls in (ApprovalRequest, Advancement, DowntimeAction):
+        for cls in self.get_character_trackers():
             cls.objects.filter(uuid=self.uuid).update(character=self)
 
         # Return a redirect to new revision
         return redirect('admin:sheets_character_change', object_id=self.pk)
+
+    @staticmethod
+    def get_character_elements():
+        return CharacterMerit, CharacterPower, SkillSpeciality
+
+    @staticmethod
+    def get_character_trackers():
+        return ApprovalRequest, Advancement, DowntimeAction, ResourceTracker
 
     def reset_derived_traits(self):
         self.size = 5
@@ -294,12 +302,33 @@ class Character(TimeStampedModel, StatusModel):
 
     def save(self, **kwargs):
         self.update_derived_traits()
+        self.create_or_update_resources()
 
         # When a sheet becomes approved, all other approved sheets for the same character are archived
         if self.status == 'approved':
             self.revisions().filter(status='approved').update(status='archived')
             self.approval_requests.filter(status='pending').update(status='complete')
         super().save(**kwargs)
+
+    def main_resource(self) -> 'ResourceTracker':
+        return self.resources.filter(name=self.template.resource_name).first()
+
+    def create_or_update_resources(self):
+        name = self.template.resource_name
+        if not name:
+            return
+        if not self.resources.exists():
+            ResourceTracker.objects.create(
+                character=self,
+                name=name,
+                capacity=self.resource_max,
+                current=self.resource_start
+            )
+        else:
+            resource = self.main_resource()
+            if self.resource_max != resource.capacity:
+                resource.capacity = self.resource_max
+                resource.save()
 
     def revisions(self):
         return Character.objects.filter(uuid=self.uuid).order_by('version')
@@ -527,5 +556,11 @@ class DowntimeAction(TimeStampedModel, CharacterTracker):
 
 
 class ResourceTracker(CharacterTracker):
-    pass
+    character = ForeignKey('sheets.Character', CASCADE, related_name='resources')
+    name = CharField(max_length=40)
+    capacity = PositiveSmallIntegerField(default=10)
+    current = PositiveSmallIntegerField(default=10)
+
+    def range_boxes(self):
+        return ((i, i <= self.current) for i in range(1, self.capacity + 1))
 

@@ -8,7 +8,7 @@ from django.contrib import admin
 from core.rest import router
 from core.views import Index, EditMyProfile
 from organization.views import AcceptInvite
-from sheets.views import RequestCharacter, DownloadAttachment, CharacterDetail, RequestApproval
+from sheets.views import RequestCharacter, DownloadAttachment, CharacterDetail, ResourceUpdateAjax
 
 logger = logging.getLogger(__name__)
 
@@ -45,9 +45,10 @@ urlpatterns = [
 
     # Dashboard links
     path('character/<int:pk>', CharacterDetail.as_view(), name="character-detail"),
+    path('update-resource/', ResourceUpdateAjax.as_view(), name="update-resource"),
 
     # Player Tools
-    path('character/<int:pk>/request-approval', RequestApproval.as_view(), name="request-approval"),
+    path('character/<int:pk>/request-approval', ResourceUpdateAjax.as_view(), name="request-approval"),
 
     # Main IndexView (homepage)
     path('', Index.as_view(), name='index'),

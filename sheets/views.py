@@ -8,7 +8,7 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import FormView, DetailView
 
-from .models import Character, ApprovalRequest
+from .models import Character, ApprovalRequest, ResourceTracker
 from organization.models import Chronicle
 from .forms import RequestCharacterForm, RequestApprovalForm
 
@@ -18,6 +18,7 @@ __all__ = (
     'RequestCharacter',
     'DownloadAttachment',
     'RequestApproval',
+    'ResourceUpdateAjax',
 )
 
 
@@ -95,5 +96,16 @@ class RequestApproval(FormView):
         context['character'] = get_object_or_404(Character, pk=self.kwargs['pk'])
         return context
 
+
+class ResourceUpdateAjax(View):
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.method == 'POST':
+            resource = get_object_or_404(ResourceTracker, pk=request.POST.get('pk'))
+            val = int(request.POST.get('val'))
+            if val != resource.current:
+                resource.current = val
+                resource.save()
+            return HttpResponse(status=200)
 
 

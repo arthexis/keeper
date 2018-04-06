@@ -103,6 +103,10 @@ ul.anchors {
     font-size: 125%;
 }
 
+.resource .box {
+    max-width: 9%;
+    zoom: 2;
+}
 
 
 
