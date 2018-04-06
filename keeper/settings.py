@@ -18,6 +18,8 @@ SITE_NAME = HEROKU_APP_NAME or 'keeper'
 
 SITE_DOMAIN = f'http://{HEROKU_APP_NAME}.herokuapp.com' if HEROKU_APP_NAME else 'http://localhost:8100'
 
+SITE_TITLE = 'Keeper'
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

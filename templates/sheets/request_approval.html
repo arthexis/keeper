@@ -6,7 +6,7 @@
     <form>
     {% csrf_token %}
     <div class="row">
-        <div class="col-lg-6">
+        <div class="col-lg-6 col-xs-12">
             <h2>{{ character.name }}</h2>
             <h4>{{ character.chronicle.name }}</h4>
             <hr>
@@ -26,6 +26,7 @@
                 <input type="text" id="id-detail" name="detail" class="form-control" >
                 <p>The specific trait you want (Strength, Dominate, Allies, etc.)</p>
             </div>
+
         <br>
 
             <div class="form-group">
@@ -43,8 +44,7 @@
 
         </div>
 
-
         </div>
     </div>
     </form>
-{% endblock %}
+{% endblock content %}

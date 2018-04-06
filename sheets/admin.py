@@ -183,7 +183,7 @@ class CharacterAdmin(SimpleActionsModel):
         ('resource_max', 'resource_name', lambda x: f'{x} Capacity'),
         ('resource_start', 'resource_name', lambda x: f'Starting {x}')
     )
-    change_form_template = 'sheets/change_form.html'
+    change_form_template = 'admin/sheets/change_form.html'
     change_actions = (
         'create_revision',
         'randomize',

@@ -1,69 +1,34 @@
-{% extends 'base.html' %}
-{% load bootstrap3 static %}
+{% extends 'base.html' %}{% load bootstrap3 static i18n %}
 
-{% block contenttitle %}Dashboard{% endblock %}
+{% block contenttitle %}{% trans 'Dashboard' %}{% endblock %}
 
 {% block content %}
   {% if membership %}
 
     {% if new_guide %}
-      {% include 'new_guide.html' %}
+      {% include 'index/new_guide.html' %}
     {% else %}
 
       <div class="row">
-        <div class="col-lg-8 col-xs-12">
 
-        {% if pending_approvals %}
-            {% include 'sheets/pending_approvals.html' %}
-        {% endif %}
-
-        <br>
-
-        {% if approved_characters %}
-            {% include 'sheets/approved_characters.html' %}
-        {% endif %}
-
+        <div class="col-lg-8 col-md-8 col-xs-12">
+            {% include 'index/dashboard.html' %}
         </div>
 
-        <div class="col-lg-4 col-xs-12">
-            <div class="panel panel-default">
-                <div class="panel-heading"><h4>Member Tools</h4></div>
-                <div class="panel-body form-group">
-                    <label for="chronicle-selector">Chronicle:</label>
-                    <select id="chronicle-selector" class="form-control">
-                        {% for chronicle in membership.organization.chronicles.all %}
-                            <option value="{{ chronicle.pk }}" data-request-url="{% url 'request' chronicle.pk %}">
-                                {{ chronicle.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <table class="table" id="member-tools">
-                    <tr>
-                        <td><a href="" id="request-character">Request new character</a></td>
-                    </tr>
-                </table>
-                <script>
-                    $(function () {
-                        var $chronicleSelector = $('#chronicle-selector'),
-                            $requestCharacter = $('#request-character')
-                        function updateTools() {
-                            var $chronicle = $chronicleSelector.find('option:selected')
-                            $requestCharacter.attr('href', $chronicle.data('request-url'))
-                        }
-                        updateTools()
-                    })
-                </script>
-            </div>
+        <div class="col-lg-4 col-md-4 col-xs-12">
+            {% include 'index/member_tools.html' %}
         </div>
 
       </div>
 
-    {% endif %}
+    {% endif %}{# new_guide #}
 
-  {% else %}
+  {% else %}{# not membership #}
+
     <h3>No membership is associated with this account</h3>
     <p>
       Please ask your <strong>Coordinator</strong> for an invitation link.
     </p>
-  {% endif %}
+
+  {% endif %}{# membership #}
 {% endblock %}

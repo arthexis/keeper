@@ -2,6 +2,7 @@
 <fieldset class="_module _aligned"
           id="fieldset-{% if stacked_prefix %}{{ stacked_prefix }}-{% endif %}{{ forloop.counter }}"
           style="background:transparent">
+
     {% if fieldset.name %}
         <legend>
             {% if 'collapse' in fieldset.classes %}
@@ -15,6 +16,7 @@
             {% endif %}
         </legend>
     {% endif %}
+
     <div class="fields {% if not errors %}{{ fieldset.classes }}{% endif %}">
         {% if fieldset.description %}
             <div class="description">{{ fieldset.description|safe }}</div>
@@ -54,4 +56,5 @@
             </div>
         {% endfor %}
     </div>
+
 </fieldset>

@@ -1,0 +1,32 @@
+<div class="panel panel-default">
+
+    <div class="panel-heading"><h4>Member Tools</h4></div>
+    <div class="panel-body form-group">
+        <label for="chronicle-selector">Chronicle:</label>
+        <select id="chronicle-selector" class="form-control">
+            {% for chronicle in membership.organization.chronicles.all %}
+                <option value="{{ chronicle.pk }}" data-request-url="{% url 'request' chronicle.pk %}">
+                    {{ chronicle.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <table class="table" id="member-tools">
+        <tr>
+            <td><a href="" id="request-character">Request new character</a></td>
+        </tr>
+    </table>
+
+    <script>
+        $(function () {
+            var $chronicleSelector = $('#chronicle-selector'),
+                $requestCharacter = $('#request-character')
+
+            function updateTools() {
+                var $chronicle = $chronicleSelector.find('option:selected')
+                $requestCharacter.attr('href', $chronicle.data('request-url'))
+            }
+            updateTools()
+        })
+    </script>
+
+</div>

@@ -1,29 +1,30 @@
-{% load bootstrap3 %}
+{% load bootstrap3 i18n %}
 
 <nav class="navbar navbar-inverse navbar-static-top">
 
-    <div class="navbar-header">
-        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-                data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-            <span class="sr-only">Toggle navigation</span>
-        </button>
-        <a class="navbar-brand" href="{% url 'index' %}">Keeper</a>
-    </div>
+    <div class="container">
 
-    <div class="collapse navbar-collapse">
-        <ul class="nav navbar-nav navbar-right">
-            <li><a href="{% url 'profile' %}">
-              Profile ({{ user.username }})
-            </a></li>
-            {% if user.is_staff %}
-                <li><a target="_blank" href="{% url 'admin:index' %}">
-                  Admin
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">{% trans 'Toggle navigation' %}</span>
+            </button>
+            <a class="navbar-brand" href="{% url 'index' %}">Keeper</a>
+        </div>
+
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="{% url 'profile' %}">
+                  {% trans 'Profile' %} ({{ user.username }})
                 </a></li>
-                <li><a target="_blank" href="{% url 'api-root' %}">
-                  API</a></li>
-            {% endif %}
-            <li><a href="{% url 'account_logout' %}">Logout</a></li>
-        </ul>
+                {% if user.is_staff %}
+                    <li><a target="_blank" href="{% url 'admin:index' %}">Admin</a></li>
+                    <li><a target="_blank" href="{% url 'api-root' %}">API</a></li>
+                {% endif %}
+                <li><a href="{% url 'account_logout' %}">{% trans 'Logout' %}</a></li>
+            </ul>
+        </div>
+
     </div>
 
 </nav>

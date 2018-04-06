@@ -1,0 +1,9 @@
+{% if pending_approvals %}
+    {% include 'sheets/pending_approvals.html' %}
+{% endif %}
+
+<br>
+
+{% if approved_characters %}
+    {% include 'sheets/approved_characters.html' %}
+{% endif %}

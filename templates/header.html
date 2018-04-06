@@ -1,0 +1,29 @@
+{% load i18n %}
+
+<div class="row header">
+
+    <div class="col-lg-6 col-md-6 col-xs-12">
+        <h1 class="content-title">
+            {% block actiontitle %}
+
+                {% if view.title %}
+                    {{ view.title }}
+                {% elif view.model_name %}
+                    {% if object %}
+                        <h1>{% trans 'Edit' %} {{ view.model_name }}</h1>
+                    {% else %}
+                        <h1>{% trans 'Create' %} {{ view.model_name }}</h1>
+                    {% endif %}
+                {% endif %}
+
+            {% endblock actiontitle %}
+        </h1>
+    </div>
+
+    <div class="col-lg-6 col-md-6 col-xs-12 organization-header">
+        {% block memberhead %}
+            {% if membership %}{{ membership.organization.name }}{% else %}{% endif %}
+        {% endblock memberhead %}
+    </div>
+
+</div>

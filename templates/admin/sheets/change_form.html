@@ -8,7 +8,7 @@
 
 {% block field_sets %}
   {% for fieldset in adminform %}
-    {% include "sheets/fieldset.html" with group_column_width=adminform|form_fieldset_column_width %}
+    {% include "admin/sheets/fieldset.html" with group_column_width=adminform|form_fieldset_column_width %}
   {% endfor %}
 {% endblock %}
 
