@@ -9,11 +9,11 @@ body {
     margin-bottom: 60px;
 }
 
-h1.content-title {
+.header h1 {
     margin-top: 5px;
 }
 
-.organization-header {
+.header .organization {
     text-align: right;
     padding-top: 10px;
     font-size: 1.5em;
@@ -39,6 +39,10 @@ h1.content-title {
 
 .main {
     margin-top: 20px;
+}
+
+.container.inner {
+    padding: 0
 }
 
 .text-center {

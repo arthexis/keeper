@@ -201,17 +201,25 @@ class Character(TimeStampedModel, StatusModel):
         return {v: getattr(self, k) for k, v in settings.ATTRIBUTES}
 
     def attribute_sections(self):
-        return {v: getattr(self, k) for k, v in settings.ATTRIBUTES}
+        section = []
+        for k, v in settings.ATTRIBUTES:
+            section.append((v, getattr(self, k)))
+            if len(section) == 3:
+                yield section
+                section = []
 
     def __getattribute__(self, name: str):
         if '_specialties' in name:
             skill = name.split('_specialties')[0]
-            qs = self.specialities.filter(skill=skill)
-            if qs.exists():
-                return ', '.join(qs.values_list('speciality', flat=True))
-            else:
-                return ''
+            return self.get_skill_specialities(skill)
         return super().__getattribute__(name)
+
+    def get_skill_specialities(self, skill):
+        qs = self.specialities.filter(skill=skill)
+        if qs.exists():
+            return ', '.join(qs.values_list('speciality', flat=True))
+        else:
+            return ''
 
     def powers_by_category(self):
         categories = []
@@ -228,6 +236,14 @@ class Character(TimeStampedModel, StatusModel):
             if anchors:
                 categories.append((category.name, anchors))
         return categories
+
+    def skill_sections(self):
+        section = []
+        for k, v in settings.SKILLS:
+            section.append((v, getattr(self, k), self.get_skill_specialities(k)))
+            if len(section) == 8:
+                yield section
+                section = []
 
     # Methods related to revisions and approvals
 
