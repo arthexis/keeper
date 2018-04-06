@@ -11,22 +11,7 @@
 
 {% block content %}
 
-    <div class="row">
-        {% include 'sheets/column.html' with title="Template" value=character.template %}
-        {% include 'sheets/column.html' with title="Chronicle" value=character.chronicle.name %}
-        {% include 'sheets/column.html' with title="Player" value=character.user %}
-    </div>
-    <div class="row">
-        {% include 'sheets/column.html' with title=character.primary_anchor_name value=character.primary_anchor %}
-        {% include 'sheets/column.html' with title=character.secondary_anchor_name value=character.secondary_anchor %}
-        {% include 'sheets/column.html' with title="Concept" value=character.concept %}
-    </div>
-    <div class="row">
-        {% for splat, value in character.splats %}
-            {% include 'sheets/column.html' with title=splat value=value %}
-        {% endfor %}
-        {% include 'sheets/column.html' with title=character.template.character_group_name value=character.character_group %}
-    </div>
+    {% include 'sheets/basic_info.html' %}
     <br><hr>
 
     <div class="row">
@@ -43,14 +28,14 @@
 
         <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
             <hr>
-            <div class="container" style="padding: 0">
+            <div class="container inner">
                 {% include 'sheets/skills.html' %}
             </div>
         </div>
 
         <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
             <hr>
-            <div class="container" style="padding: 0">
+            <div class="container inner">
                 {% include 'sheets/powers.html' %}
                 {% include 'sheets/merits.html' %}
                 {% include 'sheets/anchors.html' %}
@@ -88,19 +73,19 @@
         {% if character.user == user %}
 
             <div class="col-lg-2 col-xs-6">
-                <a class="btn btn-default" style="width: 100%"
-                        href="{% url 'request-approval' character.pk %}">
+                <a class="btn btn-default" href="{% url 'request-approval' character.pk %}">
                     Request Approval</a>
             </div>
 
         {% endif %}
 
         {% if user.is_staff %}
+
             <div class="col-lg-2 col-xs-6">
-                <a class="btn btn-default" style="width: 100%"
-                   href="{% url 'admin:sheets_character_change' character.pk %}">
+                <a class="btn btn-default" href="{% url 'admin:sheets_character_change' character.pk %}">
                     Edit as Admin</a>
             </div>
+
         {% endif %}
 
 

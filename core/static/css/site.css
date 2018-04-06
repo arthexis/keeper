@@ -18,11 +18,9 @@ h1.content-title {
     padding: 5px;
 }
 
-
 .facebook-login-btn {
     width: 100%;
     background-color: #4267b2;
-
 }
 
 .alert-dismissable .close {
@@ -35,6 +33,10 @@ h1.content-title {
 
 .container.main {
     margin-top: 20px;
+}
+
+.container.inner {
+    padding: 0
 }
 
 .text-center {

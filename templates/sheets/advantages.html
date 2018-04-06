@@ -3,26 +3,26 @@
     <h3 class="power-title">Advantages</h3>
     <div class="container" style="padding: 0">
         <div class="row">
-            {% include 'sheets/column_dots.html' with title=character.template.power_stat_name value=character.power_stat cap=ten %}
+            {% include 'sheets/col/dots.html' with title=character.template.power_stat_name value=character.power_stat cap=ten %}
         </div>
         <div class="row">
-            {% include 'sheets/column_dots.html' with title=character.template.integrity_name value=character.integrity cap=ten %}
+            {% include 'sheets/col/dots.html' with title=character.template.integrity_name value=character.integrity cap=ten %}
         </div>
         <div class="row">
-            {% include 'sheets/column_dots.html' with title="Willpower" value=character.willpower cap=ten %}
+            {% include 'sheets/col/dots.html' with title="Willpower" value=character.willpower cap=ten %}
         </div>
         <div class="row">
-            {% include 'sheets/column_dots.html' with title="Size" value=character.size cap=ten %}
+            {% include 'sheets/col/dots.html' with title="Size" value=character.size cap=ten %}
         </div>
         <div class="row">
             {% if character.health > 10 %}
-                {% include 'sheets/column_dots.html' with title="Health" value=character.health cap=twenty %}
+                {% include 'sheets/col/dots.html' with title="Health" value=character.health cap=twenty %}
             {% else %}
-                {% include 'sheets/column_dots.html' with title="Health" value=character.health cap=ten %}
+                {% include 'sheets/col/dots.html' with title="Health" value=character.health cap=ten %}
             {% endif %}
         </div>
         <div class="row">
-            {% include 'sheets/column_dots.html' with title="Defense" value=character.defense cap=ten %}
+            {% include 'sheets/col/dots.html' with title="Defense" value=character.defense cap=ten %}
         </div>
     </div>
 </div>

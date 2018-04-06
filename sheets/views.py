@@ -72,7 +72,7 @@ class DownloadAttachment(View):
 
 class CharacterDetail(DetailView):
     model = Character
-    template_name = 'sheets/character_detail.html'
+    template_name = 'sheets/character.html'
     context_object_name = 'character'
 
     def get_context_data(self, **kwargs):

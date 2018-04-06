@@ -1,44 +1,17 @@
-<div class="col-md-4">
-    <div class="container" style="padding: 0">
-        <div class="row">
-            {% include 'sheets/column_dots.html' with title="Intelligence" value=character.intelligence cap=ten %}
-        </div>
-        <div class="row">
-            {% include 'sheets/column_dots.html' with title="Wits" value=character.wits cap=ten %}
-        </div>
-        <div class="row">
-            {% include 'sheets/column_dots.html' with title="Resolve" value=character.resolve cap=ten %}
-        </div>
-    </div>
-    <br>
-</div>
 
-<div class="col-md-4">
-    <div class="container" style="padding: 0">
-        <div class="row">
-            {% include 'sheets/column_dots.html' with title="Strength" value=character.strength cap=ten %}
-        </div>
-        <div class="row">
-            {% include 'sheets/column_dots.html' with title="Dexterity" value=character.dexterity cap=ten %}
-        </div>
-        <div class="row">
-            {% include 'sheets/column_dots.html' with title="Stamina" value=character.stamina cap=ten %}
-        </div>
-    </div>
-    <br>
-</div>
+{% for section in character.attribute_sections %}
 
-<div class="col-md-4">
-    <div class="container" style="padding: 0">
-        <div class="row">
-            {% include 'sheets/column_dots.html' with title="Presence" value=character.presence cap=ten %}
+    <div class="col-lg-4 col-md-4 col-xs-12">
+        <div class="container inner">
+            {% for title, value in section %}
+                <div class="row">
+                    {% include 'sheets/col/dots.html' with title=title value=value cap=ten %}
+                </div>
+            {% endfor %}
         </div>
-        <div class="row">
-            {% include 'sheets/column_dots.html' with title="Manipulation" value=character.manipulation cap=ten %}
-        </div>
-        <div class="row">
-            {% include 'sheets/column_dots.html' with title="Composure" value=character.composure cap=ten %}
-        </div>
+        <br>
     </div>
-    <br>
-</div>
+
+{% endfor %}
+
+

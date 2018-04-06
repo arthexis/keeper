@@ -1,0 +1,21 @@
+
+{% with c=character %}
+
+    <div class="row">
+        {% include 'sheets/col/base.html' with title="Template" value=c.template %}
+        {% include 'sheets/col/base.html' with title="Chronicle" value=c.chronicle.name %}
+        {% include 'sheets/col/base.html' with title="Player" value=c.user %}
+    </div>
+    <div class="row">
+        {% include 'sheets/col/base.html' with title=c.primary_anchor_name value=c.primary_anchor %}
+        {% include 'sheets/col/base.html' with title=c.secondary_anchor_name value=c.secondary_anchor %}
+        {% include 'sheets/col/base.html' with title="Concept" value=c.concept %}
+    </div>
+    <div class="row">
+        {% for splat, value in character.splats %}
+            {% include 'sheets/col/base.html' with title=splat value=value %}
+        {% endfor %}
+        {% include 'sheets/col/base.html' with title=c.template.character_group_name value=c.character_group %}
+    </div>
+
+{% endwith %}
