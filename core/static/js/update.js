@@ -33,7 +33,10 @@ function update(url, id, field, value) {
             id: id,
             field: field,
             value: value
-        }
+        },
+        success: (function () {
+            console.log('Updated ' + field + " = " + value + " in #" + id)
+        })
     })
 }
 

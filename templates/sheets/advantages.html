@@ -69,7 +69,7 @@
                             if (timeout) window.clearTimeout(timeout)
                             timeout = window.setTimeout(function () {
                                 update('{% url 'update-resource' %}', pk, 'current', value)
-                            }, 1000)
+                            }, 500)
                         } else {
                             event.preventDefault()
                         }
