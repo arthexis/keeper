@@ -1,0 +1,32 @@
+{% load i18n %}
+
+<div class="row">
+    <div class="col-lg-12">
+        <h3 class="power-title">{% trans 'Tools' %}</h3>
+    </div>
+</div>
+
+<hr>
+<div class="row">
+
+    {% if character.user == user %}
+
+        <div class="col-lg-2 col-xs-6">
+            <a class="btn btn-default full-width" href="{% url 'request-approval' character.pk %}">
+                {% trans 'Request Approval' %}</a>
+        </div>
+
+    {% endif %}
+
+    {% if user.is_staff %}
+
+        <div class="col-lg-2 col-xs-6">
+            <a class="btn btn-default full-width" target="_blank"
+               href="{% url 'admin:sheets_character_change' character.pk %}">
+                {% trans 'Edit as Admin' %}</a>
+        </div>
+
+    {% endif %}
+
+
+</div>

@@ -38,7 +38,11 @@
                     {% if approval.is_prestige %}
                         <td>Prestige {{ approval.prestige_level }}</td>
                     {% else %}
-                        <td>{{ approval.total_cost }} XP</td>
+                        {% if approval.total_cost %}
+                            <td>{{ approval.total_cost }} XP</td>
+                        {% else %}
+                            <td>N/A</td>
+                        {% endif %}
                     {% endif %}
                     <td>{{ approval.get_status_display }}</td>
                     <td>{{ approval.modified|date:"Y-m-d" }}</td>

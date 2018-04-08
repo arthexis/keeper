@@ -302,13 +302,15 @@ class Character(TimeStampedModel, StatusModel):
 
     def save(self, **kwargs):
         self.update_derived_traits()
-        self.create_or_update_resources()
 
         # When a sheet becomes approved, all other approved sheets for the same character are archived
         if self.status == 'approved':
             self.revisions().filter(status='approved').update(status='archived')
             self.approval_requests.filter(status='pending').update(status='complete')
         super().save(**kwargs)
+
+        # Stuff that needs to happen after the original charcter is already saved
+        self.create_or_update_resources()
 
     def main_resource(self) -> 'ResourceTracker':
         return self.resources.filter(name=self.template.resource_name).first()
