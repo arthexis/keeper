@@ -2,7 +2,7 @@ from rest_framework import routers, serializers, viewsets
 from rest_framework.relations import StringRelatedField
 
 from organization.models import Organization
-from sheets.models import Character, ApprovalRequest
+from sheets.models import Character, ApprovalRequest, ResourceTracker
 from game_rules.models import Merit
 
 
@@ -23,7 +23,7 @@ class CharacterSerializer(serializers.HyperlinkedModelSerializer):
         )
 
 
-class MeritSerializer(serializers.HyperlinkedModelSerializer):
+class MeritSerializer(serializers.ModelSerializer):
     class Meta:
         model = Merit
         fields = ('name',)
@@ -44,6 +44,12 @@ class ApprovalSerializer(serializers.HyperlinkedModelSerializer):
         )
 
 
+class ResourceSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = ResourceTracker
+        fields = ('id', 'name', 'capacity', 'current', 'character')
+
+
 # View sets
 
 
@@ -52,12 +58,12 @@ class CharacterViewSet(viewsets.ModelViewSet):
     serializer_class = CharacterSerializer
 
 
-class MeritViewSet(viewsets.ModelViewSet):
+class MeritViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Merit.objects.all()
     serializer_class = MeritSerializer
 
 
-class OrganizationViewSet(viewsets.ModelViewSet):
+class OrganizationViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Organization.objects.all()
     serializer_class = OrganizationSerializer
 
@@ -67,8 +73,14 @@ class ApprovalViewSet(viewsets.ModelViewSet):
     serializer_class = ApprovalSerializer
 
 
+class ResourceViewSet(viewsets.ModelViewSet):
+    queryset = ResourceTracker.objects.all()
+    serializer_class = ResourceSerializer
+
+
 router = routers.DefaultRouter()
 router.register(r'character', CharacterViewSet)
 router.register(r'merit', MeritViewSet)
 router.register(r'organization', OrganizationViewSet)
 router.register(r'approval', ApprovalViewSet)
+router.register(r'resource', ResourceViewSet)

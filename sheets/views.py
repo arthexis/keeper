@@ -2,12 +2,13 @@ import logging
 
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import FormView, DetailView
 
+from core.views import UpdateAjax
 from .models import Character, ApprovalRequest, ResourceTracker
 from organization.models import Chronicle
 from .forms import RequestCharacterForm, RequestApprovalForm
@@ -102,15 +103,7 @@ class RequestApproval(FormView):
         return context
 
 
-class ResourceUpdateAjax(View):
-
-    def dispatch(self, request, *args, **kwargs):
-        if request.method == 'POST':
-            resource = get_object_or_404(ResourceTracker, pk=request.POST.get('pk'))
-            val = int(request.POST.get('val'))
-            if val != resource.current:
-                resource.current = val
-                resource.save()
-            return HttpResponse(status=200)
-
+class ResourceUpdateAjax(UpdateAjax):
+    model = ResourceTracker
+    fields = ['current']
 

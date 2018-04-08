@@ -561,6 +561,9 @@ class ResourceTracker(CharacterTracker):
     capacity = PositiveSmallIntegerField(default=10)
     current = PositiveSmallIntegerField(default=10)
 
+    class Meta:
+        unique_together = ('name', 'character')
+
     def range_boxes(self):
         return ((i, i <= self.current) for i in range(1, self.capacity + 1))
 

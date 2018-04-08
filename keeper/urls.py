@@ -45,7 +45,9 @@ urlpatterns = [
 
     # Dashboard links
     path('character/<int:pk>', CharacterDetail.as_view(), name="character-detail"),
-    path('update-resource/', ResourceUpdateAjax.as_view(), name="update-resource"),
+
+    # Ajax views
+    path('ajax/update-resource/', ResourceUpdateAjax.as_view(), name="update-resource"),
 
     # Player Tools
     path('character/<int:pk>/request-approval', ResourceUpdateAjax.as_view(), name="request-approval"),

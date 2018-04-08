@@ -38,11 +38,10 @@
             {% for resource in c.resources.all %}
 
                 <div class="row resource">
-                    <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12 full-width"
+                    <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12"
                             data-current="{{ resource.current }}"
                             data-original="{{ resource.current }}"
-                            data-pk="{{ resource.pk }}"
-                    >
+                            data-pk="{{ resource.pk }}" >
                         <h3 class="power-title">{{ resource.name }}</h3>
                         {% for box, checked in resource.range_boxes %}
                             <input type="checkbox" class="box"
@@ -62,24 +61,14 @@
                         var $resource = $(this).parent(),
                             current = $resource.data('current'),
                             value = $(this).data('num'),
-                            checked = $(this).prop('checked')
+                            checked = $(this).prop('checked'),
+                            pk = $resource.data('pk')
                         if (current == value || current + 1 == value) {
-                            if (!checked) {
-                                value--
-                            }
+                            if (!checked) value--
                             $resource.data('current', value)
-                            if (timeout) {
-                                window.clearTimeout(timeout)
-                            }
+                            if (timeout) window.clearTimeout(timeout)
                             timeout = window.setTimeout(function () {
-                                $.ajax({
-                                    url: "{% url 'update-resource' %}",
-                                    method: 'post',
-                                    data: {
-                                        pk: $resource.data('pk'),
-                                        val: value
-                                    }
-                                })
+                                update('{% url 'update-resource' %}', pk, 'current', value)
                             }, 1000)
                         } else {
                             event.preventDefault()

@@ -107,6 +107,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.facebook',
+    'guardian',
 ] + LOCAL_APPS
 
 MIDDLEWARE = [
@@ -210,6 +211,7 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
     'core.auth.backends.AdminBackend',
+    'guardian.backends.ObjectPermissionBackend',
 ]
 
 
@@ -308,7 +310,7 @@ REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+        'rest_framework.permissions.DjangoObjectPermissions'
     ]
 }
 

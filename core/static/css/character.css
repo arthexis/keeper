@@ -5,7 +5,7 @@
 .character {
     border-radius: 10px;
     background: white;
-    padding: 10px;
+    padding: 5px 15px 5px 10px;
 }
 
 .inline-dots {
@@ -105,6 +105,7 @@ ul.anchors {
 
 .resource .box {
     max-width: 9%;
+    min-width: 2%;
     zoom: 2;
 }
 

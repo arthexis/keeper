@@ -1,8 +1,10 @@
 import logging
 
 from django.contrib import messages
-from django.shortcuts import redirect
+from django.http import Http404, HttpResponse
+from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy
+from django.views import View
 from django.views.generic import TemplateView, UpdateView
 
 from .models import UserProfile
@@ -12,6 +14,7 @@ logger = logging.getLogger(__name__)
 __all__ = (
     'Index',
     'EditMyProfile',
+    'UpdateAjax',
 )
 
 
@@ -58,5 +61,28 @@ class EditMyProfile(UpdateView):
         return super().form_valid(form)
 
 
+class UpdateAjax(View):
+    model = None
+    owner_field = 'user'
+    fields = []
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.method != 'POST' or request.user.is_anonymous:
+            return HttpResponse(status=401)
+        pk = request.POST.get('pk', None) or request.POST.get('id')
+        obj = get_object_or_404(self.model, pk=pk)
+        owner = getattr(obj, self.owner_field, None)
+        if owner and request.user != owner and not request.user.is_superuser:
+            return HttpResponse(status=403)
+        self.update(request, obj, request.POST)
+        return HttpResponse()
+
+    def update(self, request, obj, data):
+        field = data.get('field')
+        if field in self.fields:
+            val = data.get('value')
+            if getattr(obj, field) != val:
+                setattr(obj, field, val)
+                obj.save()
 
 
