@@ -122,8 +122,8 @@ class Character(TimeStampedModel, StatusModel):
     chronicle = ForeignKey(Chronicle, SET_NULL, null=True, blank=True, related_name='characters')
 
     # Tracking of spent resources
-    willpower = DotsField()
-    health = DotsField(number=20, break_after=10)
+    willpower_max = DotsField()
+    health_boxes = DotsField(number=20, break_after=10)
 
     # Character Anchors (ie. Virtue / Vice)
     primary_anchor = CharField(max_length=40, blank=True)
@@ -288,8 +288,8 @@ class Character(TimeStampedModel, StatusModel):
         self.initiative = (self.dexterity + self.composure)
         self.resource_max = (self.resource_max * 2)
         self.resource_start = self.resource_start // 2
-        self.health = self.size + self.stamina
-        self.willpower = self.resolve + self.composure
+        self.health_boxes = self.size + self.stamina
+        self.willpower_max = self.resolve + self.composure
 
     def update_derived_traits(self):
         self.size = self.size or 5
@@ -297,8 +297,8 @@ class Character(TimeStampedModel, StatusModel):
         self.initiative = self.initiative or (self.dexterity + self.composure)
         self.resource_max = self.resource_max or 8 + (self.resource_max * 2)
         self.resource_start = self.resource_start or self.resource_start // 2
-        self.health = self.health or self.size + self.stamina
-        self.willpower = self.willpower or self.resolve + self.composure
+        self.health_boxes = self.health_boxes or self.size + self.stamina
+        self.willpower_max = self.willpower_max or self.resolve + self.composure
 
     def save(self, **kwargs):
         self.update_derived_traits()
@@ -313,6 +313,9 @@ class Character(TimeStampedModel, StatusModel):
     def main_resource(self) -> 'ResourceTracker':
         return self.resources.filter(name=self.template.resource_name).first()
 
+    def willpower(self) -> 'ResourceTracker':
+        return self.resources.filter(name='Willpower').first()
+
     def create_or_update_resources(self):
         name = self.template.resource_name
         if not name:
@@ -324,11 +327,21 @@ class Character(TimeStampedModel, StatusModel):
                 capacity=self.resource_max,
                 current=self.resource_start
             )
+            ResourceTracker.objects.create(
+                character=self,
+                name='Willpower',
+                capacity=self.willpower_max,
+                current=self.willpower_max
+            )
         else:
             resource = self.main_resource()
             if self.resource_max != resource.capacity:
                 resource.capacity = self.resource_max
                 resource.save()
+            willpower = self.willpower()
+            if self.willpower_max != willpower.capacity:
+                willpower.capacity = self.willpower_max
+                willpower.save()
 
     def revisions(self):
         return Character.objects.filter(uuid=self.uuid).order_by('version')
@@ -563,6 +576,10 @@ class ResourceTracker(CharacterTracker):
 
     class Meta:
         unique_together = ('name', 'character')
+        verbose_name ='Resource'
+
+    def __str__(self):
+        return self.name
 
     def range_boxes(self):
         return ((i, i <= self.current) for i in range(1, self.capacity + 1))

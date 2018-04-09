@@ -5,7 +5,7 @@ from core.admin import SimpleActionsModel
 from sheets.forms import CharacterAdminForm
 from game_rules.models import PowerCategory, Power, SplatCategory, Splat, TemplateAnchor, PowerOption
 from sheets.models import ApprovalRequest, Character, CharacterMerit, SkillSpeciality, CharacterPower, \
-    CharacterAnchor, Advancement, DowntimeAction
+    CharacterAnchor, Advancement, DowntimeAction, ResourceTracker
 from django.forms.widgets import HiddenInput
 from game_rules.admin import ParentInlineMixin
 from game_rules.fields import DotsField
@@ -114,11 +114,17 @@ class BaseAnchorInline(ParentInlineMixin):
         return TemplateAnchor.objects.filter(character_template=self.character_template)
 
 
+class ResourceTrackerInline(admin.TabularInline):
+    model = ResourceTracker
+    fields = ('name', 'capacity', 'current')
+    extra = 0
+
+
 @admin.register(Character)
 class CharacterAdmin(SimpleActionsModel):
     model = Character
     form = CharacterAdminForm
-    inlines = (SkillSpecialityInline, MeritInline,)
+    inlines = (SkillSpecialityInline, MeritInline, ResourceTrackerInline)
     fieldsets = (
         (None, {
             'fields': (
@@ -157,7 +163,7 @@ class CharacterAdmin(SimpleActionsModel):
             'description': "If left blank, advantages will be calculated automatically on save.",
             'fields': (
                 ('integrity', 'power_stat', 'resource_max',),
-                ('willpower', 'health', 'resource_start'),
+                ('willpower_max', 'health_boxes', 'resource_start'),
                 ('size', 'speed', 'initiative'),
             ),
         }),
