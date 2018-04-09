@@ -318,15 +318,21 @@ class Character(TimeStampedModel, StatusModel):
 
     def create_or_update_resources(self):
         name = self.template.resource_name
-        if not name:
-            return
-        if not self.resources.exists():
-            ResourceTracker.objects.create(
-                character=self,
-                name=name,
-                capacity=self.resource_max,
-                current=self.resource_start
-            )
+        if name:
+            if not self.main_resource():
+                ResourceTracker.objects.create(
+                    character=self,
+                    name=name,
+                    capacity=self.resource_max,
+                    current=self.resource_start
+                )
+            else:
+                resource = self.main_resource()
+                if self.resource_max != resource.capacity:
+                    resource.capacity = self.resource_max
+                    resource.save()
+
+        if not self.willpower():
             ResourceTracker.objects.create(
                 character=self,
                 name='Willpower',
@@ -334,10 +340,6 @@ class Character(TimeStampedModel, StatusModel):
                 current=self.willpower_max
             )
         else:
-            resource = self.main_resource()
-            if self.resource_max != resource.capacity:
-                resource.capacity = self.resource_max
-                resource.save()
             willpower = self.willpower()
             if self.willpower_max != willpower.capacity:
                 willpower.capacity = self.willpower_max
@@ -570,7 +572,7 @@ class DowntimeAction(TimeStampedModel, CharacterTracker):
 
 class ResourceTracker(CharacterTracker):
     character = ForeignKey('sheets.Character', CASCADE, related_name='resources')
-    name = CharField(max_length=40)
+    name = CharField(max_length=40, editable=False)
     capacity = PositiveSmallIntegerField(default=10)
     current = PositiveSmallIntegerField(default=10)
 

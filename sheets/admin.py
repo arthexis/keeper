@@ -117,6 +117,7 @@ class BaseAnchorInline(ParentInlineMixin):
 class ResourceTrackerInline(admin.TabularInline):
     model = ResourceTracker
     fields = ('name', 'capacity', 'current')
+    readonly_fields = ('name', )
     extra = 0
 
 
