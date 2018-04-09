@@ -4,7 +4,8 @@ import uuid
 import os.path
 
 from django.db.models import Model, CharField, ForeignKey, TextField, PositiveIntegerField, \
-    PROTECT, DO_NOTHING, CASCADE, UUIDField, SET_NULL, Manager, BinaryField, PositiveSmallIntegerField, Sum
+    PROTECT, DO_NOTHING, CASCADE, UUIDField, SET_NULL, Manager, BinaryField, PositiveSmallIntegerField, Sum, \
+    OneToOneField
 from django.contrib.auth.models import User, Group
 from django.shortcuts import redirect
 from django.conf import settings
@@ -578,7 +579,7 @@ class ResourceTracker(CharacterTracker):
 
     class Meta:
         unique_together = ('name', 'character')
-        verbose_name ='Resource'
+        verbose_name = 'Resource'
 
     def __str__(self):
         return self.name
@@ -586,3 +587,19 @@ class ResourceTracker(CharacterTracker):
     def range_boxes(self):
         return ((i, i <= self.current) for i in range(1, self.capacity + 1))
 
+
+class HealthTracker(CharacterTracker):
+    character = OneToOneField('sheets.Character', CASCADE, related_name='resources')
+    capacity = PositiveSmallIntegerField(default=10)
+    bashing_damage = PositiveSmallIntegerField(default=10)
+    lethal_damage = PositiveSmallIntegerField(default=10)
+    aggravated_damage = PositiveSmallIntegerField(default=10)
+
+    class Meta:
+        verbose_name = 'Health'
+
+    def __str__(self):
+        return 'Health'
+
+    # def range_boxes(self):
+    #     return ((i, i <= self.current) for i in range(1, self.capacity + 1))
