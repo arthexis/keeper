@@ -589,7 +589,7 @@ class ResourceTracker(CharacterTracker):
 
 
 class HealthTracker(CharacterTracker):
-    character = OneToOneField('sheets.Character', CASCADE, related_name='resources')
+    character = OneToOneField('sheets.Character', CASCADE, related_name='health')
     capacity = PositiveSmallIntegerField(default=10)
     bashing_damage = PositiveSmallIntegerField(default=10)
     lethal_damage = PositiveSmallIntegerField(default=10)
