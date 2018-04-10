@@ -109,5 +109,33 @@ ul.anchors {
     zoom: 2;
 }
 
+.health .box {
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    margin-right: 2px;
+    border: black 1px solid;
+    text-align: center;
+    padding-top: 5px;
+}
+
+.health-buttons .form-control {
+    max-width: 15%;
+    display: inline-block;
+    font-size: 14px;
+    margin-right: 1px;
+    padding: 3px;
+    height: 24px;
+    font-weight: bolder;
+}
+
+span.damage {
+    font-size: 18px;
+    line-height: 70%;
+}
+
+.damage-N {
+    color: white;
+}
 
 

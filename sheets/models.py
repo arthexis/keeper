@@ -5,7 +5,7 @@ import os.path
 
 from django.db.models import Model, CharField, ForeignKey, TextField, PositiveIntegerField, \
     PROTECT, DO_NOTHING, CASCADE, UUIDField, SET_NULL, Manager, BinaryField, PositiveSmallIntegerField, Sum, \
-    OneToOneField
+    OneToOneField, F
 from django.contrib.auth.models import User, Group
 from django.shortcuts import redirect
 from django.conf import settings
@@ -22,6 +22,7 @@ from keeper.settings import ATTRIBUTE_KEYS, SKILLS, SKILL_KEYS
 from game_rules.fields import DotsField
 from keeper.utils import missing
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -34,6 +35,8 @@ __all__ = (
     "SkillSpeciality",
     "Advancement",
     'DowntimeAction',
+    'ResourceTracker',
+    'HealthTracker',
 )
 
 
@@ -130,7 +133,7 @@ class Character(TimeStampedModel, StatusModel):
     primary_anchor = CharField(max_length=40, blank=True)
     secondary_anchor = CharField(max_length=40, blank=True)
 
-    # Versioning fields. The highest number is the latest version
+    # Version fields. The highest number is the latest version
     version = PositiveIntegerField(default=0)
     active = QueryManager(status__in=('in_progress', 'approved'))
 
@@ -281,7 +284,7 @@ class Character(TimeStampedModel, StatusModel):
 
     @staticmethod
     def get_character_trackers():
-        return ApprovalRequest, Advancement, DowntimeAction, ResourceTracker
+        return ApprovalRequest, Advancement, DowntimeAction, ResourceTracker, HealthTracker
 
     def reset_derived_traits(self):
         self.size = 5
@@ -303,13 +306,14 @@ class Character(TimeStampedModel, StatusModel):
 
     def save(self, **kwargs):
         self.update_derived_traits()
-        self.create_or_update_resources()
 
         # When a sheet becomes approved, all other approved sheets for the same character are archived
         if self.status == 'approved':
             self.revisions().filter(status='approved').update(status='archived')
             self.approval_requests.filter(status='pending').update(status='complete')
         super().save(**kwargs)
+
+        self.create_or_update_resources()
 
     def main_resource(self) -> 'ResourceTracker':
         return self.resources.filter(name=self.template.resource_name).first()
@@ -318,33 +322,40 @@ class Character(TimeStampedModel, StatusModel):
         return self.resources.filter(name='Willpower').first()
 
     def create_or_update_resources(self):
-        name = self.template.resource_name
-        if name:
-            if not self.main_resource():
-                ResourceTracker.objects.create(
-                    character=self,
-                    name=name,
-                    capacity=self.resource_max,
-                    current=self.resource_start
-                )
-            else:
-                resource = self.main_resource()
-                if self.resource_max != resource.capacity:
-                    resource.capacity = self.resource_max
-                    resource.save()
-
-        if not self.willpower():
-            ResourceTracker.objects.create(
-                character=self,
-                name='Willpower',
-                capacity=self.willpower_max,
-                current=self.willpower_max
+        resource_name = self.template.resource_name
+        if resource_name:
+            self._create_or_update_resource(
+                cls=ResourceTracker,
+                field=self.main_resource(),
+                capacity=self.resource_max,
+                current=self.resource_max,
+                name=resource_name,
             )
+
+        self._create_or_update_resource(
+            cls=ResourceTracker,
+            field=self.willpower(),
+            capacity=self.willpower_max,
+            current=self.willpower_max,
+            name='Willpower',
+        )
+
+        self._create_or_update_resource(
+            cls=HealthTracker,
+            field='health',
+            capacity=self.health_boxes
+        )
+
+    def _create_or_update_resource(self, cls, field, capacity, **kwargs):
+        params = {'character': self, 'capacity': capacity, **kwargs}
+        if isinstance(field, str):
+            field = getattr(self, field, None)
+        if not field:
+            cls.objects.create(**params)
         else:
-            willpower = self.willpower()
-            if self.willpower_max != willpower.capacity:
-                willpower.capacity = self.willpower_max
-                willpower.save()
+            if capacity != field.capacity:
+                field.capacity = capacity
+                field.save()
 
     def revisions(self):
         return Character.objects.filter(uuid=self.uuid).order_by('version')
@@ -384,7 +395,7 @@ class Character(TimeStampedModel, StatusModel):
         self.reset_derived_traits()
         self.save()
 
-    def add_random_traits(self, traits, dots):
+    def add_random_traits(self, traits, dots) -> None:
         while dots > 0:
             trait = random.choice(traits)
             trait_value = getattr(self, trait)
@@ -588,18 +599,62 @@ class ResourceTracker(CharacterTracker):
         return ((i, i <= self.current) for i in range(1, self.capacity + 1))
 
 
-class HealthTracker(CharacterTracker):
+class HealthTracker(Model):
     character = OneToOneField('sheets.Character', CASCADE, related_name='health')
     capacity = PositiveSmallIntegerField(default=10)
-    bashing_damage = PositiveSmallIntegerField(default=10)
-    lethal_damage = PositiveSmallIntegerField(default=10)
-    aggravated_damage = PositiveSmallIntegerField(default=10)
+    bashing_damage = PositiveSmallIntegerField(default=0)
+    lethal_damage = PositiveSmallIntegerField(default=0)
+    aggravated_damage = PositiveSmallIntegerField(default=0)
+    resistant_damage = PositiveSmallIntegerField(default=0)
 
     class Meta:
         verbose_name = 'Health'
+        verbose_name_plural = 'Health'
 
     def __str__(self):
         return 'Health'
 
-    # def range_boxes(self):
-    #     return ((i, i <= self.current) for i in range(1, self.capacity + 1))
+    def range_boxes(self):
+        return ((i, self.get_box(i)) for i in range(1, self.capacity + 1))
+
+    def get_box(self, i: int) -> str:
+        if self.aggravated_damage >= i:
+            return 'A'
+        if self.lethal_damage + self.aggravated_damage >= i:
+            return 'L'
+        if self.bashing_damage + self.lethal_damage + self.aggravated_damage >= i:
+            return 'B'
+        return 'N'
+
+    def total_damage(self):
+        return int(self.aggravated_damage + self.lethal_damage + self.bashing_damage)
+
+    def take_action(self, action):
+        total = original = self.total_damage()
+        if action == '+A':
+            self.aggravated_damage = F('aggravated_damage') + 1
+            total += 1
+        elif action == '+L':
+            self.lethal_damage = F('lethal_damage') + 1
+            total += 1
+        elif action == '+B':
+            self.bashing_damage = F('bashing_damage') + 1
+            total += 1
+        elif action == '-A' and self.aggravated_damage:
+            self.aggravated_damage = F('aggravated_damage') - 1
+        elif action == '-L' and self.lethal_damage:
+            self.lethal_damage = F('lethal_damage') - 1
+        elif action == '-B' and self.bashing_damage:
+            self.bashing_damage = F('bashing_damage') - 1
+        else:
+            return
+        if total > original:
+            while total > self.capacity:
+                if self.bashing_damage:
+                    self.bashing_damage = F('bashing_damage') - 1
+                elif self.lethal_damage:
+                    self.lethal_damage = F('lethal_damage') - 1
+                elif self.aggravated_damage:
+                    self.aggravated_damage = F('aggravated_damage') - 1
+                total -= 1
+        self.save()

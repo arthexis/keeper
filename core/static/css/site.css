@@ -71,4 +71,7 @@ hr {
     width: 100%;
 }
 
+#content .panel-heading {
+    background-color: #d2d2df
+}
 

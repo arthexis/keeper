@@ -5,7 +5,7 @@ from core.admin import SimpleActionsModel
 from sheets.forms import CharacterAdminForm
 from game_rules.models import PowerCategory, Power, SplatCategory, Splat, TemplateAnchor, PowerOption
 from sheets.models import ApprovalRequest, Character, CharacterMerit, SkillSpeciality, CharacterPower, \
-    CharacterAnchor, Advancement, DowntimeAction, ResourceTracker
+    CharacterAnchor, Advancement, DowntimeAction, ResourceTracker, HealthTracker
 from django.forms.widgets import HiddenInput
 from game_rules.admin import ParentInlineMixin
 from game_rules.fields import DotsField
@@ -121,11 +121,17 @@ class ResourceTrackerInline(admin.TabularInline):
     extra = 0
 
 
+class HealthTrackerInline(admin.TabularInline):
+    model = HealthTracker
+    fields = ('capacity', 'bashing_damage', 'lethal_damage', 'aggravated_damage')
+    extra = 0
+
+
 @admin.register(Character)
 class CharacterAdmin(SimpleActionsModel):
     model = Character
     form = CharacterAdminForm
-    inlines = (SkillSpecialityInline, MeritInline, ResourceTrackerInline)
+    inlines = (SkillSpecialityInline, MeritInline, ResourceTrackerInline, HealthTrackerInline)
     fieldsets = (
         (None, {
             'fields': (

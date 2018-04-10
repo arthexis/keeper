@@ -8,7 +8,7 @@ from django.contrib import admin
 from core.rest import router
 from core.views import Index, EditMyProfile
 from organization.views import AcceptInvite
-from sheets.views import RequestCharacter, DownloadAttachment, CharacterDetail, ResourceUpdateAjax
+from sheets.views import RequestCharacter, DownloadAttachment, CharacterDetail, ResourceUpdateAjax, HealthUpdateAjax
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +48,7 @@ urlpatterns = [
 
     # Ajax views
     path('ajax/update-resource/', ResourceUpdateAjax.as_view(), name="update-resource"),
+    path('ajax/update-health/', HealthUpdateAjax.as_view(), name="update-health"),
 
     # Player Tools
     path('character/<int:pk>/request-approval', ResourceUpdateAjax.as_view(), name="request-approval"),

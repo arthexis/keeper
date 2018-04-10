@@ -2,16 +2,17 @@ import logging
 
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponse, Http404
-from django.shortcuts import get_object_or_404
+from django.db.models import F
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import FormView, DetailView
+from django.views.generic import FormView, DetailView, TemplateView
 
 from core.views import UpdateAjax
-from .models import Character, ApprovalRequest, ResourceTracker
 from organization.models import Chronicle
 from .forms import RequestCharacterForm, RequestApprovalForm
+from .models import Character, ApprovalRequest, ResourceTracker, HealthTracker
 
 logger = logging.getLogger(__name__)
 
@@ -107,3 +108,19 @@ class ResourceUpdateAjax(UpdateAjax):
     model = ResourceTracker
     fields = ['current']
 
+
+class HealthUpdateAjax(View):
+    template_name = 'sheets/health_boxes.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.method != 'POST' or request.user.is_anonymous:
+            return HttpResponse(status=401)
+        pk = request.POST.get('pk', None) or request.POST.get('id')
+        obj = get_object_or_404(HealthTracker, pk=pk)
+        owner = getattr(obj, 'user', None)
+        if owner and request.user != owner and not request.user.is_superuser:
+            return HttpResponse(status=403)
+        action = request.POST.get('action', None)
+        obj.take_action(action)
+        character = Character.objects.get(pk=obj.character.pk)
+        return render(request, self.template_name, {'character': character})
