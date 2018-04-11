@@ -17,17 +17,20 @@
             <br>
 
             <div class="row text-center">
-                <div class="col-lg-1 col-md-1 col-xs-3">
-                    <div><h4>Initiative</h4> <span class="label label-default">{{ c.initiative }}</span></div>
+                <div class="col-lg-1 col-md-1 col-sm-2 col-xs-3">
+                    <div><h4>{% trans 'Initiative' %}</h4>
+                        <span class="label label-default">{{ c.initiative }}</span></div>
                 </div>
-                <div class="col-lg-1 col-md-1 col-xs-3">
-                    <div><h4>Defense </h4><span class="label label-default">{{ c.defense }}</span></div>
+                <div class="col-lg-1 col-md-1 col-sm-1 col-xs-3">
+                    <div><h4>{% trans 'Defense' %}</h4>
+                        <span class="label label-default">{{ c.defense }}</span></div>
                 </div>
-                <div class="col-lg-1 col-md-1 col-xs-3">
-                    <div><h4>Speed </h4><span class="label label-default">{{ c.speed }}</span></div>
+                <div class="col-lg-1 col-md-1 col-sm-1 col-xs-3">
+                    <div><h4>{% trans 'Speed' %}</h4>
+                        <span class="label label-default">{{ c.speed }}</span></div>
                 </div>
-                <div class="col-lg-1 col-md-1 col-xs-3">
-                    <div><h4>Armor </h4><span class="label label-default">
+                <div class="col-lg-1 col-md-1 col-sm-1 col-xs-3">
+                    <div><h4>{% trans 'Armor' %}</h4><span class="label label-default">
                         {{ c.armor_general }}/{{ c.armor_ballistic }}
                     </span></div>
                 </div>
@@ -38,7 +41,7 @@
             {% for resource in c.resources.all %}
 
                 <div class="row resource">
-                    <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12"
+                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12"
                             data-current="{{ resource.current }}"
                             data-original="{{ resource.current }}"
                             data-pk="{{ resource.pk }}" >
@@ -48,16 +51,35 @@
                                    {% if checked %}checked{% endif %}
                                    data-num="{{ box }}">
                         {% endfor %}
+                        <br><br>
                     </div>
                     <br>
                 </div>
 
             {% endfor %}
 
+            <div class="row health">
+                {% include 'sheets/health_boxes.html' %}
+                <br>
+            </div>
+            <div class="row health-buttons">
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <input class="form-control btn btn-danger" type="button" value="+A">
+                        <input class="form-control btn btn-danger" type="button" value="+L">
+                        <input class="form-control btn btn-danger" type="button" value="+B">
+                        <input class="form-control btn btn-primary" type="button" value="-A">
+                        <input class="form-control btn btn-primary" type="button" value="-L">
+                        <input class="form-control btn btn-primary" type="button" value="-B">
+                    </div>
+                </div>
+            </div>
+
             <script>
                 $(function () {
-                    var timeout = null
-                    $('.resource').on('click','.box', function ( event ) {
+                    var timeout = null,
+                        $healthButtons = $('.health-buttons .btn')
+                    $('.resource').on('click', '.box', function (event) {
                         var $resource = $(this).parent(),
                             current = $resource.data('current'),
                             value = $(this).data('num'),
@@ -74,6 +96,21 @@
                             event.preventDefault()
                         }
                     })
+                    $('.health-buttons').on('click', '.btn', function () {
+                        $healthButtons.prop('disabled', true)
+                        $.ajax({
+                            url: '{% url "update-health" %}',
+                            method: 'post',
+                            data: {
+                                id: {{ character.health.pk }},
+                                action: $(this).val()
+                            }
+                        }).done(function (data) {
+                            $('div.health').html(data)
+                        }).always(function (){
+                            $healthButtons.prop('disabled', false)
+                        })
+                    })
                 })
             </script>
 
@@ -81,6 +118,5 @@
 
     {% endwith %}
 <br>
-    <hr>
 
 </div>

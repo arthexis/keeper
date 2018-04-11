@@ -1,6 +1,7 @@
 import logging
 
 from django.contrib import messages
+from django.db.models import F
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy
@@ -47,8 +48,7 @@ class EditMyProfile(UpdateView):
     template_name = 'change_form.html'
     model = UserProfile
     fields = (
-        "username", "email", "first_name", "last_name", "phone",
-        "email_opt_out",
+        "username", "email", "first_name", "last_name", "phone", "email_opt_out",
     )
     model_name = "Profile"
     success_url = reverse_lazy('index')
@@ -84,5 +84,3 @@ class UpdateAjax(View):
             if getattr(obj, field) != val:
                 setattr(obj, field, val)
                 obj.save()
-
-
