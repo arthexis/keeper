@@ -1,13 +1,11 @@
-{% extends 'admin/base.html' %}
-{% load admin_static %}
+{% extends 'admin/base.html' %}{% load admin_static %}
+
 {% block extrahead %}
-  {{ block.super }}
-    <script
-        src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-        integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g="
-        crossorigin="anonymous"></script>
+    {{ block.super }}
+    {% include 'scripts.html' %}
 {% endblock %}
+
 {% block extrastyle %}
-  {{ block.super }}
-  <link rel="stylesheet" type="text/css" href="{% static "css/admin.css" %}" />
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "css/admin.css" %}" />
 {% endblock %}

@@ -11,9 +11,7 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/site.css' %}">
     {% block extrastyle %}{% endblock %}
 
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
-            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-            crossorigin="anonymous"></script>
+    {% include 'scripts.html' %}
 
     {% bootstrap_javascript %}
     {% if not user.is_authenticated and settings.FACEBOOK_LOGIN_ENABLED %}
