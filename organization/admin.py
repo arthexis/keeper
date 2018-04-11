@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from core.admin import SimpleActionsModel
+from core.admin import SimpleActionsModel, CSVImportInline
 from core.models import UserProfile
 from organization.models import Prestige, Membership, Chronicle, Organization, PrestigeReport, PrestigeLevel, \
     Invitation, GameEvent
@@ -45,7 +45,7 @@ class PrestigeLevelInline(admin.TabularInline):
     extra = 1
 
 
-class InviteInline(admin.TabularInline):
+class InviteInline(CSVImportInline):
     model = Invitation
     fields = ('email_address', 'external_id', 'invite_link')
     readonly_fields = ('invite_link', )

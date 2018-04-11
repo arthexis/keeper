@@ -11,6 +11,7 @@ __all__ = (
     'HiddenAdmin',
     'SimpleActionsModel',
     'SaveRedirectAdmin',
+    'CSVImportInline',
 )
 
 
@@ -71,6 +72,13 @@ class SaveRedirectAdmin(admin.ModelAdmin):
             if url:
                 return HttpResponseRedirect(url)
         return super().response_change(request, obj)
+
+
+class CSVImportInline(admin.TabularInline):
+    template = 'admin/csvinline.html'
+
+    class Media:
+        js = ('js/csvinline.js',)
 
 
 # Unregistered unnecessary admin modules
