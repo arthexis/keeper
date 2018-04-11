@@ -77,8 +77,9 @@
 
             <script>
                 $(function () {
-                    var timeout = null
-                    $('.resource').on('click','.box', function ( event ) {
+                    var timeout = null,
+                        $healthButtons = $('.health-buttons .btn')
+                    $('.resource').on('click', '.box', function (event) {
                         var $resource = $(this).parent(),
                             current = $resource.data('current'),
                             value = $(this).data('num'),
@@ -95,7 +96,8 @@
                             event.preventDefault()
                         }
                     })
-                    $('.health-buttons').on('click', '.btn', function ( event ) {
+                    $('.health-buttons').on('click', '.btn', function () {
+                        $healthButtons.prop('disabled', true)
                         $.ajax({
                             url: '{% url "update-health" %}',
                             method: 'post',
@@ -103,8 +105,10 @@
                                 id: {{ character.health.pk }},
                                 action: $(this).val()
                             }
-                        }).done(function ( data ) {
+                        }).done(function (data) {
                             $('div.health').html(data)
+                        }).always(function (){
+                            $healthButtons.prop('disabled', false)
                         })
                     })
                 })
