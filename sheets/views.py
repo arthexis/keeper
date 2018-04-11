@@ -2,12 +2,11 @@ import logging
 
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
-from django.db.models import F
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import FormView, DetailView, TemplateView
+from django.views.generic import FormView, DetailView
 
 from core.views import UpdateAjax
 from organization.models import Chronicle
