@@ -631,31 +631,37 @@ class HealthTracker(Model):
         return int(self.aggravated_damage + self.lethal_damage + self.bashing_damage)
 
     def take_action(self, action):
-        total = original = self.total_damage()
+        aggravated = int(self.aggravated_damage)
+        lethal = int(self.lethal_damage)
+        bashing = int(self.bashing_damage)
+        boxes = int(self.capacity)
+
+        # First apply the requested action
         if action == '+A':
-            self.aggravated_damage = F('aggravated_damage') + 1
-            total += 1
+            aggravated += 1
         elif action == '+L':
-            self.lethal_damage = F('lethal_damage') + 1
-            total += 1
+            lethal += 1
         elif action == '+B':
-            self.bashing_damage = F('bashing_damage') + 1
-            total += 1
-        elif action == '-A' and self.aggravated_damage:
-            self.aggravated_damage = F('aggravated_damage') - 1
-        elif action == '-L' and self.lethal_damage:
-            self.lethal_damage = F('lethal_damage') - 1
-        elif action == '-B' and self.bashing_damage:
-            self.bashing_damage = F('bashing_damage') - 1
+            bashing += 1
+        elif action == '-A' and aggravated > 0:
+            aggravated -= 1
+        elif action == '-L' and lethal > 0:
+            lethal -= 1
+        elif action == '-B' and bashing > 0:
+            bashing -= 1
         else:
-            return
-        if total > original:
-            while total > self.capacity:
-                if self.bashing_damage:
-                    self.bashing_damage = F('bashing_damage') - 1
-                elif self.lethal_damage:
-                    self.lethal_damage = F('lethal_damage') - 1
-                elif self.aggravated_damage:
-                    self.aggravated_damage = F('aggravated_damage') - 1
-                total -= 1
+            return  # Action was not valid
+
+        # Correct or switch damage type as needed
+        while aggravated + lethal + bashing > boxes:
+            if bashing > 0:
+                bashing = max(bashing - 2, 0)
+                lethal += 1
+            elif lethal > 0:
+                lethal = max(lethal - 2, 0)
+                aggravated += 1
+
+        self.aggravated_damage = min(aggravated, boxes)
+        self.lethal_damage = lethal
+        self.bashing_damage = bashing
         self.save()
