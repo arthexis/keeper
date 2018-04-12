@@ -77,8 +77,13 @@ class SaveRedirectAdmin(admin.ModelAdmin):
 class CSVImportInline(admin.TabularInline):
     template = 'admin/csvinline.html'
 
+    upload_fields = []
+
     class Media:
-        js = ('js/csvinline.js',)
+        js = ('js/jquery.csv.min.js', 'js/csvinline.js',)
+
+    def get_upload_fields_display(self):
+        return ', '.join(self.upload_fields)
 
 
 # Unregistered unnecessary admin modules
@@ -90,5 +95,3 @@ if not settings.SHOW_HIDDEN_ADMIN_MODULES:
     admin.site.unregister(SocialAccount)
     admin.site.unregister(SocialToken)
     admin.site.unregister(Site)
-
-

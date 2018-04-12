@@ -49,8 +49,9 @@ class InviteInline(CSVImportInline):
     model = Invitation
     fields = ('email_address', 'external_id', 'invite_link')
     readonly_fields = ('invite_link', )
-    extra = 3
+    extra = 1
     min_num = 0
+    upload_fields = ['email_address', 'external_id']
 
     @missing('-- Save to generate link --')
     def invite_link(self, obj: Invitation=None):
