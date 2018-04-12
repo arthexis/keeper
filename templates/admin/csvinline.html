@@ -116,7 +116,9 @@
         <fieldset>
             <legend>Upload a CSV file</legend>
             <input type="file" name="File Upload" class="csv-file" accept=".csv">
-
+            {% for opt in inline_admin_formset.opts.upload_fields %}
+                <p>{{ opt }}</p>
+            {% endfor %}
         </fieldset>
     </div>
 

@@ -65,6 +65,7 @@ class UpdateAjax(View):
     model = None
     owner_field = 'user'
     fields = []
+    upload_fields = ['email']
 
     def dispatch(self, request, *args, **kwargs):
         if request.method != 'POST' or request.user.is_anonymous:
