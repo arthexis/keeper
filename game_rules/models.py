@@ -4,6 +4,8 @@ from django.db import models
 from django.db.models import CASCADE, CharField, SlugField, PositiveSmallIntegerField
 from model_utils import Choices
 
+from .fields import DotsField
+
 logger = logging.getLogger(__name__)
 
 
@@ -16,6 +18,7 @@ __all__ = (
     "Merit",
     "Power",
     "TemplateAnchor",
+    "MeritVariant",
 )
 
 
@@ -136,7 +139,25 @@ class Merit(models.Model):
         ordering = ('name', )
 
     def __str__(self):
-        return str(self.name)
+        return f'{self.name} ({self.get_variants_display()})'
+
+    def get_variants_display(self):
+        if self.variants.exists():
+            return ', '.join(str(i) for i in self.variants.all().values_list('dots', flat=True))
+        else:
+            return '1 to 5'
+
+
+class MeritVariant(models.Model):
+    merit = models.ForeignKey(Merit, on_delete=CASCADE, related_name='variants')
+    dots = DotsField(number=10)
+    name = CharField(max_length=40, blank=True)
+
+    class Meta:
+        ordering = ('dots', )
+
+    def __str__(self):
+        return f'{self.merit.name} ({self.dots})'
 
 
 class PowerCategory(models.Model):

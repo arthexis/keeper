@@ -2,6 +2,7 @@ import logging
 import random
 import uuid
 import os.path
+from django.core.exceptions import ValidationError
 
 from django.db.models import Model, CharField, ForeignKey, TextField, PositiveIntegerField, \
     PROTECT, DO_NOTHING, CASCADE, UUIDField, SET_NULL, Manager, BinaryField, PositiveSmallIntegerField, Sum, \
@@ -428,7 +429,13 @@ class CharacterMerit(CharacterElement):
         verbose_name = "Merit"
 
     def __str__(self):
-        return f'{self.merit.name} {self.rating}'
+        return f'{self.merit.name} ({self.rating})'
+
+    def clean(self):
+        super().clean()
+        if self.merit.variants.exists():
+            if not self.merit.variants.filter(dots=self.rating).exists():
+                raise ValidationError(f'Not valid, legal values: {self.merit.get_variants_display()}')
 
 
 class CharacterPower(CharacterElement):

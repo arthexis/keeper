@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import reverse
 
 from game_rules.models import Splat, SplatCategory, Merit, Power, PowerCategory, CharacterTemplate, TemplateAnchor, \
-    PowerOption
+    PowerOption, MeritVariant
 from core.admin import SaveRedirectAdmin, HiddenAdmin
 
 
@@ -57,6 +57,13 @@ class SplatCategoryAdmin(SaveRedirectAdmin, HiddenAdmin):
         return reverse('admin:game_rules_charactertemplate_change', args=[obj.character_template.pk])
 
 
+class MeritVariantInline(admin.TabularInline):
+    model = MeritVariant
+    fields = ('dots', 'name')
+    max_num = 5
+    min_num = 5
+
+
 @admin.register(Merit)
 class MeritAdmin(admin.ModelAdmin):
     model = Merit
@@ -64,6 +71,7 @@ class MeritAdmin(admin.ModelAdmin):
     list_display = ('name', )
     prepopulated_fields = {'reference_code': ('name', )}
     search_fields = ('name', )
+    inlines = (MeritVariantInline, )
 
 
 @admin.register(Power)
