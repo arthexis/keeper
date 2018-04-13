@@ -427,6 +427,7 @@ class CharacterMerit(CharacterElement):
 
     class Meta:
         verbose_name = "Merit"
+        ordering = ('merit__name', )
 
     def __str__(self):
         return f'{self.merit.name} ({self.rating})'

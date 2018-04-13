@@ -35,7 +35,7 @@ class CountableInput(Widget):
 
     class Media:
         css = {'all': ('css/dots.css', )}
-        js = ('js/dots.js', )
+        js = ('admin/js/inlines.js', 'js/dots.js', )
 
 
 class DotsInput(CountableInput):

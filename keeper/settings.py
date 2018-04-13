@@ -3,6 +3,7 @@ import sys
 import uuid
 
 import dj_database_url
+from django.utils.log import DEFAULT_LOGGING
 from model_utils import Choices
 
 from keeper.utils import getenv
@@ -30,9 +31,11 @@ DEBUG = getenv('DEBUG', True)
 # Python Logging documentation
 # https://docs.python.org/3/library/logging.html
 
+LOGLEVEL = getenv('LOGLEVEL', 'INFO')
+
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': True,
+    'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
             'format': (
@@ -43,15 +46,15 @@ LOGGING = {
     },
     'handlers': {
         'console': {
-            'level': 'DEBUG' if DEBUG else 'INFO',
+            'level': LOGLEVEL,
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
             'stream': sys.stdout,
         },
     },
     'loggers': {
-        'keeper': {
-            'level': 'DEBUG' if DEBUG else 'INFO',
+        '': {
+            'level': LOGLEVEL,
             'handlers': ['console'],
             'propagate': True,
         },
@@ -95,8 +98,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
-    'debug_toolbar',
-    'django_extensions',
+    # 'django_extensions',
     'rest_framework',
     'django_select2',
     'bootstrap3',
@@ -120,9 +122,15 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.cache.FetchFromCacheMiddleware',
 ]
+
+ENABLE_DEBUG_TOOLBAR = getenv('ENABLE_DEBUG_TOOLBAR', False)
+
+if ENABLE_DEBUG_TOOLBAR:
+    INSTALLED_APPS += ['debug_toolbar']
+    MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
+
 
 ROOT_URLCONF = 'keeper.urls'
 
@@ -279,18 +287,11 @@ LOGOUT_REDIRECT_URL = 'index'
 # Django caching, current: local memory cache
 # https://docs.djangoproject.com/en/2.0/topics/cache/
 
-if not DEBUG:
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        },
-    }
-else:
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-        },
-    }
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    },
+}
 
 # Email settings, show below also defaults for sendgrid
 # https://sendgrid.com/docs/Integrate/Frameworks/django.html
