@@ -1,58 +1,50 @@
 <div class="container new-guide">
 
     <div class="row">
-        <div class="col-lg-6 col-sm-6">
+        <div class="col-lg-7 col-sm-7">
             <h3>Welcome to {{ membership.organization.name }}</h3>
             <p>
                 Looks like you just joined and don't have any characters yet.
-                Please follow the instructions to get started. </p>
+                Please follow the instructions: </p>
             <ol>
                 <li>
-                    Check the rules for your <strong>organization</strong> by
-                    <a href="{{ membership.organization.rules_url }}">clicking here.</a>
+                    Carefully read the rules for your organization and/or chronicle.
                 </li>
                 <li>
-                    Check the rules for creating a new character in the
-                    <strong>chronicle</strong> of your choice. The list of available chronicles appears to the right.
-                    The rules may determine what kinds of characters can be played.
-                </li>
-                <li>
-                    Fill out your character sheet, either in a paper copy or a PDF. If you
-                    use a paper sheet, take a clear photo of it or scan it.
+                    Fill out your character sheet, either in a paper copy or a PDF.
                 </li>
                 <li>
                     Click the "Request Character" link for your chronicle. You will be asked
                     to upload your character sheet.
                 </li>
                 <li>
-                    Wait until the appropriate Storyteller approves your character. They
-                    may contact you over email if they have any questions. Once approved
-                    your will receive an email notification with further instructions.
+                    Wait until the appropriate Storyteller approves your character.
                 </li>
             </ol>
         </div>
 
-        <div class="col-lg-6 col-sm-6 text-center">
-            {% for chronicle in membership.organization.chronicles.all %}
-                <br>
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h4>{{ chronicle.name_and_chronicle }}</h4>
-                    </div>
-                    {% if chronicle.short_description %}
-                        <div class="panel-body">
-                            <em>{{ chronicle.short_description }}</em>
-                        </div>
-                    {% endif %}
-                    <div class="panel-footer">
-                        <a href="{{ chronicle.rules_url }}">
-                            Chronicle Rules and Information</a> |
-                        <a href="{% url 'request' chronicle.pk %}">
-                            Request Character
-                        </a>
-                    </div>
+        <div class="col-lg-5 col-sm-5">
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>Chronicles for {{ membership.organization.name }}</h4>
                 </div>
-            {% endfor %}
+                <div class="panel-body">
+                    <p>Click on the name of a chronicle to request a new character.</p>
+                </div>
+
+                <table class="table">
+                    {% for chronicle in membership.organization.chronicles.all %}
+                        <tr>
+                            <td>{{ chronicle.reference_code }}</td>
+                            <td><a href="{% url 'request' chronicle.pk %}" id="request-character">
+                                {{ chronicle.name }}</a></td>
+                        </tr>
+                    {% endfor %}
+                </table>
+
+            </div>
+
         </div>
 
     </div>

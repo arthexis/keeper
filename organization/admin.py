@@ -31,9 +31,9 @@ class OrganizationMemberInline(admin.TabularInline):
     extra = 1
 
 
-class ChronicleInline(admin.StackedInline):
+class ChronicleInline(admin.TabularInline):
     model = Chronicle
-    fields = ('name', 'rules_url', 'reference_code', 'short_description')
+    fields = ('name', 'reference_code', )
     extra = 0
     min_num = 1
 
@@ -62,19 +62,20 @@ class InviteInline(CSVImportInline):
 class OrganizationAdmin(admin.ModelAdmin):
     model = Chronicle
     inlines = (ChronicleInline, PrestigeLevelInline, OrganizationMemberInline, InviteInline)
-    fields = ('name', 'rules_url', 'site', 'reference_code', )
-    list_display = ('name', 'rules_url', 'chronicles', 'reference_code',)
+    fields = ('name', 'site', 'reference_code', )
+    list_display = ('name', 'chronicles', 'reference_code',)
 
     def chronicles(self, obj: Organization =None):
         if obj:
             return ','.join(obj.chronicles.values_list('name', flat=True))
 
 
-class ReportPrestigeInline(admin.TabularInline):
+class ReportPrestigeInline(CSVImportInline):
     model = Prestige
     fields = ('membership', 'amount', 'notes')
     extra = 3
     min_num = 1
+    upload_fields = ['membership', 'amount', 'notes']
 
 
 @admin.register(PrestigeReport)

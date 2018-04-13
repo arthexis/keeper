@@ -42,7 +42,6 @@ class Organization(BaseOrganization):
     # Prestige is granted at organization level
 
     site = ForeignKey(Site, DO_NOTHING, related_name='organizations', null=True)  # Django Site
-    rules_url = URLField('Rules URL', blank=True, help_text='URL pointing to the organization rules document.')
     reference_code = SlugField('Reference Code', help_text='Unique short name or acronym.')
     prestige_cutoff = DateField(blank=True, null=True)
 
@@ -58,9 +57,7 @@ class Chronicle(BaseOrganization):
     # chronicles represent one or more venues sharing the same fictional universe
     # Characters are approved at chronicle level
 
-    rules_url = URLField('Rules URL', blank=True, help_text='URL pointing to the chronicle game and approval rules.')
     organization = ForeignKey('Organization', CASCADE, related_name='chronicles')
-    short_description = TextField(blank=True)
     reference_code = SlugField('Reference Code', help_text='Unique short name or acronym.')
 
     class Meta:
