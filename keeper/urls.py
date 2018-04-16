@@ -1,4 +1,5 @@
 import logging
+import notifications.urls
 
 from django.conf import settings
 from django.db import OperationalError, ProgrammingError
@@ -55,6 +56,8 @@ urlpatterns = [
 
     # Main IndexView (homepage)
     path('', Index.as_view(), name='index'),
+
+    path('inbox/notifications/', include(notifications.urls, namespace='notifications')),
 ]
 
 if settings.DEBUG:
@@ -86,6 +89,7 @@ if settings.SITE_ID == 1:
             if not app.sites.count():
                 logger.info(f'Site {settings.SITE_ID} added to social app.')
                 app.sites.add(settings.SITE_ID)
+
     except (OperationalError, ProgrammingError):
         # This happens when the app starts before running migrations, just skip it
         pass

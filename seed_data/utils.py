@@ -66,7 +66,6 @@ def serializer_factory(
         elif not field.serialize:
             continue
         elif isinstance(field, ForeignKey):
-            # TODO Store the reference_code of the related instance instead o using PK
             related_model = field.related_model
             if hasattr(related_model, REF_FIELD):
                 attrs[field.name] = SlugRelatedField(slug_field=REF_FIELD, queryset=related_model.objects.all())

@@ -41,9 +41,9 @@
 
                 <div class="row resource">
                     <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12"
-                            data-current="{{ resource.current }}"
-                            data-original="{{ resource.current }}"
-                            data-pk="{{ resource.pk }}" >
+                         data-current="{{ resource.current }}"
+                         data-original="{{ resource.current }}"
+                         data-pk="{{ resource.pk }}">
                         <h3 class="power-title">{{ resource.name }}</h3>
                         {% for box, checked in resource.range_boxes %}
                             <input type="checkbox" class="box"
@@ -62,7 +62,7 @@
                 <br>
             </div>
             <div class="row health-buttons">
-                <div class="col-lg-4">
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
                     <div class="form-group">
                         <input class="form-control btn btn-danger" type="button" value="+A">
                         <input class="form-control btn btn-danger" type="button" value="+L">
@@ -106,7 +106,7 @@
                             }
                         }).done(function (data) {
                             $('div.health').html(data)
-                        }).always(function (){
+                        }).always(function () {
                             $healthButtons.prop('disabled', false)
                         })
                     })
@@ -116,6 +116,6 @@
         </div>
 
     {% endwith %}
-<br>
+    <br>
 
 </div>

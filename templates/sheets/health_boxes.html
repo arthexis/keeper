@@ -3,7 +3,9 @@
 <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
     <h3 class="power-title">{% trans 'Health' %}</h3>
     {% for box, damage in character.health.range_boxes %}
-        <div class="box"><span class="damage damage-{{ damage }}">{{ damage }}</span></div>
+        <div class="box-wrap">
+            <div class="box"><span class="damage damage-{{ damage }}">{{ damage }}</span></div>
+        </div>
     {% endfor %}
     <br><br>
 </div>

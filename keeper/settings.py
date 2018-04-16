@@ -287,11 +287,18 @@ LOGOUT_REDIRECT_URL = 'index'
 # Django caching, current: local memory cache
 # https://docs.djangoproject.com/en/2.0/topics/cache/
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-    },
-}
+if not DEBUG:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        },
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        }
+    }
 
 # Email settings, show below also defaults for sendgrid
 # https://sendgrid.com/docs/Integrate/Frameworks/django.html
