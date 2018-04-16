@@ -12,20 +12,8 @@
 
     <div class="character">
 
-        <div class="row">
-            <div class="col-lg-12 header">
-                <h1>{{ character.name }}</h1>
-            </div>
-        </div>
-
         {% include 'sheets/basic_info.html' %}
         <br><hr>
-
-        <div class="row">
-            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
-                <h3 class="power-title">{% trans 'Attributes' %}</h3>
-            </div>
-        </div>
 
         <div class="row">
             {% include 'sheets/attributes.html' %}
@@ -55,13 +43,13 @@
         <br><hr>
 
         {% if character.player_notes %}
-            <div class="row">
+            <div class="container-fluid"><div class="row">
                 <div class="col-lg-12">
                     <h3 class="power-title">{% trans 'Player Notes' %}</h3>
                     <span class="player-notes">{{ character.player_notes }}</span>
                 </div>
             </div>
-            <br><hr>
+            <br><hr></div>
         {% endif %}
 
         {% include 'sheets/approval_log.html' %}
