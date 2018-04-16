@@ -2,7 +2,7 @@
 {% for section in character.attribute_sections %}
 
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
-        <div class="container inner">
+        <div class="container-fluid inner">
             {% for title, value in section %}
                 <div class="row">
                     {% include 'sheets/col/dots.html' with title=title value=value cap=ten %}

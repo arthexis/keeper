@@ -1,6 +1,6 @@
-<div class="col-md-1 col-sm-1 col-xs-4"><span class="character-col-title">{{ title }}</span></div>
+<div class="col-md-3 col-sm-3 col-xs-3"><span class="character-col-title">{{ title }}</span></div>
 {% with cap=cap|default:five %}
-    <div class="col-md-3 col-sm-3 {% if cap == five %}col-xs-4{% else %}col-xs-8{% endif %} character-dots">
+    <div class="col-lg-9 character-dots">
         {% for i in cap %}
             {% if i == 5 or i == 15 %}&nbsp;{% endif %}
             {% if i == 10 %}<br>{% endif %}
