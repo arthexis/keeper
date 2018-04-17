@@ -11,6 +11,7 @@ from core.views import Index, EditMyProfile
 from organization.views import AcceptInvite
 from sheets.views import RequestCharacter, DownloadAttachment, CharacterDetail, ResourceUpdateAjax, HealthUpdateAjax
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -53,6 +54,9 @@ urlpatterns = [
 
     # Player Tools
     path('character/<int:pk>/request-approval', ResourceUpdateAjax.as_view(), name="request-approval"),
+
+    # Sheet URLs
+    path('api/sheets', include('sheets.urls', namespace='sheets')),
 
     # Main IndexView (homepage)
     path('', Index.as_view(), name='index'),

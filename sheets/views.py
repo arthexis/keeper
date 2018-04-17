@@ -7,11 +7,13 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import FormView, DetailView
+from rest_framework import viewsets
 
 from core.views import UpdateAjax
 from organization.models import Chronicle
 from .forms import RequestCharacterForm, RequestApprovalForm
 from .models import Character, ApprovalRequest, ResourceTracker, HealthTracker
+from .serializers import CharacterSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +22,7 @@ __all__ = (
     'DownloadAttachment',
     'RequestApproval',
     'ResourceUpdateAjax',
+    'CharacterViewSet',
 )
 
 
@@ -123,3 +126,8 @@ class HealthUpdateAjax(View):
         obj.take_action(action)
         character = Character.objects.get(pk=obj.character.pk)
         return render(request, self.template_name, {'character': character})
+
+
+class CharacterViewSet(viewsets.ModelViewSet):
+    queryset = Character.objects.all()
+    serializer_class = CharacterSerializer
